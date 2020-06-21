@@ -7,6 +7,7 @@ Targets_list = lapply(as.character(onTarget$Annotated_Target),
 # Step 1B: Known_Target_Correlation - CRISPR
 ###########################################################################
 df2plot=onTarget$Annotated_Target_corrMeasures
+head(onTarget$Annotated_Target_corrMeasures)
 df2plot=df2plot[!is.infinite(df2plot$corr_max),]
 df2plot=df2plot[order(df2plot$corr_max, decreasing = T),]
 

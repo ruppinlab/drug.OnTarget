@@ -2,13 +2,15 @@
 ###########################################################################
 # shRNA vs CRISPR - Type of Drugs - Combined Figure 2C
 ###########################################################################
+source('drug.OnTarget/3.Tools/ValidationA1_DrugBankCitations.R')
 DrugBankScore_vsOurScore=data.frame(biogrid_matched_Subsetlist_withScore, 
                                     PredvsKnown_scores_matched[match(
                                       tolower(biogrid_matched_Subsetlist_withScore$Chemical.Name),
                                       tolower(PredvsKnown_scores_matched$CommonDrugName)),])
 
 DrugBankScore_vsOurScore$drugCategory=onTarget$drugCategory$drug_category[
-  match(DrugBankScore_vsOurScore$drugName, onTarget$drugCategory$broad_id_trimmed)]
+  match(DrugBankScore_vsOurScore$drugName, colnames(onTarget$corrMat))]
+
 colnames(DrugBankScore_vsOurScore)[c(1)]='Drugbank_Gene'
 colnames(DrugBankScore_vsOurScore)[c(4)]='Citations_Count'
 
@@ -18,7 +20,7 @@ df2plot$Count_KnownTarget=sapply(df2plot$KnownTarget,
 sort(table(df2plot$Count_KnownTarget), decreasing = T)
 df2plot_subset=df2plot[!is.na(match(df2plot$Action, names(table(as.character(df2plot$Action)))[table(as.character(df2plot$Action))>9])),]
 # df2plot_subset$drugName[!duplicated(df2plot_subset$drugName)]
-df2plot_subset[df2plot_subset$drugName=='K18895904',]
+# df2plot_subset[df2plot_subset$drugName=='K18895904',]
 ###########################################################################
 # Try1 - Figure 2C
 ###########################################################################

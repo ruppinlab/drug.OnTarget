@@ -3,6 +3,7 @@
 # Add Cripsr & shRNA corr Score for known Targets
 ###########################################################################
 require(ggpubr)
+source('drug.OnTarget/3.Tools/drug_type_effect.R')
 df2plot$crispr_corr=sapply(1:nrow(df2plot), function(x)
   err_handle(onTarget$corrMat[as.character(df2plot$Drugbank_Gene)[x], as.character(df2plot$drugName)[x]]) ) 
 df2plot$shRNA_corr=sapply(1:nrow(df2plot), function(x) 
