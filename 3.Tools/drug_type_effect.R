@@ -17,8 +17,7 @@ colnames(DrugBankScore_vsOurScore)[c(4)]='Citations_Count'
 df2plot=as.data.frame(DrugBankScore_vsOurScore)
 df2plot$Count_KnownTarget=sapply(df2plot$KnownTarget,
                                  function(x) length(strsplit(as.character(x), '\\,')[[1]])) 
-sort(table(df2plot$Count_KnownTarget), decreasing = T)
-df2plot_subset=df2plot[!is.na(match(df2plot$Action, names(table(as.character(df2plot$Action)))[table(as.character(df2plot$Action))>9])),]
+
 # df2plot_subset$drugName[!duplicated(df2plot_subset$drugName)]
 # df2plot_subset[df2plot_subset$drugName=='K18895904',]
 ###########################################################################

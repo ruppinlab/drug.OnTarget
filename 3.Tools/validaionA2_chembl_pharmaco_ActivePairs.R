@@ -11,6 +11,7 @@ numberOfActiveTargets=table(as.character(active_drugs2targets$drug.name))
 active_drugs2targets$numberOfActiveTargets=numberOfActiveTargets[match(active_drugs2targets$drug.name, names(numberOfActiveTargets))]
 matched_gs3=active_drugs2targets[(tolower(active_drugs2targets$drug.name) %in%  tolower(onTarget$drugCategory$name)),]
 matched_gs3=na.omit(matched_gs3)
+head(matched_gs3)
 
 # The AUC is super low :p 
 test_AUC<-function(seedNumber=1, numberOfActiveTargets_Thr=2, numberOfTargets_Thr=2){
@@ -22,6 +23,7 @@ test_AUC<-function(seedNumber=1, numberOfActiveTargets_Thr=2, numberOfTargets_Th
   Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
   Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
                                 rownames(onTarget$corrMat_bothScreens),]
+  print(dim(Positive_Set_DrugGene_Pairs))
   set.seed(seedNumber)
   Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs(Positive_Set_DrugGene_Pairs)
   Positive_Set_DrugGene_Pairs$Label=1

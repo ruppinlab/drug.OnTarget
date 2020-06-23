@@ -39,7 +39,6 @@ Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
 Complete_Set$drug_BroadID=df2plot$drugName[match(Complete_Set$Chemical.Name, df2plot$Chemical.Name)]
 head(Complete_Set)
 dim(onTarget$corrMat_rank)
-
 Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x) 
   err_handle(onTarget$corrMat_rank[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
 

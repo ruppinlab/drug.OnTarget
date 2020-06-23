@@ -22,9 +22,9 @@ test_AUC<-function(seedNumber=1, numberOfTargets_Thr=2, Avg_Rating_thr=3){
   Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
   Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
                                                             rownames(onTarget$corrMat_bothScreens),]
-
   Positive_Set_DrugGene_Pairs$Avg_Rating=sab_score_matched$`Avg Rating (in cells)`[match(Positive_Set_DrugGene_Pairs$Chemical.Name, sab_score_matched$`Probe Name`)]
   Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Avg_Rating>Avg_Rating_thr,1:2]
+  print(dim(Positive_Set_DrugGene_Pairs))
   set.seed(seedNumber)
   Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs_V2(Positive_Set_DrugGene_Pairs)
   Positive_Set_DrugGene_Pairs$Label=1
@@ -39,11 +39,15 @@ test_AUC<-function(seedNumber=1, numberOfTargets_Thr=2, Avg_Rating_thr=3){
   Complete_Set$both_corr=sapply(1:nrow(Complete_Set), function(x)
     err_handle(onTarget$corrMat_bothScreens[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
   Complete_Set=na.omit(Complete_Set)
+  ggplot(Complete_Set, aes(x=Label, y=both_corr))+
+    geom_boxplot()
   roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)$auc
   roc_curve_shRNA=roc(Complete_Set$Label, Complete_Set$shRNA_corr)$auc
   roc_curve_both=roc(Complete_Set$Label, Complete_Set$both_corr)$auc
   c(roc_curve_crispr, roc_curve_shRNA, roc_curve_both)
 }
-test_AUC(seedNumber=2, numberOfTargets_Thr=2,Avg_Rating_thr=3)
+
+rowMeans(sapply(1:10, function(x)
+  test_AUC(seedNumber=x, numberOfTargets_Thr=2,Avg_Rating_thr=3)))
 
 

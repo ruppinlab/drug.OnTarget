@@ -32,7 +32,7 @@ test_AUC<-function(seedNumber=1, numberOfTargets_Thr=2){
   Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
   Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
                                                             rownames(onTarget$corrMat_bothScreens),]
-  dim(Positive_Set_DrugGene_Pairs)
+  print(dim(Positive_Set_DrugGene_Pairs))
   set.seed(seedNumber)
   Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs_V2(Positive_Set_DrugGene_Pairs)
   Positive_Set_DrugGene_Pairs$Label=1
@@ -51,7 +51,11 @@ test_AUC<-function(seedNumber=1, numberOfTargets_Thr=2){
   roc_curve_shRNA=roc(Complete_Set$Label, Complete_Set$shRNA_corr)$auc
   roc_curve_both=roc(Complete_Set$Label, Complete_Set$both_corr)$auc
   c(roc_curve_crispr, roc_curve_shRNA, roc_curve_both)
+  # roc_obj=roc(Complete_Set$Label, Complete_Set$both_corr)
+  # range(Complete_Set$both_corr[Complete_Set$Label=='Positive'])
+  # ggroc(roc_obj)+
+  #   theme_minimal() + ggtitle("My ROC curve") + 
+  #   geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")
+  
 }
 test_AUC(seedNumber=1, numberOfTargets_Thr=2)
-
-

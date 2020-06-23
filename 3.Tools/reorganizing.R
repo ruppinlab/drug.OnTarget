@@ -121,8 +121,9 @@ dim(onTarget$corrMat); dim(onTarget$corrMat_shRNA)
 common_genes=intersect(rownames(onTarget$corrMat), rownames(onTarget$corrMat_shRNA))
 crispr_unique_genes=rownames(onTarget$corrMat)[!(rownames(onTarget$corrMat) %in% rownames(onTarget$corrMat_shRNA))]
 shRNA_unique_genes=rownames(onTarget$corrMat_shRNA)[!(rownames(onTarget$corrMat_shRNA) %in% rownames(onTarget$corrMat))]
+
 infunc_mat=rbind(onTarget$corrMat[crispr_unique_genes,],onTarget$corrMat_shRNA[shRNA_unique_genes,])
-corrMat_integrated=sapply(common_genes, function(x) pmax(onTarget$corrMat[x,], onTarget$corrMat[x,]))
+corrMat_integrated=sapply(common_genes, function(x) pmax(onTarget$corrMat[x,], onTarget$corrMat_shRNA[x,], na.rm = T))
 corrMat_integrated_t=t(corrMat_integrated)
 corrMat_bothScreens=rbind(corrMat_integrated_t, infunc_mat)
 corrMat_bothScreens=corrMat_bothScreens[order(rownames(corrMat_bothScreens)),]
@@ -142,6 +143,7 @@ onTarget$corrMat_bothScreens_rank=apply(onTarget$corrMat_bothScreens, 2, functio
 predicted_Target_bothScreens = apply(onTarget$corrMat_bothScreens, 2,
                                function(x) c(PredTarget=rownames(onTarget$corrMat_bothScreens)[which(x==max(x))], 
                                              Score=max(x)))
+max(c(0.1, NA))
 onTarget$Top_predicted_Target_bothScreens=data.frame(drugName=colnames(onTarget$corrMat_bothScreens),
                                                t(predicted_Target_bothScreens))
 Top_predicted_Drug_bothScreens = apply(onTarget$corrMat_bothScreens, 1,
@@ -180,6 +182,34 @@ onTarget$Annotated_Target_corrMeasures_bothScreens=data.frame(Annotated_Target=o
                                                         drugCategory=onTarget$drugCategory$drug_category)
 
 ###########################################################################
+# Add PredvsKnown for integrated Predicting
+###########################################################################
+onTarget$PredvsKnown_scores_bothScreens=onTarget$Annotated_Target_corrMeasures_bothScreens
+colnames(onTarget$PredvsKnown_scores_bothScreens)=c('KnownTarget', 'KnownTarget_corrMean', 'KnownTarget_corrMax',
+                                                    'KnownTarget_corrRank_mean', 'KnownTarget_corrRank_min',
+                                                    'Best_among_KnownTarget_based_onCorr', 'drugCategory')
+onTarget$PredvsKnown_scores_bothScreens=data.frame(CommonDrugName=onTarget$drugCategory$name,
+                                                   onTarget$Top_predicted_Target_bothScreens,
+                                                   onTarget$PredvsKnown_scores_bothScreens)
+onTarget$PredvsKnown_scores_bothScreens$Score=as.numeric(as.character(onTarget$PredvsKnown_scores_bothScreens$Score))
+###########################################################################
+# Adding z-score
+###########################################################################
+onTarget$corrMat_zscore=apply(onTarget$corrMat, 1, scale)
+onTarget$corrMat_zscore=t(onTarget$corrMat_zscore)
+colnames(onTarget$corrMat_zscore)=colnames(onTarget$corrMat)
+onTarget$corrMat_shRNA_zscore=apply(onTarget$corrMat_shRNA, 1, scale)
+onTarget$corrMat_shRNA_zscore=t(onTarget$corrMat_shRNA_zscore)
+colnames(onTarget$corrMat_shRNA_zscore)=colnames(onTarget$corrMat_shRNA)
+
+onTarget$corrMat_bothScreens_zscore=apply(onTarget$corrMat_bothScreens, 1, scale)
+onTarget$corrMat_bothScreens_zscore=t(onTarget$corrMat_bothScreens_zscore)
+colnames(onTarget$corrMat_bothScreens_zscore)=colnames(onTarget$corrMat_bothScreens)
+
+###########################################################################
 # Version3-Saving
 ###########################################################################
 saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v3.RDS')
+
+
+
