@@ -4,6 +4,7 @@ require(reshape2)
 require(statar)
 require(ggplot2)
 biogrid=read.csv('/Users/sinhas8/Project_OffTarget/2.Data/BIOGRID-CHEMICALS-3.5.182.chemtab.txt', sep='\t')
+
 common_Drug_lowerCase=tolower(levels(biogrid$Chemical.Name))[
   !is.na(match(tolower(levels(biogrid$Chemical.Name)), tolower(onTarget$PredvsKnown_scores$CommonDrugName) ))]
 biogrid_matched=biogrid[!is.na(match(tolower(biogrid$Chemical.Name), common_Drug_lowerCase)),]

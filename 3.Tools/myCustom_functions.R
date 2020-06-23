@@ -54,3 +54,34 @@ range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 scaling_cancerType<-function(quan1=gi, quan2=hist){
   unlist(lapply(split(quan1, quan2), function(x) range01(x)))
 }
+
+# Create a random df unique to the input df
+randomize_DF_with_unique_Pairs<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(df2randomize[,1])
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(df2randomize[,1], sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
+}
+
+randomize_DF_with_unique_Pairs_V2<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(rownames(onTarget$corrMat), nrow(df2randomize))
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(rownames(onTarget$corrMat), sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
+}

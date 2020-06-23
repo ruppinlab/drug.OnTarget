@@ -1,40 +1,48 @@
 # Validation V2 - Gold Standard based on pharmacologically active drugs from DrugBank
 require(ggpubr)
 load('/Users/sinhas8/Downloads/drugs2targets.RData')
-active_drugs2targets=drugs2targets[which(drugs2targets$pharmaco.active=='yes' & 
-                                           drugs2targets$action.simp.strict=='inhibition' ),]
-# source('/Users/sinhas8/Project_OffTarget/3.Tools/fewDrugs_for_experiements.R')
-matched_gs3=active_drugs2targets[match(tolower(onTarget$PredvsKnown_scores$CommonDrugName), tolower(active_drugs2targets$drug.name)),]
 
-# *Something is wrong*
-test_AUC<-function(seedNumber=123){
-  Positive_Set_DrugGene_Pairs=na.omit(data.frame(Drugbank_Gene=matched_gs3$protein.gene.symbol, 
-                                                 Chemical.Name=matched_gs3$drug.name))
+numberOfTargets=table(drugs2targets$drug.name)
+drugs2targets$numberOfTargets=numberOfTargets[match(drugs2targets$drug.name, names(numberOfTargets))]
+
+active_drugs2targets=drugs2targets[which(drugs2targets$pharmaco.active=='yes' & 
+                                           drugs2targets$action.simp.strict=='inhibition'),]
+numberOfActiveTargets=table(as.character(active_drugs2targets$drug.name))
+active_drugs2targets$numberOfActiveTargets=numberOfActiveTargets[match(active_drugs2targets$drug.name, names(numberOfActiveTargets))]
+matched_gs3=active_drugs2targets[(tolower(active_drugs2targets$drug.name) %in%  tolower(onTarget$drugCategory$name)),]
+matched_gs3=na.omit(matched_gs3)
+
+# The AUC is super low :p 
+test_AUC<-function(seedNumber=1, numberOfActiveTargets_Thr=2, numberOfTargets_Thr=2){
+  cond1=matched_gs3$numberOfActiveTargets<numberOfActiveTargets_Thr
+  cond2=matched_gs3$numberOfTargets<numberOfTargets_Thr
+  
+  Positive_Set_DrugGene_Pairs=na.omit(data.frame(Drugbank_Gene=matched_gs3$protein.gene.symbol[cond1 & cond2], 
+                                                 Chemical.Name=matched_gs3$drug.name[cond1 & cond2]))
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
+                                rownames(onTarget$corrMat_bothScreens),]
   set.seed(seedNumber)
-  Shuffled_Negative_Set=data.frame(Drugbank_Gene=Positive_Set_DrugGene_Pairs[sample(1:nrow(Positive_Set_DrugGene_Pairs), 1000, replace = T), 1],
-                                   Chemical.Name=Positive_Set_DrugGene_Pairs[sample(1:nrow(Positive_Set_DrugGene_Pairs), 1000, replace = T), 2])
-  Shuffled_Negative_Set=unique(Shuffled_Negative_Set)
-  Shuffled_Negative_Set_unique=Shuffled_Negative_Set[!apply(Shuffled_Negative_Set, 1, function(x) paste(as.character(x), collapse = '_')) %in%
-                                                       apply(Positive_Set_DrugGene_Pairs[,1:2], 1, function(x) paste(as.character(x), collapse = '_')),]
-  Negative_Set_DrugGene_Pairs=Shuffled_Negative_Set_unique[
-    sample(1:nrow(Shuffled_Negative_Set_unique), nrow(Positive_Set_DrugGene_Pairs)), ]
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs(Positive_Set_DrugGene_Pairs)
   Positive_Set_DrugGene_Pairs$Label=1
   Negative_Set_DrugGene_Pairs$Label=0
   Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  
   Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
-  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[match(Complete_Set$Chemical.Name, tolower(onTarget$drugCategory$name))]
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[match(tolower(Complete_Set$Chemical.Name), tolower(onTarget$drugCategory$name))]
   Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x)
     err_handle(onTarget$corrMat[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
   Complete_Set$shRNA_corr=sapply(1:nrow(Complete_Set), function(x)
     err_handle(onTarget$corrMat_shRNA[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
   Complete_Set$both_corr=sapply(1:nrow(Complete_Set), function(x)
     err_handle(onTarget$corrMat_bothScreens[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
+  Complete_Set=na.omit(Complete_Set)
   roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)$auc
   roc_curve_shRNA=roc(Complete_Set$Label, Complete_Set$shRNA_corr)$auc
   roc_curve_both=roc(Complete_Set$Label, Complete_Set$both_corr)$auc
   c(roc_curve_crispr, roc_curve_shRNA, roc_curve_both)
 }
-test_AUC(seedNumber=12)
+test_AUC(seedNumber=2, numberOfTargets_Thr=2, numberOfActiveTargets_Thr=2)
 
 ###########################################################################
 # Figure 3A - Gold-set scores

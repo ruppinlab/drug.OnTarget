@@ -159,6 +159,8 @@ onTarget$Top_predicted_Drug_bothScreens = data.frame(GeneName=rownames(onTarget$
 ###########################################################################
 # Annotated_Target_corrMeasures - bothScreens
 ###########################################################################
+Targets_list=sapply(onTarget$drugCategory$target, function(x) 
+  strsplit(as.character(x), ', '))
 Annotated_Target_corr=sapply(1:length(Targets_list), function(x)
   sapply(Targets_list[[x]], function(y)  err_handle(onTarget$corrMat_bothScreens[y,x]) ))
 Annotated_Target_corr_mean=sapply(Annotated_Target_corr, function(x) mean(x, na.rm=T))
@@ -177,3 +179,7 @@ onTarget$Annotated_Target_corrMeasures_bothScreens=data.frame(Annotated_Target=o
                                                         Best_among_Annotated_Target,
                                                         drugCategory=onTarget$drugCategory$drug_category)
 
+###########################################################################
+# Version3-Saving
+###########################################################################
+saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v3.RDS')
