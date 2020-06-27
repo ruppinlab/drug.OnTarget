@@ -24,7 +24,6 @@ gs2_matched_trimmed=data.frame(ProbeName=gs2_matched$CommonName,
 gs2_matched_trimmed$Targets=as.character(gs2_matched_trimmed$Targets)
 gs2_matched_trimmed$CountTargets=gs2_matched$Count_Targets_ProteinOnly
 
-
 test_AUC<-function(seedNumber=1, numberOfTargets_Thr=2){
   cond1=gs2_matched_trimmed$CountTargets<numberOfTargets_Thr
   Positive_Set_DrugGene_Pairs=na.omit(data.frame(Drugbank_Gene=gs2_matched_trimmed$Targets[cond1], 
@@ -59,3 +58,4 @@ test_AUC<-function(seedNumber=1, numberOfTargets_Thr=2){
   
 }
 test_AUC(seedNumber=1, numberOfTargets_Thr=2)
+

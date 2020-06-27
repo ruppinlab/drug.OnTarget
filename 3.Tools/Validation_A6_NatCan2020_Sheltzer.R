@@ -4,6 +4,8 @@ require(ggrepel)
 sheltzer_STM_hits=readxl::read_xlsx('2.Data/Sheltzer_STM.xlsx')
 sheltzer_STM_hits_matched=onTarget$drugCategory$name[na.omit(match(gsub('-','',tolower(sheltzer_STM_hits$Drug)), 
                                                                    gsub('-','',tolower(onTarget$drugCategory$name))))]
+onTarget$PredvsKnown_scores[na.omit(match(gsub('-','',tolower(sheltzer_STM_hits$Drug)),
+                                         gsub('-','',tolower(onTarget$PredvsKnown_scores$CommonDrugName)))),]
 ###########################################################################
 # OTS167
 ###########################################################################
@@ -49,6 +51,7 @@ df2plot$KnownTarget_corrMax_modified[is.infinite(df2plot$KnownTarget_corrMax_mod
 df2plot$Score=as.numeric(as.character(df2plot$Score))
 
 df2plot$DrugsofInterest=df2plot$Score - df2plot$KnownTarget_corrMax_modified > 0.2 & df2plot$Score>0.3
+
 df2plot$DrugsofInterest_Names=''
 
 df2plot$DrugsofInterest_Names[df2plot$DrugsofInterest]=
