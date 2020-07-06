@@ -88,8 +88,6 @@ ggplot(df2plot[df2plot$drugCategory=='targeted cancer',], aes(x=KnownTarget_corr
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)
 dev.off()
-
-
 ###########################################################################
 # From Sheltzer NatCan 2020
 ###########################################################################

@@ -122,7 +122,6 @@ diff_corrv2=apply(drugsofInterest, 1, function(x)
                                            as.character(x[3]),
                                            Exp_median_Targets$Exp[Exp_median_Targets$gene==
                                                                     as.character(x[3])])) )
-
 names(diff_corrv2)=as.character(drugsofInterest$CommonDrugName)
 diff_corr; K=17
 drugsofInterest[K,]

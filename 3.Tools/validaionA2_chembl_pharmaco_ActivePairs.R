@@ -1,7 +1,7 @@
 # Validation V2 - Gold Standard based on pharmacologically active drugs from DrugBank
 require(ggpubr)
 load('/Users/sinhas8/Downloads/drugs2targets.RData')
-
+table(drugs2targets$action.simp.loose)
 numberOfTargets=table(drugs2targets$drug.name)
 drugs2targets$numberOfTargets=numberOfTargets[match(drugs2targets$drug.name, names(numberOfTargets))]
 

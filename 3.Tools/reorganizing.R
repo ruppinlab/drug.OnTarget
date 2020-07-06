@@ -143,7 +143,6 @@ onTarget$corrMat_bothScreens_rank=apply(onTarget$corrMat_bothScreens, 2, functio
 predicted_Target_bothScreens = apply(onTarget$corrMat_bothScreens, 2,
                                function(x) c(PredTarget=rownames(onTarget$corrMat_bothScreens)[which(x==max(x))], 
                                              Score=max(x)))
-max(c(0.1, NA))
 onTarget$Top_predicted_Target_bothScreens=data.frame(drugName=colnames(onTarget$corrMat_bothScreens),
                                                t(predicted_Target_bothScreens))
 Top_predicted_Drug_bothScreens = apply(onTarget$corrMat_bothScreens, 1,
@@ -211,7 +210,67 @@ colnames(onTarget$corrMat_bothScreens_zscore)=colnames(onTarget$corrMat_bothScre
 ###########################################################################
 saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v3.RDS')
 ###########################################################################
-# Version 4- Creating
+# Version 4- Secondary_version
 ###########################################################################
+# cmat=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/corrMat_secondary_crispr.RDS')
+onTarget$corrMat_prism2=cmat
+predicted_Target_prism2 = apply(onTarget$corrMat_prism2, 2,
+                                     function(x) c(PredTarget=rownames(onTarget$corrMat_prism2)[which(x==max(x))], 
+                                                   Score=max(x)))
+onTarget$Top_predicted_Target_prism2=data.frame(drugName=colnames(onTarget$corrMat_prism2),
+                                                     t(predicted_Target_prism2))
+Top_predicted_Drug_prism2 = apply(onTarget$corrMat_prism2, 1,
+                                       function(x) c(PredTarget=colnames(onTarget$corrMat_prism2)[which(x==max(x))], 
+                                                     Score=max(x)))
+onTarget$Top_predicted_Drug_prism2 = data.frame(GeneName=rownames(onTarget$corrMat_prism2),
+                                                     t(Top_predicted_Drug_prism2))
+###########################################################################
+# Annotated_Target_corrMeasures - Prism2
+###########################################################################
+onTarget$corrMat_prism2_rank=apply(onTarget$corrMat_prism2, 2, function(x) rank(x) )
+onTarget$drugCategory_prism2=onTarget$drugCategory[match(colnames(onTarget$corrMat_prism2),onTarget$drugCategory$broad_id_trimmed),]
+Targets_list=sapply(onTarget$drugCategory_prism2$target, function(x) 
+  strsplit(as.character(x), ', '))
+Annotated_Target_corr=sapply(1:length(Targets_list), function(x)
+  sapply(Targets_list[[x]], function(y)  err_handle(onTarget$corrMat_prism2[y,x]) ))
+Annotated_Target_corr_mean=sapply(Annotated_Target_corr, function(x) mean(x, na.rm=T))
+Annotated_Target_corr_max=sapply(Annotated_Target_corr, function(x) max(x, na.rm=T))
+Annotated_Target_corr_Rank=sapply(1:length(Targets_list), function(x)
+  sapply(Targets_list[[x]], function(y)  err_handle(onTarget$corrMat_prism2_rank[y,x]) ))
+Annotated_Target_corrRank_mean=sapply(Annotated_Target_corr_Rank, function(x) mean(x, na.rm=T))
+Annotated_Target_corrRank_min=nrow(onTarget$corrMat_prism2)+1 - sapply(Annotated_Target_corr_Rank, function(x) max(x, na.rm=T))
+Best_among_Annotated_Target=sapply(Annotated_Target_corr, function(x) 
+  if(length(which.max(x))==0){NA} else names(x)[which.max(x)] )
+
+onTarget$Annotated_Target_corrMeasures_prism2=data.frame(Annotated_Target=onTarget$drugCategory_prism2$target,
+                                                              corr_mean=Annotated_Target_corr_mean,
+                                                              corr_max=Annotated_Target_corr_max,
+                                                              corrRank_mean=Annotated_Target_corr_mean,
+                                                              corrRank_min=Annotated_Target_corrRank_min,
+                                                              Best_among_Annotated_Target,
+                                                              drugCategory=onTarget$drugCategory_prism2$drug_category)
+
+###########################################################################
+# Add PredvsKnown for integrated Predicting - PRISM2
+###########################################################################
+onTarget$PredvsKnown_scores_prism2=onTarget$Annotated_Target_corrMeasures_prism2
+colnames(onTarget$PredvsKnown_scores_prism2)=c('KnownTarget', 'KnownTarget_corrMean', 'KnownTarget_corrMax',
+                                                    'KnownTarget_corrRank_mean', 'KnownTarget_corrRank_min',
+                                                    'Best_among_KnownTarget_based_onCorr', 'drugCategory')
+onTarget$PredvsKnown_scores_prism2=data.frame(CommonDrugName=onTarget$drugCategory_prism2$name,
+                                                   onTarget$Top_predicted_Target_prism2,
+                                                   onTarget$PredvsKnown_scores_prism2)
+onTarget$PredvsKnown_scores_prism2$Score=as.numeric(as.character(onTarget$PredvsKnown_scores_prism2$Score))
 
 
+###########################################################################
+# Adding z-score
+###########################################################################
+onTarget$corrMat_prism2_zscore=apply(onTarget$corrMat_prism2, 1, scale)
+onTarget$corrMat_prism2_zscore=t(onTarget$corrMat_prism2_zscore)
+colnames(onTarget$corrMat_prism2_zscore)=colnames(onTarget$corrMat_prism2)
+
+###########################################################################
+# Version4-Saving
+###########################################################################
+saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v4.RDS')

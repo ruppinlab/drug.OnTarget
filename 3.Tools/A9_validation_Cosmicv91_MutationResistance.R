@@ -7,15 +7,15 @@ CosmicResistanceMutations=read.table('CosmicResistanceMutations.tsv', sep='\t')
 colnames(CosmicResistanceMutations)=as.character(unlist(CosmicResistanceMutations[1,]))
 head(sort(table(CosmicResistanceMutations$`Pubmed Id`), decreasing = T))
 
+head(CosmicResistanceMutations)
 CosmicResistanceMutations=CosmicResistanceMutations[-1,]
 CosmicResistanceMutations=CosmicResistanceMutations[-1,]
 table(CosmicResistanceMutations$`Drug Name`)
 CosmicResistanceMutations[CosmicResistanceMutations$`Drug Name`=='Ibrutinib',]
 CosmicResistanceMutations$trimmed_geneName= sapply(CosmicResistanceMutations$`Gene Name`,function(x) strsplit(as.character(x), '_')[[1]][1])
-CosmicResistanceMutations[CosmicResistanceMutations$`Drug Name`=='Imatinib',]
 DrugTargetPair= data.frame(drugname=CosmicResistanceMutations$`Drug Name`, GeneName=CosmicResistanceMutations$trimmed_geneName)
 Evidence_Strength=table(paste(DrugTargetPair$drugname, DrugTargetPair$GeneName))
-Evidence_Strength=table(Evidence_Strength)
+# Evidence_Strength=table(Evidence_Strength)
 DrugTargetPair=unique(DrugTargetPair)
 DrugTargetPair$drugName_geneName=paste(DrugTargetPair$drugname, DrugTargetPair$GeneName)
 
@@ -37,7 +37,7 @@ test_AUC<-function(seedNumber=1, numberOfTargets_Thr=Inf, Evidence_Strength_thr=
                                                             rownames(onTarget$corrMat_bothScreens),]
   dim(Positive_Set_DrugGene_Pairs)
   Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[tolower(Positive_Set_DrugGene_Pairs$Chemical.Name)  %in%
-                                                            tolower(onTarget$drugCategory$name),]
+                                                            tolower(onTarget$drugCategory_prism2$name),]
   print(dim(Positive_Set_DrugGene_Pairs))
   # print(length(table(as.character(Positive_Set_DrugGene_Pairs$Chemical.Name))))
   set.seed(seedNumber)
@@ -54,10 +54,15 @@ test_AUC<-function(seedNumber=1, numberOfTargets_Thr=Inf, Evidence_Strength_thr=
   Complete_Set$both_corr=sapply(1:nrow(Complete_Set), function(x)
     err_handle(onTarget$corrMat_bothScreens[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
   Complete_Set=na.omit(Complete_Set)
+  Complete_Set$prism2=sapply(1:nrow(Complete_Set), function(x)
+    err_handle(onTarget$corrMat_prism2[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
+  Complete_Set=na.omit(Complete_Set)
+  
   roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)$auc
   roc_curve_shRNA=roc(Complete_Set$Label, Complete_Set$shRNA_corr)$auc
   roc_curve_both=roc(Complete_Set$Label, Complete_Set$both_corr)$auc
-  c(roc_curve_crispr, roc_curve_shRNA, roc_curve_both)
+  roc_curve_prism2=roc(Complete_Set$Label, Complete_Set$prism2)$auc
+  c(roc_curve_crispr, roc_curve_shRNA, roc_curve_both, roc_curve_prism2)
   # roc_obj=roc(Complete_Set$Label, Complete_Set$both_corr)
   # range(Complete_Set$both_corr[Complete_Set$Label=='Positive'])
   # ggroc(roc_obj)+
@@ -65,8 +70,8 @@ test_AUC<-function(seedNumber=1, numberOfTargets_Thr=Inf, Evidence_Strength_thr=
   #   geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")
   
 }
-sapply(seq(0, 300, 20), function(x) rowMeans(sapply(1:10, function(y) test_AUC(seedNumber=y, numberOfTargets_Thr=Inf, Evidence_Strength_thr=x))) )
+sapply(0, function(x) rowMeans(sapply(1:10, function(y) test_AUC(seedNumber=y, numberOfTargets_Thr=Inf, Evidence_Strength_thr=x))) )
 
 
 # Drugs whose annotation is wrong
-match(tolower(as.character(df2plot$CommonDrugName[df2plot$DrugsofInterest])), tolower(DrugTargetPair$drugname))
+# match(tolower(as.character(df2plot$CommonDrugName[df2plot$DrugsofInterest])), tolower(DrugTargetPair$drugname))
