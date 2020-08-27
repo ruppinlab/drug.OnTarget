@@ -44,7 +44,7 @@ sum(onTarget$corrMat_bothScreens[,match('OTS964', onTarget$drugCategory$name)]>0
 ###########################################################################
 # For the 10 drugs used in the study:: Can predict for four
 ###########################################################################
-df2plot=onTarget$PredvsKnown_scores_bothScreens
+df2plot=onTarget$PredvsKnown_scores_prism2
 df2plot$KnownTarget_corrMax_modified=df2plot$KnownTarget_corrMax
 df2plot$KnownTarget_corrMax_modified[is.na(df2plot$KnownTarget_corrMax_modified)]=0
 df2plot$KnownTarget_corrMax_modified[is.infinite(df2plot$KnownTarget_corrMax_modified)]=0

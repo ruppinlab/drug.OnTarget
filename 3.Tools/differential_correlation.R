@@ -25,18 +25,21 @@ df2plot$DrugsofInterest_Names[df2plot$DrugsofInterest]=
 df2plot=as.data.table(df2plot)
 colnames(df2plot)
 drugsofInterest=df2plot[DrugsofInterest & drugCategory=='targeted cancer',c(1, 3, 10, 5)]
-write.csv(drugsofInterest, '2.Data/drugsofInterest.csv')
+# write.csv(drugsofInterest, '2.Data/drugsofInterest_prism2.csv')
 ###########################################################################
 # Expression distribution of targets
 ###########################################################################
+# expression_Known_Target=do.call(rbind, lapply(drugsofInterest$Best_among_KnownTarget_based_onCorr,
+#                                               function(x) err_handle(data.table(Exp=onTarget$expression[as.character(x),], gene=as.character(x))))[-c(17, 13, 7, 1, 2)])
 expression_Known_Target=do.call(rbind, lapply(drugsofInterest$Best_among_KnownTarget_based_onCorr,
-                                              function(x) err_handle(data.table(Exp=onTarget$expression[as.character(x),], gene=as.character(x))))[-6])
+                                              function(x) err_handle(data.table(Exp=onTarget$expression[as.character(x),], gene=as.character(x))))[-c(6)])
+
 Exp_median_Targets=aggregate(Exp ~ gene, data = expression_Known_Target, function(x) median(x))
 Background_Exp=median(rowMedians(onTarget$expression))
 Exp_median_Targets$drugName=drugsofInterest$CommonDrugName[match(Exp_median_Targets$gene, drugsofInterest$Best_among_KnownTarget_based_onCorr)]
 Exp_median_Targets$annotation=paste(Exp_median_Targets$gene, Exp_median_Targets$drugName, sep = '\n')
 
-tiff('4.Results/DOI_KnownTarget_Expression.tiff')
+tiff('4.Results/DOI_KnownTarget_Expression_test.tiff')
 ggplot(data=Exp_median_Targets, aes(x=annotation, y=Exp)) +
   geom_bar(stat="identity")+
   geom_hline(yintercept = Background_Exp)+
@@ -51,7 +54,7 @@ dev.off()
 ###########################################################################
 lowTargetExpression_Drugs=Exp_median_Targets$drugName[Exp_median_Targets$Exp < 1]
 ###########################################################################
-# Confirming whether it is true for all the targets
+# Confirming whether it is true for all the targets:: Targets_tandutinib
 ###########################################################################
 Targets_tandutinib=strsplit(as.character(unlist(drugsofInterest[match(as.character(
   lowTargetExpression_Drugs[2]), drugsofInterest$CommonDrugName),4])),
@@ -115,6 +118,7 @@ test_differential_correlation<-function(infunc_drugName='ibrutinib',
   )
   
 }
+
 drugsofInterest=drugsofInterest[,-5]
 diff_corrv2=apply(drugsofInterest, 1, function(x)
   err_handle(test_differential_correlation(as.character(x[1]),
@@ -123,9 +127,9 @@ diff_corrv2=apply(drugsofInterest, 1, function(x)
                                            Exp_median_Targets$Exp[Exp_median_Targets$gene==
                                                                     as.character(x[3])])) )
 names(diff_corrv2)=as.character(drugsofInterest$CommonDrugName)
-diff_corr; K=17
+K=13
 drugsofInterest[K,]
-diff_corr[[K]]
+diff_corrv2[[K]]
 ################################################################################
 # If Drug response variance and Target response variance is confouding our results
 ################################################################################
