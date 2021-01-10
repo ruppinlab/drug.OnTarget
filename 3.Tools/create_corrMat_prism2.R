@@ -1,5 +1,6 @@
 # Create Corrmat_crispr_Secondary
-secondary=readRDS('2.Data/secondary_screen_processed.RDS')
+secondary=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/secondary_screen_processed.RDS')
+onTarget$secondary_prism=secondary$secondary_screen
 onTarget=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v3.RDS')
 ###########################################################################
 # Step 0: match cols and rows
@@ -14,7 +15,6 @@ use_cores=detectCores()
 avana_matched_list=lapply(split(avana_matched, c(rep(1:use_cores, each=nrow(avana_matched)/use_cores),
                                  rep(use_cores, nrow(avana_matched)%%use_cores))),
                   matrix, ncol=ncol(avana_matched))
-
 calling_CORtest <- function(avana_matched_list_mat){
   lapply(1:nrow(avana_matched_list_mat), function(y) sapply(1:nrow(secondary_prism_matched), function(x)
     cor(avana_matched_list_mat[y,],

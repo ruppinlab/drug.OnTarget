@@ -274,3 +274,65 @@ colnames(onTarget$corrMat_prism2_zscore)=colnames(onTarget$corrMat_prism2)
 # Version4-Saving
 ###########################################################################
 saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v4.RDS')
+secondary=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/secondary_screen_processed.RDS')
+onTarget$secondary_prism=secondary$secondary_screen
+###########################################################################
+# Version6-Saving
+###########################################################################
+saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v6.RDS')
+rm(list=ls()); gc()
+onTarget=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v6.RDS')
+###########################################################################
+# Version7-Saving
+###########################################################################
+saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v7.RDS')
+onTarget=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v7.RDS')
+
+###########################################################################
+# Version8-Saving
+###########################################################################
+annotation_20Q4=read.csv('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/sample_info (3).csv')
+onTarget$annotation_20Q4=annotation_20Q4
+expression_20Q4=read.csv('/Users/sinhas8/Downloads/CCLE_expression.csv', row.names = 1)
+geneNames_filtered=sapply(strsplit(colnames(expression_20Q4), split = '\\.'), '[[',1)
+colnames(expression_20Q4)=geneNames_filtered
+onTarget$expression_20Q4=t(expression_20Q4)
+saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v8.RDS')
+onTarget=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v8.RDS')
+
+###########################################################################
+# Version9-Saving
+###########################################################################
+secondary=read.csv('/Users/sinhas8/Project_OffTarget/secondary-screen-dose-response-curve-parameters.csv')
+secondary$col_names=paste(secondary$broad_id, secondary$screen_id, secondary$name, secondary$phase, sep='_')
+secondary_trimmed=secondary[,c(21, 20, 11)]
+secondary_trimmed_wide <- spread(secondary_trimmed, col_names, ic50)
+rownames(secondary_trimmed_wide)=as.character(secondary_trimmed_wide$row_name)
+secondary_trimmed_wide=secondary_trimmed_wide[,-1]
+column_annotation=t(sapply(colnames(secondary_trimmed_wide), function(x) c(strsplit(x, '_')[[1]])))
+column_annotation=data.frame(column_annotation)
+colnames(column_annotation)=c('Broad_id', 'Screen_id', 'CommonName')
+rownames(column_annotation)=NULL
+column_annotation$Broad_id_trimmed=sapply(as.character(column_annotation$Broad_id), function(x) strsplit(x, '-')[[1]][2])
+secondary_trimmed_wide_t=t(secondary_trimmed_wide)
+rownames(secondary_trimmed_wide_t)=column_annotation$Broad_id_trimmed
+onTarget$secondary_prism_ic50=secondary_trimmed_wide_t
+onTarget$secondary_screen_drugAnnotation=secondary$drug_Info
+saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v9.RDS')
+###########################################################################
+# Version9-Saving
+###########################################################################
+CPM_data_Lung=readRDS('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/scRNA_CCLE/CPM_data_Lung Cancerv2.RDS')
+geneNames=fread('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/CPM_data.txt',
+                select = c("GENE"))
+rownames(CPM_data_Lung)=as.character(unlist(geneNames$GENE))
+onTarget$CPM_scRNA_lung=CPM_data_Lung
+onTarget$metadata_CPM_scRNA=metadata
+onTarget$metadata_CPM_scRNA$Cell_line_trimmed= strsplit_customv0(onTarget$metadata_CPM_scRNA$Cell_line, '_', 1)
+onTarget$metadata_CPM_scRNA$DepMap_ID=onTarget$annotation_20Q4$DepMap_ID[match(onTarget$metadata_CPM_scRNA$Cell_line,
+                                                                               onTarget$annotation_20Q4$CCLE_Name)]
+onTarget$metadata_CPM_scRNA$NAME_modified_for_dataframe=gsub('-','.',onTarget$metadata_CPM_scRNA$NAME)
+
+dim(onTarget$metadata_CPM_scRNA)
+
+saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v10.RDS')
