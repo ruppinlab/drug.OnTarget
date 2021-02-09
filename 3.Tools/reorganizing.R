@@ -320,7 +320,7 @@ onTarget$secondary_prism_ic50=secondary_trimmed_wide_t
 onTarget$secondary_screen_drugAnnotation=secondary$drug_Info
 saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v9.RDS')
 ###########################################################################
-# Version9-Saving
+# Version10-Saving
 ###########################################################################
 CPM_data_Lung=readRDS('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/scRNA_CCLE/CPM_data_Lung Cancerv2.RDS')
 geneNames=fread('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/CPM_data.txt',
@@ -333,6 +333,34 @@ onTarget$metadata_CPM_scRNA$DepMap_ID=onTarget$annotation_20Q4$DepMap_ID[match(o
                                                                                onTarget$annotation_20Q4$CCLE_Name)]
 onTarget$metadata_CPM_scRNA$NAME_modified_for_dataframe=gsub('-','.',onTarget$metadata_CPM_scRNA$NAME)
 
-dim(onTarget$metadata_CPM_scRNA)
+saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v10.RDS')
+###########################################################################
+# Version11-Saving
+###########################################################################
+setwd('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/scRNA_CCLE/')
+CCL_fileList=list.files()
+fileName_allCacnerType_list=CCL_fileList[grep('v2',CCL_fileList)]
+# remove lung and a enpty file
+fileName_allCacnerType_list=fileName_allCacnerType_list[-c(11, 15)]
+load_andProcess <- function(infunc_fileName=fileName_allCacnerType_list[1]){
+  mat2return=readRDS(infunc_fileName)
+  rownames(mat2return)=rownames(onTarget$CPM_scRNA_lung)
+  mat2return
+}
+# geneExp=fread('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/CPM_data.txt', nThread=4)
+# require('sqldf')
+# f <- file('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/CPM_data.txt')
+# bigdf <- sqldf('select * from f', dbname = tempfile(), file.format = list(header = T, row.names = F))
+
+allCance_CPM_CCL=do.call(cbind, lapply(fileName_allCacnerType_list, load_andProcess))
+onTarget$CPM_scRNA_allCancer=allCance_CPM_CCL
+metadata=fread('/Users/sinhas8/Project_scRNAbased_drugCombination/Data/scRNA_CCLE/metadata.txt')
+
+onTarget$metadata_CPM_scRNA=metadata
+onTarget$metadata_CPM_scRNA$Cell_line_trimmed= strsplit_customv0(onTarget$metadata_CPM_scRNA$Cell_line, '_', 1)
+onTarget$metadata_CPM_scRNA$DepMap_ID=onTarget$annotation_20Q4$DepMap_ID[match(onTarget$metadata_CPM_scRNA$Cell_line,
+                                                                               onTarget$annotation_20Q4$CCLE_Name)]
+onTarget$metadata_CPM_scRNA$NAME_modified_for_dataframe=gsub('-','.',onTarget$metadata_CPM_scRNA$NAME)
 
 saveRDS(onTarget, '/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v10.RDS')
+
