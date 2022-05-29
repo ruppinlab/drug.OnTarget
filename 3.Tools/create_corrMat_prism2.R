@@ -1,7 +1,9 @@
 # Create Corrmat_crispr_Secondary
-secondary=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/secondary_screen_processed.RDS')
-onTarget$secondary_prism=secondary$secondary_screen
-onTarget=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/onTarget_v3.RDS')
+source('/Users/neelamf2/Documents/GitHub/Roboust_biomarker_using_SCRNA/code/step_0_global_func.R')
+# secondary=readRDS('/Users/sinhas8/Project_OffTarget/2.Data/secondary_screen_processed.RDS')
+# onTarget$secondary_prism=secondary$secondary_screen
+onTarget=readRDS('/Users/neelamf2/Documents/GitHub/drug.OnTarget/data/onTarget_v12.RDS')
+
 ###########################################################################
 # Step 0: match cols and rows
 ###########################################################################

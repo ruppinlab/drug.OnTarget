@@ -1,0 +1,111 @@
+---
+title: "Viagra_drug_target_rank_test"
+output: html_document
+---
+
+```{r}
+onTarget$drugCategory[grep('rolipram-R',onTarget$drugCategory$name, ignore.case = T),]
+
+DOI_id = grep('sildenafil',onTarget$drugCategory$name, ignore.case = T)
+DOI_broadid = onTarget$drugCategory$broad_id_trimmed[DOI_id]
+
+DOI_response=onTarget$drug_prism[DOI_broadid,]
+hist(DOI_response)
+```
+<!-- Function for finding correlation of true target for all drugs targeting PDE's -->
+```{r}
+checking_all_PDE_target_drug <- function(infunc_drug_list= PDEs_drug_list){
+  
+  onTarget$drugCategory[onTarget$drugCategory$name %in% infunc_drug_list,]
+  DOI_id = grep(infunc_drug_list,onTarget$drugCategory$name, ignore.case = T)
+  
+  DOI_broadid = onTarget$drugCategory$broad_id_trimmed[DOI_id]
+  DOI_response=onTarget$drug_prism[DOI_broadid,]
+  
+ # Datasets used
+  crispr_matched=colSubset(mat =onTarget$avana, column_Names =  names(DOI_response))
+  DOI_response_matched=DOI_response[colnames(crispr_matched)]
+  
+ # Finding correlation
+  correlations_with_a_gene=apply(crispr_matched, 1, function(x)
+  unlist(cor.test(x, DOI_response_matched)[c(3,4)]))
+
+  correlations_with_a_gene=as.data.frame(t(correlations_with_a_gene))
+  correlations_with_a_gene=correlations_with_a_gene[order(correlations_with_a_gene$estimate.cor, decreasing = T),]
+  correlations_with_a_gene$target= rownames(correlations_with_a_gene)
+  rownames(correlations_with_a_gene)= NULL
+  correlations_with_a_gene$rank=seq(1:nrow(correlations_with_a_gene))
+  correlations_with_a_gene$drug_name= onTarget$drugCategory$name[DOI_id]
+  correlations_with_a_gene
+}
+```
+ 
+<!--correlation estimate and rank of all PDE of the given list of drug-->
+```{r}
+# List of all drug
+PDEs_drug_list= c("ehna","bay 60-7550","oxindole",
+                  "amrinone","milrinone", "enoximone", "cilostazol", "pimobendan", "dipyridamole",
+                  "rolipram-R", "ibudilast","rp-73401", "roflumilast", "apremilast",
+                  "sildenafil",	"tadalafil","vardenafil", "udenafil",	"avanafil",
+                  "quinazoline","1,7-dimethylxanthine","^papaverine")
+
+onTarget$drugCategory[onTarget$drugCategory$name %in% PDEs_drug_list,]
+
+# List of drug with their targets specific
+PDE2_drug_list= c("ehna","bay 60-7550","oxindole")
+PDE3_drug_list= c("amrinone","milrinone", "enoximone", "cilostazol", "pimobendan", "dipyridamole")
+PDE4_drug_list= c("rolipram-R", "ibudilast","rp-73401", "roflumilast", "apremilast")
+PDE5_drug_list= c("sildenafil",	"tadalafil", "vardenafil", "udenafil",	"avanafil")
+PDE7_drug_list = c("quinazoline")
+PDE9_drug_list = c("1,7-dimethylxanthine")
+PDE10_drug_list = c("^papaverine")
+
+## running the function
+Corr_of_drug_with_target= lapply(PDEs_drug_list, function(x) err_handle(checking_all_PDE_target_drug(x)))
+
+PDE_correlation_for_all_drug= do.call(rbind, lapply(Corr_of_drug_with_target, function(x) 
+  err_handle(x[grep('^PDE',x$target),])))
+
+```
+<!--spread and gather to visualize the dataset-->
+```{r}
+require(tidyr)
+PDE_correlation_for_all_drug=na.omit(PDE_correlation_for_all_drug)
+PDE_estimate_plot_1= PDE_correlation_for_all_drug[,c(2,3,5)]
+rownames(PDE_estimate_plot_1)= NULL
+
+PDE_estimate_plot_1= spread(data =PDE_estimate_plot_1, 
+       key = unique(drug_name),
+       value = estimate.cor)
+PDE_estimate_plot_1_df=as.data.frame(PDE_estimate_plot_1)
+```
+```{r}
+require(corrplot)
+row.names(PDE_estimate_plot_1_df)=PDE_estimate_plot_1_df[,1]
+PDE_estimate_plot_1_df=PDE_estimate_plot_1_df[,-1]
+corrplot(as.matrix(PDE_estimate_plot_1_df), is.corr = F)
+```
+<!-- cor_hist polt for rank drug and target-->
+```{r}
+PDE_correlation_for_all_drug=na.omit(PDE_correlation_for_all_drug)
+PDE_rank_plot_1= PDE_correlation_for_all_drug[,c(3,4,5)]
+rownames(PDE_rank_plot_1)= NULL
+
+PDE_Rank_plot_1= spread(data =PDE_rank_plot_1, 
+       key = unique(drug_name),
+       value = rank)
+PDE_rank_plot_1_df=as.data.frame(PDE_Rank_plot_1)
+## visualize
+row.names(PDE_rank_plot_1_df)=PDE_rank_plot_1_df[,1]
+PDE_rank_plot_1_df=PDE_rank_plot_1_df[,-1]
+corrplot(18333 - as.matrix(PDE_rank_plot_1_df), is.corr = F)
+```
+
+
+
+
+
+
+
+
+

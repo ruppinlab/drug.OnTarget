@@ -1,0 +1,169 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- All targets ranking of a given drug -->
+```{r}
+DOI_id = grep('TG-02',onTarget$drugCategory$name, ignore.case = T)
+DOI_broadid = onTarget$drugCategory$broad_id_trimmed[DOI_id]
+
+DOI_response=onTarget$secondary_prism[DOI_broadid,]
+crispr_matched=colSubset(mat =onTarget$avana, column_Names =  names(DOI_response))
+DOI_response_matched=DOI_response[colnames(crispr_matched)]
+
+correlations_with_a_gene=apply(crispr_matched, 1, function(x)
+  unlist(cor.test(x, DOI_response_matched)[c(3,4)]))
+```
+
+```{r}
+correlations_with_a_gene=as.data.frame(t(correlations_with_a_gene))
+correlations_with_a_gene=correlations_with_a_gene[order(correlations_with_a_gene$estimate.cor, decreasing = T),]
+correlations_with_a_gene$rank=seq(1:nrow(correlations_with_a_gene))
+```
+
+<!-- Saving the top 30 targets of TG-02 ()-->
+```{r}
+write.csv(correlations_with_a_gene, '../neelamf2/Documents/GitHub/drug.OnTarget/data/Top_target_of_TG02.csv')
+```
+
+<!-- Ranks of all CDK derivatives-->
+```{r}
+correlations_with_a_gene[grep('CDK',rownames(correlations_with_a_gene)),]
+
+#### other gene target given by jing
+DOI_list=c('JAK2', 'TYK2', 'LCK', 'FLT3', 'ERK5')
+correlations_with_a_gene[DOI_list,]
+```
+
+<!-- Running the pipeline for Glioma pipeline -->
+```{r}
+DOI_id = grep('TG-02',onTarget$drugCategory$name, ignore.case = T)
+DOI_broadid = onTarget$drugCategory$target[DOI_id]
+DOI_response=onTarget$secondary_prism[DOI_broadid,]
+
+### cellines in glioma fro lineage subtype using annotation
+glioma_cellines= onTarget$annotation_20Q4$DepMap_ID[grep("glio",onTarget$annotation_20Q4$lineage_subtype, ignore.case = T)]
+crispr_matched_glioma_cellines = colSubset(mat =onTarget$avana, column_Names = glioma_cellines)
+DOI_response_matched_glioma_cellines = DOI_response[names(DOI_response) %in% colnames(crispr_matched_glioma_cellines)]
+
+correlations_with_a_gene=apply(crispr_matched_glioma_cellines, 1, function(x)
+  unlist(cor.test(x, DOI_response_matched_glioma_cellines)[c(3,4)]))
+
+#### ranking of the gene 
+correlations_with_a_gene=as.data.frame(t(correlations_with_a_gene))
+correlations_with_a_gene=correlations_with_a_gene[order(correlations_with_a_gene$estimate.cor, decreasing = T),]
+correlations_with_a_gene$rank=seq(1:nrow(correlations_with_a_gene))
+correlations_with_a_gene
+
+correlations_with_a_gene[grep('LTA',rownames(correlations_with_a_gene)),]
+correlations_with_a_gene[grep('CDK',rownames(correlations_with_a_gene)),]
+
+```
+
+<!--Function for the running the True target pipeline in cellines by cancer type-->
+```{r}
+### removing cancer type where the cellines are less than 10
+# unique_cancer_type = unique(onTarget$annotation_20Q4$lineage_subtype[table(onTarget$annotation_20Q4$lineage_subtype) > 30])
+cellLines_with_screens=match(colnames(crispr_with_common_celline), onTarget$annotation_20Q4$DepMap_ID)
+lineages_with_enough_samples=names(table(onTarget$annotation_20Q4$lineage[cellLines_with_screens])[
+  which(table(onTarget$annotation_20Q4$lineage[cellLines_with_screens])>15)])
+
+
+CDK9_rank_in_all_cancer_type <- function(infunc_cancer_type = lineages_with_enough_samples[1],
+                                         infunc_DOI_broadid=DOI_broadid){
+  infunc_cellines = onTarget$annotation_20Q4$DepMap_ID[grep(infunc_cancer_type,onTarget$annotation_20Q4$lineage, ignore.case = T)]
+  
+  infunc_cellines_matched=intersect(infunc_cellines,colnames(crispr_with_common_celline))
+  #### Matrix sorted by board id
+  DOI_response=drug_response_with_common_celline[infunc_DOI_broadid,infunc_cellines_matched]
+  crispr_matched=crispr_with_common_celline[,infunc_cellines_matched]
+  
+#### Correlation of the Crispr and drug response 
+  correlations_with_a_gene=apply(crispr_matched, 1, function(x)
+    unlist(cor.test(x, DOI_response)[c(3,4)]))
+  correlations_with_a_gene=as.data.frame(t(correlations_with_a_gene))
+  correlations_with_a_gene=correlations_with_a_gene[order(correlations_with_a_gene$estimate.cor, decreasing = T),]
+  correlations_with_a_gene$rank=seq(1:nrow(correlations_with_a_gene))
+  correlations_with_a_gene$cancer_type = infunc_cancer_type
+  correlations_with_a_gene
+} 
+
+
+# Running the function
+correlations_with_a_gene_by_cancertype= lapply(lineages_with_enough_samples, 
+                                               function (x) 
+                                                 CDK9_rank_in_all_cancer_type(infunc_cancer_type = x))
+
+correlations_with_a_gene_by_cancertype[[2]]$cancer_type = "CNS"
+CDK9_correlation_TM02=do.call(rbind, lapply(correlations_with_a_gene_by_cancertype, function(x) 
+  x[rownames(x)=='CDK9',] ))
+
+
+CDK9_correlation_TM02= CDK9_correlation_TM02[order(CDK9_correlation_TM02$estimate.cor, decreasing = F),]
+CDK9_correlation_TM02$target= 'CDK9'
+CDK9_correlation_TM02$fdr_pvalue= fdrcorr(CDK9_correlation_TM02$p.value)
+rownames(CDK9_correlation_TM02)= NULL
+```
+<!-- Visualization -->
+```{r}
+
+ggplot(CDK9_correlation_TM02, aes(x=factor(cancer_type, levels = factor(cancer_type)), 
+                                  y= estimate.cor, 
+                                  color= fdr_pvalue< 0.05))+
+  geom_point(stat="identity", aes(size= rank))+
+  geom_segment(aes(x= factor(cancer_type, levels = factor(cancer_type)),
+                   xend = factor(cancer_type, levels = factor(cancer_type)), y=0, 
+                   yend=estimate.cor))+
+  geom_label(label = CDK9_correlation_TM02$rank, hjust = 0, nudge_x = 0.1, nudge_y = 0.01,size= 3)+
+  theme(text = element_text(size = 9),element_line(size =1))+
+  xlab('Cancer Types')+
+  ylab('Target confidence score')
+```
+
+```{r}
+mean_expression_of_CDK9_by_cancer_type_function <- function(infunc_cancer_type = lineages_with_enough_samples[6],
+                                                   infunc_target= 'CDK9'){
+  
+  infunc_cellines = onTarget$annotation_20Q4$DepMap_ID[grep(infunc_cancer_type,onTarget$annotation_20Q4$lineage, ignore.case = T)]
+  infunc_cellines_matched=intersect(infunc_cellines,colnames(expression_with_common_celline))
+  
+  #### Matrix sorted by board id
+  expression_data_for_CDK9 = expression_with_common_celline[infunc_target,infunc_cellines_matched] 
+  mean_expression = median(expression_data_for_CDK9, na.rm = TRUE)
+  mean_expression
+}
+
+mean_expression_of_CDK9_by_cancer_type = as.data.frame(row.names = lineages_with_enough_samples, 
+                                                          do.call(rbind,
+                                                                  lapply(lineages_with_enough_samples,function (x) 
+                                                 mean_expression_of_CDK9_by_cancer_type_function(infunc_cancer_type = x,
+                                                                              infunc_target= 'CDK9'))))
+colnames(mean_expression_of_CDK9_by_cancer_type)= 'mean_value_of_expression'
+
+# visualization
+rownames(mean_expression_of_CDK9_by_cancer_type)[2]= 'CNS'
+plot_1= mean_expression_of_CDK9_by_cancer_type[match(rownames(mean_expression_of_CDK9_by_cancer_type),
+                                                     CDK9_correlation_TM02$cancer_type),]
+ggplot(plot_1, aes(x=reorder(rownames(plot_1), mean_value_of_expression), 
+                                  y= mean_value_of_expression))+
+  geom_point(stat="identity")+
+  theme(text = element_text(size = 9),element_line(size =1))+
+  xlab('Cancer Types')+
+  ylab('mean expression in each cancer type')
+
+```
+
+
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

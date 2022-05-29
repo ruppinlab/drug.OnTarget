@@ -1,0 +1,149 @@
+---
+title: "Step_1_corrMat_prism2"
+output: html_document
+---
+
+```{r}
+# Libraries
+require(parallel)
+require(tictoc) 
+require(WGCNA)
+require(ggplot2)
+require(cowplot)
+library(interactions)
+library(ggpubr)
+
+# # Files
+setwd('/Users/neelamf2/Documents/GitHub/drug.OnTarget/data/')
+source('/Users/neelamf2/Documents/GitHub/Roboust_biomarker_using_SCRNA/code/step_0_global_func.R')
+source('/Users/neelamf2/Documents/GitHub/Roboust_biomarker_using_SCRNA/code/step_00_myCustom_functions.R')
+```
+
+<!--Data loading and exploration-->
+```{r}
+## Drug response viability
+onTarget=readRDS('/Users/neelamf2/Documents/GitHub/drug.OnTarget/data/onTarget_v12.RDS')
+myhead(onTarget$secondary_prism)
+dim(onTarget$secondary_prism)
+length(unique(colnames(onTarget$secondary_prism)))
+
+
+## CRISPR Data
+# myhead(onTarget$avana)
+# dim(onTarget$avana)
+# unique(colnames(onTarget$avana))
+Crispr_22Q2 = read.csv('../data/CRISPR_gene_effect.csv', row.names = 1)
+colnames(Crispr_22Q2)= gsub("\\..*","",colnames(Crispr_22Q2))
+Crispr_22Q2= t(Crispr_22Q2)
+
+myhead(Crispr_22Q2)
+dim(Crispr_22Q2)
+
+
+## expression data
+myhead(onTarget$expression)
+dim(onTarget$expression)
+
+## celline information annotation data
+length(intersect(colnames(onTarget$avana),colnames(onTarget$secondary_prism)))
+dim(onTarget$annotation_20Q4)
+myhead(onTarget$annotation_20Q4)
+```
+
+<!--Dataset preprocessing -->
+```{r}
+### Renaming the colname "Cellinie_number_FAILED_STR" to "Celline_number" 
+## after which 2 cellines added in common depid (320 -> 322). 
+colnames(onTarget$secondary_prism)= gsub("_.*$","",colnames(onTarget$secondary_prism))
+#### unique drugnames
+length(unique(rownames(onTarget$secondary_prism)))
+
+### Common celline in Crispr and Drug response data
+depid_of_interest= intersect(colnames(onTarget$secondary_prism), colnames(Crispr_22Q2))
+depid_of_interest_with_exp_info= intersect(colnames(onTarget$expression), depid_of_interest)
+
+#### Data frames required
+# crispr_with_common_celline= onTarget$avana[,depid_of_interest] ## Old Crispr screen from depmap
+crispr_with_common_celline= Crispr_22Q2[,depid_of_interest_with_exp_info]
+
+drug_response_with_common_celline= onTarget$secondary_prism[unique(rownames(onTarget$secondary_prism)),
+                                                            depid_of_interest_with_exp_info]
+expression_with_common_celline= onTarget$expression[,depid_of_interest_with_exp_info]
+dim(expression_with_common_celline)
+### Drug_category for broad_ID
+Drug_OI= intersect(rownames(drug_response_with_common_celline), onTarget$drugCategory$broad_id_trimmed)
+drug_cat= onTarget$drugCategory[onTarget$drugCategory$broad_id_trimmed %in% Drug_OI,]
+```
+<!--Function-->
+```{r}
+calling_cor_test <- function(infunc_drug_name="A03623303", # "A03623303,A00758722",
+                             infunc_broad_id_df = drug_cat,
+                             infunc_COI= depid_of_interest){
+  ###Target name
+  target_name= as.character(infunc_broad_id_df
+                                       [(infunc_broad_id_df$broad_id_trimmed == infunc_drug_name), 
+                                                          c("target")])
+  target_name= (strsplit(target_name,", ")[[1]])
+  
+  #### Defining the dataframes used:
+  infunc_drug_df= onTarget$secondary_prism[unique(rownames(onTarget$secondary_prism)),
+                                           infunc_COI]
+  infunc_crispr_df = Crispr_22Q2[,infunc_COI]
+
+ #### correlation function for finding cor between the drug response and crispr KO of true target 
+  if(length(target_name)== 1){  
+    cor_target= unlist(cor.test(infunc_drug_df[infunc_drug_name,],
+                      infunc_crispr_df[target_name,] ,
+                      method = "p")[c(3,4)])
+    target= target_name
+    
+  } else{
+    cor_multiple_target= data.frame(sapply(target_name, function (x) 
+      unlist(cor.test(infunc_drug_df[infunc_drug_name,],
+               infunc_crispr_df[x,], 
+               method = "p")[c(3,4)]) ))
+    
+  ### target name and p value and cor
+    target= target_name[which.max(cor_multiple_target["estimate",])]
+    cor_multiple_target= cor_multiple_target[,which.max(cor_multiple_target['estimate',])]
+    cor_target= cor_multiple_target
+  }
+return(c(target,cor_target))
+}
+```
+
+```{r}
+drug_list= rownames(drug_response_with_common_celline)
+tic()
+correlation_mat =mclapply(drug_list, function (x) err_handle(calling_cor_test(infunc_drug_name = x,
+                                                infunc_broad_id_df = drug_cat,
+                                                infunc_COI = depid_of_interest_with_exp_info)),
+          mc.cores = detectCores())
+toc()
+
+correlation_mat_df=as.data.frame(do.call(rbind, correlation_mat))
+rownames(correlation_mat_df)=rownames(drug_response_with_common_celline)
+colnames(correlation_mat_df) = c("Target","pvalue","cor_estimate")
+correlation_mat_df= correlation_mat_df[!is.na(correlation_mat_df$Target),]
+correlation_mat_df$pvalue= as.numeric(correlation_mat_df$pvalue)
+correlation_mat_df$cor_estimate= as.numeric(correlation_mat_df$cor_estimate)
+
+#write.csv(correlation_mat_df, "../data/correlation_matV2.csv") 
+correlation_mat_df_v1= read.csv("../data/correlation_matV1.csv", row.names = 1)
+correlation_mat_df= read.csv("../data/correlation_matV2.csv", row.names = 1)
+head(correlation_mat_df)
+```
+
+```{r}
+ggplot(correlation_mat_df, aes(x= as.numeric(cor_estimate)))+
+  geom_histogram()+
+  labs(title= "Corr_df with updated version of crispr")
+
+ggplot(correlation_mat_df_v1, aes(x= as.numeric(cor_estimate)))+
+  geom_histogram()+
+  labs(title="Corr_df with previouis version of crispr")
+
+max((correlation_mat_df$cor_estimate))
+correlation_mat_df[order(correlation_mat_df$cor_estimate,decreasing = TRUE),]
+range(Crispr_22Q2, na.rm = T)
+```
