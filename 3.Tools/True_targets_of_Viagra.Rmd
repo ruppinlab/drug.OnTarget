@@ -2,6 +2,10 @@
 title: "Viagra_drug_target_rank_test"
 output: html_document
 ---
+<!-- Libraries -->
+```{r}
+library(ggrepel)
+```
 
 <!--Data loading and exploration-->
 ```{r}
@@ -31,12 +35,47 @@ correlations_with_a_gene=apply(crispr_matched, 1, function(x)
 correlations_with_a_gene=as.data.frame(t(correlations_with_a_gene))
 correlations_with_a_gene=correlations_with_a_gene[order(correlations_with_a_gene$estimate.cor, decreasing = T),]
 correlations_with_a_gene$rank=seq(1:nrow(correlations_with_a_gene))
+correlations_with_a_gene$fdr_pvalue= fdrcorr(correlations_with_a_gene$p.value)
 correlations_with_a_gene
-write.csv(correlations_with_a_gene, "../data/Correlation_df_with_viagra.csv")
+# write.csv(correlations_with_a_gene, "../Correlation_df_with_viagra.csv")
 ```
+<!-- Scatter plot showing the top hits predicted via our pipeline -->
+```{r}
+Plot_1_df_rank= correlations_with_a_gene
+
+Plot_1= ggplot(Plot_1_df_rank, aes(x=rank, 
+                                  y= estimate.cor, 
+                                  color= p.value< 0.05 & estimate.cor > 0))+
+  geom_point(stat="identity", aes(size= -rank),show.legend = F)+
+  geom_text(aes(label=ifelse(rank == 1,as.character(rownames(Plot_1_df_rank)),'')),hjust = 0, nudge_x = 1000, nudge_y = 0.001,size= 4)+
+  theme(text = element_text(size = 9),element_line(size =1))+
+  theme_bw(base_size = 15)+
+  labs(x= 'Rank of gene target', 
+       y='Target confidence score', 
+       title= 'Ranks of suggested targets of sildenafil in pan cancer')
+
+ggsave('../result/Scatter_plot_showing_rank_of_all_targets.pdf', Plot_1,
+       height=6, width = 8, units = 'in')
+```
+
 <!--Finding rank of "PDE5A" and other PDE's in the cor result from our pipeline-->
 ```{r}
 pde_correlation= correlations_with_a_gene[grep('^PDE',rownames(correlations_with_a_gene)),]
+
+Plot_3= ggplot(pde_correlation, aes(x= reorder(rownames(pde_correlation), estimate.cor), 
+                                  y= estimate.cor, 
+                                  color= p.value< 0.05))+
+  geom_point(stat="identity", aes(size= -rank),show.legend = F)+
+  geom_text(aes(label=ifelse(rank < 500,as.character(rank),'')), hjust = 0, nudge_x = -1.6, nudge_y = 0.0001,size= 4)+
+  theme_bw(base_size = 15)+ 
+  theme(legend.position = 'top', axis.text.x = element_text(angle = 90))+
+  labs(x= 'Rank of gene target', 
+       y='Target confidence score', 
+       title= 'Ranks of suggested targets of sildenafil in pan cancer')
+
+ggsave('../result/Scatter_plot_showing_rank_of_all_PDE.jpg', Plot_3,
+       height=6, width = 8, units = 'in')
+
 # write.csv(pde_correlation, "../neelamf2/Documents/GitHub/drug.OnTarget/data/PDE_correlation.csv")
 ```
 <!-- Visualization of all targets of viagra -->
@@ -45,15 +84,19 @@ DOI_list=c('PDE5A', "PDE6G", "PDE6H", "SLCO1B1", 'SLCO1B3')
 predicted_rank_of_targets_of_viagra= correlations_with_a_gene[DOI_list,]
 predicted_rank_of_targets_of_viagra$fdr_pvalue= fdrcorr(predicted_rank_of_targets_of_viagra$p.value)
 
-ggplot(predicted_rank_of_targets_of_viagra, aes(x=reorder(rownames(predicted_rank_of_targets_of_viagra), estimate.cor), 
+Plot_2 = ggplot(predicted_rank_of_targets_of_viagra, aes(x=reorder(rownames(predicted_rank_of_targets_of_viagra), estimate.cor), 
                                   y= estimate.cor, 
                                   color= fdr_pvalue< 0.05))+
-  geom_point(stat="identity", aes(size= -rank))+
-  geom_label(label = predicted_rank_of_targets_of_viagra$rank, hjust = 0, nudge_x = 0.01, nudge_y = 0.001,size= 3)+
-  theme(text = element_text(size = 9),element_line(size =1))+
-  labs(x= 'Targets of sildenafil', 
+  geom_point(stat="identity", aes(size= -rank), show.legend = F)+
+  geom_label(label = predicted_rank_of_targets_of_viagra$rank, hjust = 0, nudge_x = 0.1, nudge_y = 0.001,size= 5)+
+  theme_bw(base_size = 15)+
+  theme(legend.position = 'top')+
+  labs(x= 'Five known targets of sildenafil (Drug bank)', 
        y='Target confidence score', 
        title= 'Ranks of suggested targets of sildenafil in pan cancer')
+
+ggsave('../result/point_plot_showing_rank_targets_for_viagra.jpg', Plot_2,
+       height=6, width = 8, units = 'in')
 ```
 <!-- Functionfor sildenafil -->
 ```{r}
@@ -297,17 +340,26 @@ ggplot(plot_4, aes(x= lineage, y= PDE5A, fill=lineage))+
 #Correlation between the Drug killing "Sidenafil" and target "FAM49B"
 TOI= "FAM49B"
 plot1_drug_kill_df=data.frame(Drug_kill= DOI_response_matched, 
-           mut= onTarget$mutations_matrix[TOI,colnames(crispr_matched)],
-           exp= expression_hulala[TOI,])
-ggplot(plot1_drug_kill_df, aes(x=exp, y= Drug_kill))+
+           mutation= onTarget$mutations_matrix[TOI,colnames(crispr_matched)],
+           expression= expression_hulala[TOI,])
+ggplot(plot1_drug_kill_df, aes(x=expression, y= Drug_kill))+
   geom_point()+
   geom_smooth(method = "lm", se= F)+
   stat_cor(label.y.npc = "top")
 ```
+
 ```{r}
-ggplot(plot1_drug_kill_df, aes(x=factor(mut), y= Drug_kill))+
+plot1_drug_kill_df$mutation=factor(plot1_drug_kill_df$mutation)
+levels(plot1_drug_kill_df$mutation)= c('Not Mutated', 'Mutated')
+Plot_4 = ggplot(plot1_drug_kill_df, aes(x=mutation, y= Drug_kill, fill=mutation))+
   geom_boxplot()+
-  stat_compare_means()
+  stat_compare_means()+
+  theme_bw(base_size = 15)+
+  labs(x= 'Mutation status of FAM49B',
+       y= 'Viability after Sildenafil treatment')
+ggsave('../result/correlation_with_Mutation.jpg', Plot_4,
+       height=6, width = 8, units = 'in')
+
 ```
 
 
