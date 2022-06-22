@@ -1777,17 +1777,30 @@ the chunk or by placing your cursor inside it and pressing
 <!-- Load needed libraries, functions and data --></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxua25pdHI6OmtuaXQoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9Ub29scy9TdGVwMEJfRGF0YV9hbmRfTGlicmFyaWVzLlJtZCcpXG5rbml0cjo6a25pdCgnL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0L1Rvb2xzL1N0ZXAwX1dyaXRlX0Z1bmN0aW9ucy5SbWQnKVxuYGBgIn0= -->
-<pre class="r"><code>knitr::knit(&#39;/Users/sinhas8/Project_TrueTarget/Tools/Step0B_Data_and_Libraries.Rmd&#39;)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxua25pdHI6OmtuaXQoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9Ub29scy9TdGVwMEJfRGF0YV9hbmRfTGlicmFyaWVzLlJtZCcpXG5rbml0cjo6a25pdCgnL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0L1Rvb2xzL1N0ZXAwX1dyaXRlX0Z1bmN0aW9ucy5SbWQnKVxuYGBgXG5gYGAifQ== -->
+<pre class="r"><code>```r
+knitr::knit(&#39;/Users/sinhas8/Project_TrueTarget/Tools/Step0B_Data_and_Libraries.Rmd&#39;)
 knitr::knit(&#39;/Users/sinhas8/Project_TrueTarget/Tools/Step0_Write_Functions.Rmd&#39;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- MOA pathway annotation -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyB0YXJnZXRfYnlfbW9hPXNwbGl0KG9uVGFyZ2V0JGRydWdDYXRlZ29yeSR0YXJnZXQsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpXG4jIHRhcmdldF9ieV9tb2FfdW5saXN0ZWQ9c2FwcGx5KHRhcmdldF9ieV9tb2EsIHVubGlzdClcbiMgXG4jIHRhcmdldF9ieV9tb2FfcGF0aHdheXM9bGFwcGx5KHRhcmdldF9ieV9tb2FfdW5saXN0ZWQsIGZ1bmN0aW9uKHkpe1xuIyAgIHVuaXF1ZSh1bmxpc3Qoc2FwcGx5KGFzLmNoYXJhY3Rlcih5KSwgZnVuY3Rpb24oeCkgXG4jICAgdW5saXN0KHN0cnNwbGl0KHgsICcsICcpKSApKSlcbiMgfVxuIyApXG4jIG1vYV9wYXRod2F5cz10YXJnZXRfYnlfbW9hX3BhdGh3YXlzXG4jIHNhdmVSRFMobW9hX3BhdGh3YXlzLCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvRGF0YS9tb2FfcGF0aHdheXMuUkRTJyApXG5gYGAifQ== -->
-<pre class="r"><code># target_by_moa=split(onTarget$drugCategory$target, onTarget$drugCategory$moa)
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+&lt;!-- MOA pathway annotation --&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyB0YXJnZXRfYnlfbW9hPXNwbGl0KG9uVGFyZ2V0JGRydWdDYXRlZ29yeSR0YXJnZXQsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpXG4jIHRhcmdldF9ieV9tb2FfdW5saXN0ZWQ9c2FwcGx5KHRhcmdldF9ieV9tb2EsIHVubGlzdClcbiMgXG4jIHRhcmdldF9ieV9tb2FfcGF0aHdheXM9bGFwcGx5KHRhcmdldF9ieV9tb2FfdW5saXN0ZWQsIGZ1bmN0aW9uKHkpe1xuIyAgIHVuaXF1ZSh1bmxpc3Qoc2FwcGx5KGFzLmNoYXJhY3Rlcih5KSwgZnVuY3Rpb24oeCkgXG4jICAgdW5saXN0KHN0cnNwbGl0KHgsICcsICcpKSApKSlcbiMgfVxuIyApXG4jIG1vYV9wYXRod2F5cz10YXJnZXRfYnlfbW9hX3BhdGh3YXlzXG4jIHNhdmVSRFMobW9hX3BhdGh3YXlzLCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvRGF0YS9tb2FfcGF0aHdheXMuUkRTJyApXG5gYGAifQ== --&gt;
+
+```r
+# target_by_moa=split(onTarget$drugCategory$target, onTarget$drugCategory$moa)
 # target_by_moa_unlisted=sapply(target_by_moa, unlist)
 # 
 # target_by_moa_pathways=lapply(target_by_moa_unlisted, function(y){
@@ -1800,18 +1813,36 @@ knitr::knit(&#39;/Users/sinhas8/Project_TrueTarget/Tools/Step0_Write_Functions.R
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<!-- Load pathway annotation data and perform the needed preprocessing -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW9hX3BhdGh3YXlzPXJlYWRSRFMoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9EYXRhL21vYV9wYXRod2F5cy5SRFMnKVxubW9hX3BhdGh3YXlzPXNhcHBseShtb2FfcGF0aHdheXMsIG5hLm9taXQpXG5oaXN0KHNhcHBseShtb2FfcGF0aHdheXMsIGxlbmd0aCkpXG5cbmBgYCJ9 -->
-<pre class="r"><code>moa_pathways=readRDS(&#39;/Users/sinhas8/Project_TrueTarget/Data/moa_pathways.RDS&#39;)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxubW9hX3BhdGh3YXlzPXJlYWRSRFMoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9EYXRhL21vYV9wYXRod2F5cy5SRFMnKVxubW9hX3BhdGh3YXlzPXNhcHBseShtb2FfcGF0aHdheXMsIG5hLm9taXQpXG5oaXN0KHNhcHBseShtb2FfcGF0aHdheXMsIGxlbmd0aCkpXG5cbmBgYFxuYGBgIn0= -->
+<pre class="r"><code>```r
+moa_pathways=readRDS(&#39;/Users/sinhas8/Project_TrueTarget/Data/moa_pathways.RDS&#39;)
 moa_pathways=sapply(moa_pathways, na.omit)
 hist(sapply(moa_pathways, length))
 </code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncz1tY2xhcHBseSgxOm5jb2woZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpLCBmdW5jdGlvbih4KSB7XG4gIElGX2NvcnJfd2l0aF9nZW5lPXVubGlzdChkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aFsseF0pXG4gIG5hbWVzKElGX2NvcnJfd2l0aF9nZW5lKSAgPSByb3duYW1lcyhkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aClcbiAgSUZfY29ycl93aXRoX2dlbmVfb3JkZXJlZD1zb3J0KElGX2NvcnJfd2l0aF9nZW5lLCBkZWNyZWFzaW5nID0gVClcbiAgZ3NlYV9lbnJpY2htZW50PWZnc2VhKHBhdGh3YXlzID0gbW9hX3BhdGh3YXlzLFxuICAgICAgICAgICAgICAgICAgc3RhdHMgPSBJRl9jb3JyX3dpdGhfZ2VuZV9vcmRlcmVkLFxuICAgICAgICAgICAgICAgICAgbWluU2l6ZT0xLFxuICAgICAgICAgICAgICAgICAgbWF4U2l6ZT0xMDApXG4gIGdzZWFfZW5yaWNobWVudFxufSwgbWMuY29yZXMgPSBkZXRlY3RDb3JlcygpKVxubmFtZXMoZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncyk9Y29sbmFtZXMoZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpXG5gYGAifQ== -->
-<pre class="r"><code>gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+&lt;!-- Run gene enrichment (this will take some time, ~20 mins) --&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncz1tY2xhcHBseSgxOm5jb2woZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpLCBmdW5jdGlvbih4KSB7XG4gIElGX2NvcnJfd2l0aF9nZW5lPXVubGlzdChkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aFsseF0pXG4gIG5hbWVzKElGX2NvcnJfd2l0aF9nZW5lKSAgPSByb3duYW1lcyhkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aClcbiAgSUZfY29ycl93aXRoX2dlbmVfb3JkZXJlZD1zb3J0KElGX2NvcnJfd2l0aF9nZW5lLCBkZWNyZWFzaW5nID0gVClcbiAgZ3NlYV9lbnJpY2htZW50PWZnc2VhKHBhdGh3YXlzID0gbW9hX3BhdGh3YXlzLFxuICAgICAgICAgICAgICAgICAgc3RhdHMgPSBJRl9jb3JyX3dpdGhfZ2VuZV9vcmRlcmVkLFxuICAgICAgICAgICAgICAgICAgbWluU2l6ZT0xLFxuICAgICAgICAgICAgICAgICAgbWF4U2l6ZT0xMDApXG4gIGdzZWFfZW5yaWNobWVudFxufSwgbWMuY29yZXMgPSBkZXRlY3RDb3JlcygpKVxubmFtZXMoZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncyk9Y29sbmFtZXMoZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpXG5gYGBcbmBgYCJ9 --&gt;
+
+```r
+```r
+gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
   IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
   names(IF_corr_with_gene)  = rownames(drugVScrispr_corr_Strength)
   IF_corr_with_gene_ordered=sort(IF_corr_with_gene, decreasing = T)
@@ -1822,47 +1853,94 @@ hist(sapply(moa_pathways, length))
   gsea_enrichment
 }, mc.cores = detectCores())
 names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- Test example -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyByYW5rZWRfbGlzdD1kcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aFssMV1cbiMgcmFua2VkX2xpc3Rfb3JkZXJlZD1zb3J0KHJhbmtlZF9saXN0LCBkZWNyZWFzaW5nID0gVClcbiMgaGVhZChyYW5rZWRfbGlzdF9vcmRlcmVkKVxuIyBmZ3NlYVJlcyA8LSBmZ3NlYShwYXRod2F5cyA9IG1vYV9wYXRod2F5cyxcbiMgICAgICAgICAgICAgICAgICAgc3RhdHMgPSByYW5rZWRfbGlzdF9vcmRlcmVkLFxuIyAgICAgICAgICAgICAgICAgICBtaW5TaXplPTEsXG4jICAgICAgICAgICAgICAgICAgIG1heFNpemU9MjAwKVxuYGBgIn0= -->
-<pre class="r"><code># ranked_list=drugVScrispr_corr_Strength[,1]
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+
+&lt;!-- Test example --&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuIyByYW5rZWRfbGlzdD1kcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aFssMV1cbiMgcmFua2VkX2xpc3Rfb3JkZXJlZD1zb3J0KHJhbmtlZF9saXN0LCBkZWNyZWFzaW5nID0gVClcbiMgaGVhZChyYW5rZWRfbGlzdF9vcmRlcmVkKVxuIyBmZ3NlYVJlcyA8LSBmZ3NlYShwYXRod2F5cyA9IG1vYV9wYXRod2F5cyxcbiMgICAgICAgICAgICAgICAgICAgc3RhdHMgPSByYW5rZWRfbGlzdF9vcmRlcmVkLFxuIyAgICAgICAgICAgICAgICAgICBtaW5TaXplPTEsXG4jICAgICAgICAgICAgICAgICAgIG1heFNpemU9MjAwKVxuYGBgXG5gYGAifQ== --&gt;
+
+```r
+```r
+# ranked_list=drugVScrispr_corr_Strength[,1]
 # ranked_list_ordered=sort(ranked_list, decreasing = T)
 # head(ranked_list_ordered)
 # fgseaRes &lt;- fgsea(pathways = moa_pathways,
 #                   stats = ranked_list_ordered,
 #                   minSize=1,
 #                   maxSize=200)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBGaWd1cmUyQSA8LSBnZ3Bsb3QoZmdzZWFSZXNbZmdzZWFSZXMkcHZhbDwwLjA1LF0sIGFlcyhyZW9yZGVyKHBhdGh3YXksIE5FUyksIE5FUykpICtcbiMgICBnZW9tX2NvbChhZXMoZmlsbD1wYWRqPDAuMDUpKSArXG4jICAgY29vcmRfZmxpcCgpICtcbiMgICBsYWJzKHg9XCJQYXRod2F5XCIsIHk9XCJOb3JtYWxpemVkIEVucmljaG1lbnQgU2NvcmVcIixcbiMgICAgICAgIHRpdGxlPVwiSGFsbG1hcmsgcGF0aHdheXMgTkVTIGZyb20gR1NFQVwiKSArIFxuIyAgIHRoZW1lX21pbmltYWwoYmFzZV9zaXplID0gMTApXG5gYGAifQ== -->
-<pre class="r"><code># Figure2A &lt;- ggplot(fgseaRes[fgseaRes$pval&lt;0.05,], aes(reorder(pathway, NES), NES)) +
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuIyBGaWd1cmUyQSA8LSBnZ3Bsb3QoZmdzZWFSZXNbZmdzZWFSZXMkcHZhbDwwLjA1LF0sIGFlcyhyZW9yZGVyKHBhdGh3YXksIE5FUyksIE5FUykpICtcbiMgICBnZW9tX2NvbChhZXMoZmlsbD1wYWRqPDAuMDUpKSArXG4jICAgY29vcmRfZmxpcCgpICtcbiMgICBsYWJzKHg9XFxQYXRod2F5XFwsIHk9XFxOb3JtYWxpemVkIEVucmljaG1lbnQgU2NvcmVcXCxcbiMgICAgICAgIHRpdGxlPVxcSGFsbG1hcmsgcGF0aHdheXMgTkVTIGZyb20gR1NFQVxcKSArIFxuIyAgIHRoZW1lX21pbmltYWwoYmFzZV9zaXplID0gMTApXG5gYGBcbmBgYCJ9 --&gt;
+
+```r
+```r
+# Figure2A &lt;- ggplot(fgseaRes[fgseaRes$pval&lt;0.05,], aes(reorder(pathway, NES), NES)) +
 #   geom_col(aes(fill=padj&lt;0.05)) +
 #   coord_flip() +
-#   labs(x=&quot;Pathway&quot;, y=&quot;Normalized Enrichment Score&quot;,
-#        title=&quot;Hallmark pathways NES from GSEA&quot;) + 
+#   labs(x=\Pathway\, y=\Normalized Enrichment Score\,
+#        title=\Hallmark pathways NES from GSEA\) + 
 #   theme_minimal(base_size = 10)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBoZWFkKGNvbG5hbWVzKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKSlcbiMgaGVhZChvblRhcmdldCRkcnVnQ2F0ZWdvcnkpXG4jIG1vYV9wYXRod2F5cyRgUEtBIGFjdGl2YXRvcmBcbiMgZmdzZWFSZXNbZmdzZWFSZXMkcGF0aHdheT09J1BLQSBhY3RpdmF0b3InLF1cbmBgYCJ9 -->
-<pre class="r"><code># head(colnames(drugVScrispr_corr_Strength))
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuIyBoZWFkKGNvbG5hbWVzKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKSlcbiMgaGVhZChvblRhcmdldCRkcnVnQ2F0ZWdvcnkpXG4jIG1vYV9wYXRod2F5cyRgUEtBIGFjdGl2YXRvcmBcbiMgZmdzZWFSZXNbZmdzZWFSZXMkcGF0aHdheT09J1BLQSBhY3RpdmF0b3InLF1cbmBgYFxuYGBgIn0= --&gt;
+
+```r
+```r
+# head(colnames(drugVScrispr_corr_Strength))
 # head(onTarget$drugCategory)
 # moa_pathways$`PKA activator`
 # fgseaRes[fgseaRes$pathway==&#39;PKA activator&#39;,]</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBwbG90RW5yaWNobWVudChtb2FfcGF0aHdheXNbWydQS0EgYWN0aXZhdG9yJ11dLFxuIyAgICAgICAgICAgICAgICByYW5rZWRfbGlzdF9vcmRlcmVkKSArIGxhYnModGl0bGU9J1BLQSBhY3RpdmF0b3InKVxuIyBncmVwKCdQUktHMScsIG5hbWVzKHJhbmtlZF9saXN0X29yZGVyZWQpKVxuYGBgIn0= -->
-<pre class="r"><code># plotEnrichment(moa_pathways[[&#39;PKA activator&#39;]],
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuIyBwbG90RW5yaWNobWVudChtb2FfcGF0aHdheXNbWydQS0EgYWN0aXZhdG9yJ11dLFxuIyAgICAgICAgICAgICAgICByYW5rZWRfbGlzdF9vcmRlcmVkKSArIGxhYnModGl0bGU9J1BLQSBhY3RpdmF0b3InKVxuIyBncmVwKCdQUktHMScsIG5hbWVzKHJhbmtlZF9saXN0X29yZGVyZWQpKVxuYGBgXG5gYGAifQ== --&gt;
+
+```r
+```r
+# plotEnrichment(moa_pathways[[&#39;PKA activator&#39;]],
 #                ranked_list_ordered) + labs(title=&#39;PKA activator&#39;)
 # grep(&#39;PRKG1&#39;, names(ranked_list_ordered))</code></pre>
+<p>```</p>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1877,7 +1955,7 @@ run any R code chunks. Instead, the output of the chunk when it was last
 run in the editor is displayed.</p>
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKVGhpcyBpcyBhbiBbUiBNYXJrZG93bl0oaHR0cDovL3JtYXJrZG93bi5yc3R1ZGlvLmNvbSkgTm90ZWJvb2suIFdoZW4geW91IGV4ZWN1dGUgY29kZSB3aXRoaW4gdGhlIG5vdGVib29rLCB0aGUgcmVzdWx0cyBhcHBlYXIgYmVuZWF0aCB0aGUgY29kZS4gCgpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ21kK1NoaWZ0K0VudGVyKi4gCjwhLS0gSWRlbnRpZnkgVGFyZ2V0cyBhdCBwYXRod2F5IGxldmVsIC0tPgo8IS0tIExvYWQgbmVlZGVkIGxpYnJhcmllcywgZnVuY3Rpb25zIGFuZCBkYXRhIC0tPgpgYGB7cn0Ka25pdHI6OmtuaXQoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9Ub29scy9TdGVwMEJfRGF0YV9hbmRfTGlicmFyaWVzLlJtZCcpCmtuaXRyOjprbml0KCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvVG9vbHMvU3RlcDBfV3JpdGVfRnVuY3Rpb25zLlJtZCcpCmBgYAo8IS0tIE1PQSBwYXRod2F5IGFubm90YXRpb24gLS0+CmBgYHtyfQojIHRhcmdldF9ieV9tb2E9c3BsaXQob25UYXJnZXQkZHJ1Z0NhdGVnb3J5JHRhcmdldCwgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkKIyB0YXJnZXRfYnlfbW9hX3VubGlzdGVkPXNhcHBseSh0YXJnZXRfYnlfbW9hLCB1bmxpc3QpCiMgCiMgdGFyZ2V0X2J5X21vYV9wYXRod2F5cz1sYXBwbHkodGFyZ2V0X2J5X21vYV91bmxpc3RlZCwgZnVuY3Rpb24oeSl7CiMgICB1bmlxdWUodW5saXN0KHNhcHBseShhcy5jaGFyYWN0ZXIoeSksIGZ1bmN0aW9uKHgpIAojICAgdW5saXN0KHN0cnNwbGl0KHgsICcsICcpKSApKSkKIyB9CiMgKQojIG1vYV9wYXRod2F5cz10YXJnZXRfYnlfbW9hX3BhdGh3YXlzCiMgc2F2ZVJEUyhtb2FfcGF0aHdheXMsJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9EYXRhL21vYV9wYXRod2F5cy5SRFMnICkKYGBgCgpgYGB7cn0KbW9hX3BhdGh3YXlzPXJlYWRSRFMoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9EYXRhL21vYV9wYXRod2F5cy5SRFMnKQptb2FfcGF0aHdheXM9c2FwcGx5KG1vYV9wYXRod2F5cywgbmEub21pdCkKaGlzdChzYXBwbHkobW9hX3BhdGh3YXlzLCBsZW5ndGgpKQoKYGBgCmBgYHtyfQpnc2VhX2VucmljaG1lbnRfYWxsX2RydWdzPW1jbGFwcGx5KDE6bmNvbChkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aCksIGZ1bmN0aW9uKHgpIHsKICBJRl9jb3JyX3dpdGhfZ2VuZT11bmxpc3QoZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGhbLHhdKQogIG5hbWVzKElGX2NvcnJfd2l0aF9nZW5lKSAgPSByb3duYW1lcyhkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aCkKICBJRl9jb3JyX3dpdGhfZ2VuZV9vcmRlcmVkPXNvcnQoSUZfY29ycl93aXRoX2dlbmUsIGRlY3JlYXNpbmcgPSBUKQogIGdzZWFfZW5yaWNobWVudD1mZ3NlYShwYXRod2F5cyA9IG1vYV9wYXRod2F5cywKICAgICAgICAgICAgICAgICAgc3RhdHMgPSBJRl9jb3JyX3dpdGhfZ2VuZV9vcmRlcmVkLAogICAgICAgICAgICAgICAgICBtaW5TaXplPTEsCiAgICAgICAgICAgICAgICAgIG1heFNpemU9MTAwKQogIGdzZWFfZW5yaWNobWVudAp9LCBtYy5jb3JlcyA9IGRldGVjdENvcmVzKCkpCm5hbWVzKGdzZWFfZW5yaWNobWVudF9hbGxfZHJ1Z3MpPWNvbG5hbWVzKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKQpgYGAKCjwhLS0gVGVzdCBleGFtcGxlIC0tPgpgYGB7cn0KIyByYW5rZWRfbGlzdD1kcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aFssMV0KIyByYW5rZWRfbGlzdF9vcmRlcmVkPXNvcnQocmFua2VkX2xpc3QsIGRlY3JlYXNpbmcgPSBUKQojIGhlYWQocmFua2VkX2xpc3Rfb3JkZXJlZCkKIyBmZ3NlYVJlcyA8LSBmZ3NlYShwYXRod2F5cyA9IG1vYV9wYXRod2F5cywKIyAgICAgICAgICAgICAgICAgICBzdGF0cyA9IHJhbmtlZF9saXN0X29yZGVyZWQsCiMgICAgICAgICAgICAgICAgICAgbWluU2l6ZT0xLAojICAgICAgICAgICAgICAgICAgIG1heFNpemU9MjAwKQpgYGAKYGBge3J9CiMgRmlndXJlMkEgPC0gZ2dwbG90KGZnc2VhUmVzW2Znc2VhUmVzJHB2YWw8MC4wNSxdLCBhZXMocmVvcmRlcihwYXRod2F5LCBORVMpLCBORVMpKSArCiMgICBnZW9tX2NvbChhZXMoZmlsbD1wYWRqPDAuMDUpKSArCiMgICBjb29yZF9mbGlwKCkgKwojICAgbGFicyh4PSJQYXRod2F5IiwgeT0iTm9ybWFsaXplZCBFbnJpY2htZW50IFNjb3JlIiwKIyAgICAgICAgdGl0bGU9IkhhbGxtYXJrIHBhdGh3YXlzIE5FUyBmcm9tIEdTRUEiKSArIAojICAgdGhlbWVfbWluaW1hbChiYXNlX3NpemUgPSAxMCkKYGBgCmBgYHtyfQojIGhlYWQoY29sbmFtZXMoZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpKQojIGhlYWQob25UYXJnZXQkZHJ1Z0NhdGVnb3J5KQojIG1vYV9wYXRod2F5cyRgUEtBIGFjdGl2YXRvcmAKIyBmZ3NlYVJlc1tmZ3NlYVJlcyRwYXRod2F5PT0nUEtBIGFjdGl2YXRvcicsXQpgYGAKCmBgYHtyfQojIHBsb3RFbnJpY2htZW50KG1vYV9wYXRod2F5c1tbJ1BLQSBhY3RpdmF0b3InXV0sCiMgICAgICAgICAgICAgICAgcmFua2VkX2xpc3Rfb3JkZXJlZCkgKyBsYWJzKHRpdGxlPSdQS0EgYWN0aXZhdG9yJykKIyBncmVwKCdQUktHMScsIG5hbWVzKHJhbmtlZF9saXN0X29yZGVyZWQpKQpgYGAKCgoKQWRkIGEgbmV3IGNodW5rIGJ5IGNsaWNraW5nIHRoZSAqSW5zZXJ0IENodW5rKiBidXR0b24gb24gdGhlIHRvb2xiYXIgb3IgYnkgcHJlc3NpbmcgKkNtZCtPcHRpb24rSSouCgpXaGVuIHlvdSBzYXZlIHRoZSBub3RlYm9vaywgYW4gSFRNTCBmaWxlIGNvbnRhaW5pbmcgdGhlIGNvZGUgYW5kIG91dHB1dCB3aWxsIGJlIHNhdmVkIGFsb25nc2lkZSBpdCAoY2xpY2sgdGhlICpQcmV2aWV3KiBidXR0b24gb3IgcHJlc3MgKkNtZCtTaGlmdCtLKiB0byBwcmV2aWV3IHRoZSBIVE1MIGZpbGUpLiAKClRoZSBwcmV2aWV3IHNob3dzIHlvdSBhIHJlbmRlcmVkIEhUTUwgY29weSBvZiB0aGUgY29udGVudHMgb2YgdGhlIGVkaXRvci4gQ29uc2VxdWVudGx5LCB1bmxpa2UgKktuaXQqLCAqUHJldmlldyogZG9lcyBub3QgcnVuIGFueSBSIGNvZGUgY2h1bmtzLiBJbnN0ZWFkLCB0aGUgb3V0cHV0IG9mIHRoZSBjaHVuayB3aGVuIGl0IHdhcyBsYXN0IHJ1biBpbiB0aGUgZWRpdG9yIGlzIGRpc3BsYXllZC4KCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKVGhpcyBpcyBhbiBbUiBNYXJrZG93bl0oaHR0cDovL3JtYXJrZG93bi5yc3R1ZGlvLmNvbSkgTm90ZWJvb2suIFdoZW4geW91IGV4ZWN1dGUgY29kZSB3aXRoaW4gdGhlIG5vdGVib29rLCB0aGUgcmVzdWx0cyBhcHBlYXIgYmVuZWF0aCB0aGUgY29kZS4gCgpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ21kK1NoaWZ0K0VudGVyKi4gCjwhLS0gSWRlbnRpZnkgVGFyZ2V0cyBhdCBwYXRod2F5IGxldmVsIC0tPgo8IS0tIExvYWQgbmVlZGVkIGxpYnJhcmllcywgZnVuY3Rpb25zIGFuZCBkYXRhIC0tPgpgYGB7cn0Ka25pdHI6OmtuaXQoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9Ub29scy9TdGVwMEJfRGF0YV9hbmRfTGlicmFyaWVzLlJtZCcpCmtuaXRyOjprbml0KCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvVG9vbHMvU3RlcDBfV3JpdGVfRnVuY3Rpb25zLlJtZCcpCmBgYAo8IS0tIE1PQSBwYXRod2F5IGFubm90YXRpb24gLS0+CmBgYHtyfQojIHRhcmdldF9ieV9tb2E9c3BsaXQob25UYXJnZXQkZHJ1Z0NhdGVnb3J5JHRhcmdldCwgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkKIyB0YXJnZXRfYnlfbW9hX3VubGlzdGVkPXNhcHBseSh0YXJnZXRfYnlfbW9hLCB1bmxpc3QpCiMgCiMgdGFyZ2V0X2J5X21vYV9wYXRod2F5cz1sYXBwbHkodGFyZ2V0X2J5X21vYV91bmxpc3RlZCwgZnVuY3Rpb24oeSl7CiMgICB1bmlxdWUodW5saXN0KHNhcHBseShhcy5jaGFyYWN0ZXIoeSksIGZ1bmN0aW9uKHgpIAojICAgdW5saXN0KHN0cnNwbGl0KHgsICcsICcpKSApKSkKIyB9CiMgKQojIG1vYV9wYXRod2F5cz10YXJnZXRfYnlfbW9hX3BhdGh3YXlzCiMgc2F2ZVJEUyhtb2FfcGF0aHdheXMsJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9EYXRhL21vYV9wYXRod2F5cy5SRFMnICkKYGBgCjwhLS0gTG9hZCBwYXRod2F5IGFubm90YXRpb24gZGF0YSBhbmQgcGVyZm9ybSB0aGUgbmVlZGVkIHByZXByb2Nlc3NpbmcgLS0+CmBgYHtyfQptb2FfcGF0aHdheXM9cmVhZFJEUygnL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0L0RhdGEvbW9hX3BhdGh3YXlzLlJEUycpCm1vYV9wYXRod2F5cz1zYXBwbHkobW9hX3BhdGh3YXlzLCBuYS5vbWl0KQpoaXN0KHNhcHBseShtb2FfcGF0aHdheXMsIGxlbmd0aCkpCmBgYAo8IS0tIFJ1biBnZW5lIGVucmljaG1lbnQgKHRoaXMgd2lsbCB0YWtlIHNvbWUgdGltZSwgfjIwIG1pbnMpIC0tPgpgYGB7cn0KZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncz1tY2xhcHBseSgxOm5jb2woZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpLCBmdW5jdGlvbih4KSB7CiAgSUZfY29ycl93aXRoX2dlbmU9dW5saXN0KGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoWyx4XSkKICBuYW1lcyhJRl9jb3JyX3dpdGhfZ2VuZSkgID0gcm93bmFtZXMoZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpCiAgSUZfY29ycl93aXRoX2dlbmVfb3JkZXJlZD1zb3J0KElGX2NvcnJfd2l0aF9nZW5lLCBkZWNyZWFzaW5nID0gVCkKICBnc2VhX2VucmljaG1lbnQ9ZmdzZWEocGF0aHdheXMgPSBtb2FfcGF0aHdheXMsCiAgICAgICAgICAgICAgICAgIHN0YXRzID0gSUZfY29ycl93aXRoX2dlbmVfb3JkZXJlZCwKICAgICAgICAgICAgICAgICAgbWluU2l6ZT0xLAogICAgICAgICAgICAgICAgICBtYXhTaXplPTEwMCkKICBnc2VhX2VucmljaG1lbnQKfSwgbWMuY29yZXMgPSBkZXRlY3RDb3JlcygpKQpuYW1lcyhnc2VhX2VucmljaG1lbnRfYWxsX2RydWdzKT1jb2xuYW1lcyhkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aCkKYGBgCgo8IS0tIFRlc3QgZXhhbXBsZSAtLT4KYGBge3J9CiMgcmFua2VkX2xpc3Q9ZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGhbLDFdCiMgcmFua2VkX2xpc3Rfb3JkZXJlZD1zb3J0KHJhbmtlZF9saXN0LCBkZWNyZWFzaW5nID0gVCkKIyBoZWFkKHJhbmtlZF9saXN0X29yZGVyZWQpCiMgZmdzZWFSZXMgPC0gZmdzZWEocGF0aHdheXMgPSBtb2FfcGF0aHdheXMsCiMgICAgICAgICAgICAgICAgICAgc3RhdHMgPSByYW5rZWRfbGlzdF9vcmRlcmVkLAojICAgICAgICAgICAgICAgICAgIG1pblNpemU9MSwKIyAgICAgICAgICAgICAgICAgICBtYXhTaXplPTIwMCkKYGBgCmBgYHtyfQojIEZpZ3VyZTJBIDwtIGdncGxvdChmZ3NlYVJlc1tmZ3NlYVJlcyRwdmFsPDAuMDUsXSwgYWVzKHJlb3JkZXIocGF0aHdheSwgTkVTKSwgTkVTKSkgKwojICAgZ2VvbV9jb2woYWVzKGZpbGw9cGFkajwwLjA1KSkgKwojICAgY29vcmRfZmxpcCgpICsKIyAgIGxhYnMoeD0iUGF0aHdheSIsIHk9Ik5vcm1hbGl6ZWQgRW5yaWNobWVudCBTY29yZSIsCiMgICAgICAgIHRpdGxlPSJIYWxsbWFyayBwYXRod2F5cyBORVMgZnJvbSBHU0VBIikgKyAKIyAgIHRoZW1lX21pbmltYWwoYmFzZV9zaXplID0gMTApCmBgYApgYGB7cn0KIyBoZWFkKGNvbG5hbWVzKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKSkKIyBoZWFkKG9uVGFyZ2V0JGRydWdDYXRlZ29yeSkKIyBtb2FfcGF0aHdheXMkYFBLQSBhY3RpdmF0b3JgCiMgZmdzZWFSZXNbZmdzZWFSZXMkcGF0aHdheT09J1BLQSBhY3RpdmF0b3InLF0KYGBgCgpgYGB7cn0KIyBwbG90RW5yaWNobWVudChtb2FfcGF0aHdheXNbWydQS0EgYWN0aXZhdG9yJ11dLAojICAgICAgICAgICAgICAgIHJhbmtlZF9saXN0X29yZGVyZWQpICsgbGFicyh0aXRsZT0nUEtBIGFjdGl2YXRvcicpCiMgZ3JlcCgnUFJLRzEnLCBuYW1lcyhyYW5rZWRfbGlzdF9vcmRlcmVkKSkKYGBgCgoKCkFkZCBhIG5ldyBjaHVuayBieSBjbGlja2luZyB0aGUgKkluc2VydCBDaHVuayogYnV0dG9uIG9uIHRoZSB0b29sYmFyIG9yIGJ5IHByZXNzaW5nICpDbWQrT3B0aW9uK0kqLgoKV2hlbiB5b3Ugc2F2ZSB0aGUgbm90ZWJvb2ssIGFuIEhUTUwgZmlsZSBjb250YWluaW5nIHRoZSBjb2RlIGFuZCBvdXRwdXQgd2lsbCBiZSBzYXZlZCBhbG9uZ3NpZGUgaXQgKGNsaWNrIHRoZSAqUHJldmlldyogYnV0dG9uIG9yIHByZXNzICpDbWQrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4gCgpUaGUgcHJldmlldyBzaG93cyB5b3UgYSByZW5kZXJlZCBIVE1MIGNvcHkgb2YgdGhlIGNvbnRlbnRzIG9mIHRoZSBlZGl0b3IuIENvbnNlcXVlbnRseSwgdW5saWtlICpLbml0KiwgKlByZXZpZXcqIGRvZXMgbm90IHJ1biBhbnkgUiBjb2RlIGNodW5rcy4gSW5zdGVhZCwgdGhlIG91dHB1dCBvZiB0aGUgY2h1bmsgd2hlbiBpdCB3YXMgbGFzdCBydW4gaW4gdGhlIGVkaXRvciBpcyBkaXNwbGF5ZWQuCgo=</div>
 
 
 

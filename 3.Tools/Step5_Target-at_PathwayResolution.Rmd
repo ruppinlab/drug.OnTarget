@@ -25,13 +25,13 @@ knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0_Write_Functions.Rmd')
 # moa_pathways=target_by_moa_pathways
 # saveRDS(moa_pathways,'/Users/sinhas8/Project_TrueTarget/Data/moa_pathways.RDS' )
 ```
-
+<!-- Load pathway annotation data and perform the needed preprocessing -->
 ```{r}
 moa_pathways=readRDS('/Users/sinhas8/Project_TrueTarget/Data/moa_pathways.RDS')
 moa_pathways=sapply(moa_pathways, na.omit)
 hist(sapply(moa_pathways, length))
-
 ```
+<!-- Run gene enrichment (this will take some time, ~20 mins) -->
 ```{r}
 gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
   IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
