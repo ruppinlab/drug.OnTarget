@@ -1,0 +1,87 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- Identify Targets at pathway level -->
+<!-- Load needed libraries, functions and data -->
+```{r}
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0_Write_Functions.Rmd')
+```
+<!-- MOA pathway annotation -->
+```{r}
+# target_by_moa=split(onTarget$drugCategory$target, onTarget$drugCategory$moa)
+# target_by_moa_unlisted=sapply(target_by_moa, unlist)
+# 
+# target_by_moa_pathways=lapply(target_by_moa_unlisted, function(y){
+#   unique(unlist(sapply(as.character(y), function(x) 
+#   unlist(strsplit(x, ', ')) )))
+# }
+# )
+# moa_pathways=target_by_moa_pathways
+# saveRDS(moa_pathways,'/Users/sinhas8/Project_TrueTarget/Data/moa_pathways.RDS' )
+```
+
+```{r}
+moa_pathways=readRDS('/Users/sinhas8/Project_TrueTarget/Data/moa_pathways.RDS')
+moa_pathways=sapply(moa_pathways, na.omit)
+hist(sapply(moa_pathways, length))
+
+```
+```{r}
+gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
+  IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
+  names(IF_corr_with_gene)  = rownames(drugVScrispr_corr_Strength)
+  IF_corr_with_gene_ordered=sort(IF_corr_with_gene, decreasing = T)
+  gsea_enrichment=fgsea(pathways = moa_pathways,
+                  stats = IF_corr_with_gene_ordered,
+                  minSize=1,
+                  maxSize=100)
+  gsea_enrichment
+}, mc.cores = detectCores())
+names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)
+```
+
+<!-- Test example -->
+```{r}
+# ranked_list=drugVScrispr_corr_Strength[,1]
+# ranked_list_ordered=sort(ranked_list, decreasing = T)
+# head(ranked_list_ordered)
+# fgseaRes <- fgsea(pathways = moa_pathways,
+#                   stats = ranked_list_ordered,
+#                   minSize=1,
+#                   maxSize=200)
+```
+```{r}
+# Figure2A <- ggplot(fgseaRes[fgseaRes$pval<0.05,], aes(reorder(pathway, NES), NES)) +
+#   geom_col(aes(fill=padj<0.05)) +
+#   coord_flip() +
+#   labs(x="Pathway", y="Normalized Enrichment Score",
+#        title="Hallmark pathways NES from GSEA") + 
+#   theme_minimal(base_size = 10)
+```
+```{r}
+# head(colnames(drugVScrispr_corr_Strength))
+# head(onTarget$drugCategory)
+# moa_pathways$`PKA activator`
+# fgseaRes[fgseaRes$pathway=='PKA activator',]
+```
+
+```{r}
+# plotEnrichment(moa_pathways[['PKA activator']],
+#                ranked_list_ordered) + labs(title='PKA activator')
+# grep('PRKG1', names(ranked_list_ordered))
+```
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

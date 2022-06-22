@@ -15,13 +15,9 @@ test_topbottomQuantile<-function(var1=UCD_score_M1, var2_tobetiled=unlist(Exp_me
 hypergeometric_test_for_twolists<-function(test_list, base_list, global, lowertail=FALSE) {
   #If lowertail=FALSE - we calculate the probability for enrichment
   length(base_list)
-  base_list_within_global=global[na.omit(match(base_list, global))]
-  intersect_of_two_list= test_list[!is.na(match(test_list, base_list_within_global))]
-  phyper(length(intersect_of_two_list)-1, #white balls in the samples
-         length(base_list_within_global), #total white balls in the box
-         length(global)- length(base_list_within_global), #total black balls in the box
-         length(test_list), #total balls sampled
-         lower.tail=lowertail) #whether you wish to calculate enrichment or depletion
+  adj_base_list=global[na.omit(match(base_list, global))]
+  Matched_list=test_list[!is.na(match(test_list, adj_base_list))]
+  phyper(length(Matched_list)-1, length(adj_base_list), length(global)- length(adj_base_list), length(test_list), lower.tail=lowertail)
 }
 fdrcorr<-function(test_list){p.adjust(test_list, method = 'fdr')}
 
@@ -53,72 +49,39 @@ installORload<-function(packages){
   })
 }
 # Scale 0-1
-topXPercentValue<-function(vec, X_percentile=95){
-  vec=na.omit(vec)
-  len=length(vec)
-  vec=sort(vec)
-  vec[ceiling(len*(X_percentile/100))]
-}
-range01 <- function(x){
-  # Chossing 95% and 5% percentile as thresholds for outliers
-  substitute_of_Min=topXPercentValue(vec=x, 
-                                     X_percentile=5)
-  substitute_of_Max=topXPercentValue(vec=x, 
-                                     X_percentile=95)
-  x_scaled=(x-substitute_of_Min)/(substitute_of_Max-substitute_of_Min)
-  x_scaled[x_scaled<0]=0
-  x_scaled[x_scaled>1]=1
-  x_scaled
-}
-
-range01(1:200)
-
-
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 # Scale 0-1 cancer type specifically
 scaling_cancerType<-function(quan1=gi, quan2=hist){
   unlist(lapply(split(quan1, quan2), function(x) range01(x)))
 }
 
-
-factor2numeric<-function(x){
-  as.numeric(as.character(x))
+# Create a random df unique to the input df
+randomize_DF_with_unique_Pairs<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(df2randomize[,1])
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(df2randomize[,1], sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
 }
 
-mycorTest<-function(x, y){
-  unlist(cor.test(x, y)[c(3, 4)])
-}
-
-stripall2match<-function(x){
-  # Strip all non-char and non-numeric and make lower case
-  # this is primarily to facilitate inconsistent naming
-  tolower(gsub('[^A-z0-9]','',x) )
-}
-
-
-'%!in%' <- function(x,y)!('%in%'(x,y))
-
-
-strsplit_customv0 <- function(infunc_list=pred_viab$cellLines_mapping$cellLine_ID,
-                              infunc_split_by='_',
-                              retreving_onject_id=1){
-  sapply(strsplit(infunc_list, split = infunc_split_by), function(x) x[retreving_onject_id])
-}
-
-colMax <- function (colData) {
-  apply(colData, MARGIN=c(2), max)
-}
-colMedian <- function (colData) {
-  apply(colData, MARGIN=c(2), median)
-}
-
-rowMax <- function (colData) {
-  apply(colData, MARGIN=c(1), max)
-}
-rowMin <- function (colData) {
-  apply(colData, MARGIN=c(1), min)
-}
-
-
-srowProd <- function (colData) {
-  apply(colData, 1, prod)
+randomize_DF_with_unique_Pairs_V2<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(rownames(onTarget$corrMat), nrow(df2randomize))
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(rownames(onTarget$corrMat), sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
 }
