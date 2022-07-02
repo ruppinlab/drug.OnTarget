@@ -5,6 +5,8 @@ output: html_document
 <!-- Libraries -->
 ```{r}
 library(ggrepel)
+install.packages("gridExtra")
+library("gridExtra")
 ```
 
 <!--Data loading and exploration-->
@@ -48,11 +50,12 @@ Plot_1= ggplot(Plot_1_df_rank, aes(x=rank,
                                   color= p.value< 0.05 & estimate.cor > 0))+
   geom_point(stat="identity", aes(size= -rank),show.legend = F)+
   geom_text(aes(label=ifelse(rank == 1,as.character(rownames(Plot_1_df_rank)),'')),hjust = 0, nudge_x = 1000, nudge_y = 0.001,size= 4)+
-  theme(text = element_text(size = 9),element_line(size =1))+
-  theme_bw(base_size = 15)+
+  theme_bw(base_size = 18)+
   labs(x= 'Rank of gene target', 
-       y='Target confidence score', 
-       title= 'Ranks of suggested targets of sildenafil in pan cancer')
+       y='Target confidence score' 
+       # ,title= 'Ranks of suggested targets of sildenafil in pan cancer'
+       )+
+  theme(legend.position = 'bottom')
 
 ggsave('../result/Scatter_plot_showing_rank_of_all_targets.pdf', Plot_1,
        height=6, width = 8, units = 'in')
@@ -70,8 +73,9 @@ Plot_3= ggplot(pde_correlation, aes(x= reorder(rownames(pde_correlation), estima
   theme_bw(base_size = 15)+ 
   theme(legend.position = 'top', axis.text.x = element_text(angle = 90))+
   labs(x= 'Rank of gene target', 
-       y='Target confidence score', 
-       title= 'Ranks of suggested targets of sildenafil in pan cancer')
+       y='Target confidence score'
+       # ,title= 'Ranks of suggested targets of sildenafil in pan cancer'
+       )
 
 ggsave('../result/Scatter_plot_showing_rank_of_all_PDE.jpg', Plot_3,
        height=6, width = 8, units = 'in')
@@ -88,12 +92,13 @@ Plot_2 = ggplot(predicted_rank_of_targets_of_viagra, aes(x=reorder(rownames(pred
                                   y= estimate.cor, 
                                   color= fdr_pvalue< 0.05))+
   geom_point(stat="identity", aes(size= -rank), show.legend = F)+
-  geom_label(label = predicted_rank_of_targets_of_viagra$rank, hjust = 0, nudge_x = 0.1, nudge_y = 0.001,size= 5)+
+  geom_label(label = predicted_rank_of_targets_of_viagra$rank, hjust = 0, nudge_x = -0.6, nudge_y = 0.005,size= 5)+
   theme_bw(base_size = 15)+
   theme(legend.position = 'top')+
   labs(x= 'Five known targets of sildenafil (Drug bank)', 
-       y='Target confidence score', 
-       title= 'Ranks of suggested targets of sildenafil in pan cancer')
+       y='Target confidence score'
+       # ,title= 'Ranks of suggested targets of sildenafil in pan cancer'
+       )
 
 ggsave('../result/point_plot_showing_rank_targets_for_viagra.jpg', Plot_2,
        height=6, width = 8, units = 'in')
@@ -354,13 +359,31 @@ levels(plot1_drug_kill_df$mutation)= c('Not Mutated', 'Mutated')
 Plot_4 = ggplot(plot1_drug_kill_df, aes(x=mutation, y= Drug_kill, fill=mutation))+
   geom_boxplot()+
   stat_compare_means()+
-  theme_bw(base_size = 15)+
+  theme_bw(base_size = 18)+
   labs(x= 'Mutation status of FAM49B',
-       y= 'Viability after Sildenafil treatment')
+       y= 'Viability after Sildenafil treatment')+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+        legend.position = 'bottom')
+  
 ggsave('../result/correlation_with_Mutation.jpg', Plot_4,
-       height=6, width = 8, units = 'in')
-
+       height=4.5, width = 4)
 ```
+
+```{r}
+# figure <- grid.arrange(Plot_1,Plot_4,
+#              layout_matrix = rbind(c(1,1, 1,2, 2 )))
+figure <- ggarrange(Plot_1,Plot_4, labels = c('A','B'), widths = c(1.25,0.75))
+ggsave('../result/combined_fig_for_FAM49B.jpg', figure,
+       height=6.5, width =12 )
+```
+
+```{r}
+combined_fig_pde= ggarrange(Plot_2,Plot_3,labels = c('A','B'), widths = c(0.80,1.20))
+ggsave('../result/combined_fig_for_PDEB.jpg', combined_fig_pde,
+       height=6, width =12 )
+```
+
+
 
 
 
