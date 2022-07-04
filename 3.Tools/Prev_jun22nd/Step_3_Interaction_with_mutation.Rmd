@@ -3,10 +3,18 @@ title: "Intraction with mutation"
 output: html_document
 ---
 
+<!--loading correlation data of drug_response and viability-->
 ```{r}
-# th= 
-mutation_data= onTarget$mutations_matrix[, depid_of_interest]
+correlation_mat_df= read.csv("../data/correlation_matV2.csv", row.names = 1)
+head(correlation_mat_df)
+```
 
+```{r}
+cmat_drug_name= rownames(correlation_mat_df)
+cmat_target= correlation_mat_df$Target
+
+mutation_data= onTarget$mutations_matrix[, depid_of_interest_with_exp_info]
+dim(mutation_data)
   
 lm_cmat_with_intraction_with_mutation= as.data.frame(do.call(rbind, sapply(cmat_drug_name,function (x) 
     err_handle(
@@ -20,13 +28,29 @@ lm_cmat_with_intraction_with_mutation$Target= correlation_mat_df$Target[match(ro
 lm_cmat_with_intraction_with_mutation$drug_name= onTarget$drugCategory$name[match(rownames(lm_cmat_with_intraction_with_mutation),
                                                                                   onTarget$drugCategory$broad_id_trimmed)]
 
-lm_cmat_with_intraction_with_mutation[grep('ibru', lm_cmat_with_intraction_with_mutation$drug_name),]
+lm_cmat_with_intraction_with_mutation[grep('erlo', lm_cmat_with_intraction_with_mutation$drug_name),]
+```
+<!-- sorting the mutation interaction by sig -->
+```{r}
+mutation_interaction_order_by_cor= lm_cmat_with_intraction_with_mutation[order(lm_cmat_with_intraction_with_mutation$intraction_estimate, decreasing = T),]
+mutation_interaction_order_by_pval= lm_cmat_with_intraction_with_mutation[order(lm_cmat_with_intraction_with_mutation$pvalue, decreasing = F),]
+mutation_interaction_order_by_pval$rank= seq(1:nrow(mutation_interaction_order_by_pval))
+mutation_interaction_order_by_pval[grep('vemu', mutation_interaction_order_by_pval$drug_name),]
+mutation_interaction_order_by_cor[grep('veli', mutation_interaction_order_by_cor$Target, ignore.case = T),]
+
+mutation_interaction_order_by_cor[(mutation_interaction_order_by_cor$pvalue < 0.05),]
+```
+```{r}
+mutation_interaction_order_by_cor[(mutation_interaction_order_by_cor$pvalue < 0.05),]
 ```
 
+<!-- checking erlotonib -->
 ```{r}
-drug_cat[grep('ibru', drug_cat$name),]
+drugname= 'afatinib'
+drug_cat[grep(drugname, drug_cat$name),]
 
-x= 'K70301465'
+x= drug_cat[grep(drugname, drug_cat$name),'broad_id_trimmed']
+
 drug_response= drug_response_with_common_celline[x,]
 viability= crispr_with_common_celline[correlation_mat_df[ x ,'Target'],]
 mut= factor(mutation_data[correlation_mat_df[ x ,'Target'],])
@@ -44,6 +68,15 @@ interact_plot(model = fit,
             # ,
             # linearity.check = TRUE
             )+ theme_bw()
+
+# mutated= names(which(mutation_data[correlation_mat_df[ x ,'Target'],]==1))
+# not_mutated= names(which(mutation_data[correlation_mat_df[ x ,'Target'],]==0))
+# 
+# mean(drug_response_with_common_celline[x,mutated], na.rm = T)
+# mean(drug_response_with_common_celline[x,not_mutated], na.rm = T)
+# 
+# hist(drug_response_with_common_celline[x,mutated])
+# hist(drug_response_with_common_celline[x,not_mutated])
 ```
 
 
@@ -61,8 +94,8 @@ df2plot_2= data.frame(cor_estimate=correlation_mat_df[match_rows,'cor_estimate']
                     pvalue=lm_cmat_with_intraction_with_mutation$pvalue,  
                     row.names = rownames(lm_cmat_with_intraction_with_mutation))
 
-ggplot(df2plot_2, aes(x=intraction_estimate, y= (cor_estimate)))+
-  geom_point(size=1, shape= 22, aes(color= pvalue < 0.05) )+
+ggplot(df2plot_2, aes(x=intraction_estimate, y= (cor_estimate), color= (intraction_estimate > 0 & pvalue < 0.05)))+
+  geom_point(size=1, shape= 22)+
   geom_smooth(method = "lm", se= F)+
   stat_cor()
 ```
@@ -76,7 +109,7 @@ ggplot(na.omit(df2plot_2), aes(x=-log10(pvalue), y= (cor_estimate)))+
 ```{r}
 df2plot_2$cor_estimateQ=factor(xtile(df2plot_2$cor_estimate, 5))
 df2plot_2$log10P= -log10(df2plot_2$pvalue)
-df2plot_2$conditionOFInterest=df2plot_2$pvalue <0.1 & df2plot_2$intraction_estimate >0
+df2plot_2$conditionOFInterest=df2plot_2$pvalue <0.2 & df2plot_2$intraction_estimate >0
 aggregate_df2plot_2=aggregate(df2plot_2$conditionOFInterest, list(df2plot_2$cor_estimateQ), function(x) sum(x)/length(x))
 colnames(aggregate_df2plot_2)=c('corEstimate', 'Conditions_matched_Proportion')
 ggplot(aggregate_df2plot_2, aes(y=Conditions_matched_Proportion, x=corEstimate))+
