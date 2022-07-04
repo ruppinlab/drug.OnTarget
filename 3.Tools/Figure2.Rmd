@@ -9,8 +9,8 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r}
 require(ggrepel)
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
 ```
 
 ```{r}
@@ -58,7 +58,7 @@ Figure2B <- ggplot(df2plot, aes(x=Maxcorr, y=PredictedRank))+
 ```
 
 ```{r}
-clinicalPhase=read.csv('/Users/sinhas8/Project_TrueTarget/Data/biomarkers.csv')
+clinicalPhase=read.csv('../Data/biomarkers.csv')
 df2plot$stage=clinicalPhase$phase[match_stripall(df2plot$drugName, clinicalPhase$name)]
 df2plot=na.omit(df2plot)
 df2plot_launched=df2plot[df2plot$stage=='Launched',]
