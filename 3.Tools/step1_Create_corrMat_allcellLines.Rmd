@@ -63,19 +63,6 @@ drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_features_list, function(x) x
 # KnownTarget_predictions=KnownTarget_predictions[order(KnownTarget_predictions$Maxcorr, decreasing = T),]
 ```
 
-```{r}
-dim(onTarget$drugCategory)
-category_inhibitor=c('inhibitor', 'antagonist', 'blocker')
-category_activator=c('agonist', 'activator', 'stimulant')
-category_inhibitor_drugs_ID=sapply(category_inhibitor, function(x) grep(x, onTarget$drugCategory$moa))
-category_activator_drugs_ID=sapply(category_activator, function(x) grep(x, onTarget$drugCategory$moa))
-category_inhibitor_drugs_ID=unique(unlist(category_inhibitor_drugs_ID))
-category_activator_drugs_ID=unique(unlist(category_activator_drugs_ID))
-onTarget$drugCategory$is.inhibitor=F
-onTarget$drugCategory$is.inhibitor[category_inhibitor_drugs_ID]=T
-onTarget$drugCategory$is.activator=F
-onTarget$drugCategory$is.activator[category_activator_drugs_ID]=T
-```
 
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.

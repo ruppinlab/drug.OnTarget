@@ -1,5 +1,4 @@
 # A5 Validation using ChemicalProbes.org Scientific Advisory Board recommendation score
-setwd('/Users/sinhas8/Project_OffTarget/')
 sab_score=readxl::read_xlsx('2.Data/SAB_Score_chemical_Probes.xlsx')
 sab_score$`Probe Name`=tolower(sab_score$`Probe Name`)
 sab_score_matched=sab_score[!is.na(match(tolower(sab_score$`Probe Name`), tolower(onTarget$drugsCommonName))),]

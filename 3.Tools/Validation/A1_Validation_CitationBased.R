@@ -1,11 +1,11 @@
 # A1 gold-standard (Hits with citation>3)
 # ValidataionA1 - By Curating BioGrid Chemical Interaction database we would like to test 
-require(stats)
-require(reshape2)
-require(statar)
-require(ggplot2)
-require(ggpubr)
-require(pROC)
+# require(stats)
+# require(reshape2)
+# require(statar)
+# require(ggplot2)
+# require(ggpubr)
+# require(pROC)
 biogrid=read.csv('/Users/sinhas8/Project_OffTarget/2.Data/BIOGRID-CHEMICALS-3.5.182.chemtab.txt',
                  sep='\t')
 common_Drug_lowerCase=tolower(levels(biogrid$Chemical.Name))[

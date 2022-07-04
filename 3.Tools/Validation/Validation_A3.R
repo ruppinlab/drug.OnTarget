@@ -1,6 +1,5 @@
 # Validation in another dataset - From Miquel dataset
 source('drug.OnTarget/3.Tools/myCustom_functions.R')
-require(data.table)
 gs2=read.csv('/Users/sinhas8/Downloads/drugbank_chembldrug.tsv', sep='\t')
 gs2=gs2[gs2$direction == -1,]
 inchimapping=readxl::read_xlsx('/Users/sinhas8/Downloads/DSSTox_Identifiers_and_CASRN.xlsx')

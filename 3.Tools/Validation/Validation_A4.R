@@ -12,5 +12,4 @@ chemical_aliasv2=fread('/Users/sinhas8/Project_OffTarget/2.Data/chemical.aliases
 
 p53_drugs_effSize_delThis=read.csv('/Users/sinhas8/p53_drugs_effSize_delThis.csv')
 head(onTarget$drugCategory[match(p53_drugs_effSize_delThis$X, onTarget$drugCategory$name),])
-
 load('/Users/sinhas8/Downloads/drugs.of.interest.RData')

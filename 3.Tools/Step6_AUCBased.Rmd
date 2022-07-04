@@ -1,0 +1,550 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- Perfomring validation of primary target identification -->
+<!-- Preloading -->
+```{r}
+library(pROC)
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+```
+<!-- V1: Validation based on Targets that are more indepedently cited >3 -->
+<!-- By Curating BioGrid Chemical Interaction database we would like to test  -->
+<!-- V1_ROC -->
+```{r}
+biogrid=read.csv('/Users/sinhas8/Project_TrueTarget/Data/BIOGRID-CHEMICALS-3.5.182.chemtab.txt',sep='\t')
+KnownTarget_predictions$drugName_stripall=stripall2match(KnownTarget_predictions$drugName)
+biogrid$Chemical.Name_stripall = stripall2match(biogrid$Chemical.Name)
+  
+# common_Drug_lowerCase=stripall2match(levels(biogrid$Chemical.Name))[
+#   !is.na(match(stripall2match(levels(biogrid$Chemical.Name)), 
+#                KnownTarget_predictions$drugName_stripall ))]
+dim(biogrid[!is.na(match(biogrid$Chemical.Name_stripall,
+                         KnownTarget_predictions$drugName_stripall)),])
+biogrid_matched=biogrid[!is.na(match(biogrid$Chemical.Name_stripall,
+                         KnownTarget_predictions$drugName_stripall)),]
+# Available small molecules
+small_molecules_available=unique(biogrid_matched$Chemical.Name_stripall)
+KnownTarget_predictions_matched=KnownTarget_predictions[
+  !is.na(match(KnownTarget_predictions$drugName_stripall,
+         small_molecules_available )),]
+biogrid_matched$Chemical.Name= factor(as.character(biogrid_matched$Chemical.Name))
+biogrid_matched_Subsetlist=split(biogrid_matched[,c('Official.Symbol', 'Chemical.Name',
+                                                    'Interaction.Type', 'Action')],
+                                 biogrid_matched$Chemical.Name)
+biogrid_matched_Subsetlist_reformat=lapply(biogrid_matched_Subsetlist, function(x)
+  dcast(x, Official.Symbol + Chemical.Name + Action ~  Interaction.Type))
+
+# dcast(biogrid_matched_Subsetlist$Barbital, Official.Symbol + Chemical.Name + Action ~  Interaction.Type)
+biogrid_matched_Subsetlist_withScore=do.call(rbind, biogrid_matched_Subsetlist_reformat)
+colnames(biogrid_matched_Subsetlist_withScore)[4]='Score'
+biogrid_matched_Subsetlist_withScore$Score=as.numeric(biogrid_matched_Subsetlist_withScore$Score)
+biogrid_matched_Subsetlist_withScore$Score[is.na(biogrid_matched_Subsetlist_withScore$Score)]=1
+biogrid_matched_Subsetlist_withScore=biogrid_matched_Subsetlist_withScore[
+  order(biogrid_matched_Subsetlist_withScore$Score, decreasing = T),]
+###########################################################################
+# Step 2
+###########################################################################
+biogrid_matched_Subsetlist_withScore$Chemical.Name_stripall=stripall2match(biogrid_matched_Subsetlist_withScore$Chemical.Name)
+DrugBankScore_vsOurScore=data.frame(biogrid_matched_Subsetlist_withScore, 
+                                    KnownTarget_predictions_matched[match(
+                                      biogrid_matched_Subsetlist_withScore$Chemical.Name_stripall,
+                                      KnownTarget_predictions_matched$drugName_stripall),])
+onTarget$drugCategory$name_stripall=stripall2match(onTarget$drugCategory$name)
+
+DrugBankScore_vsOurScore$drugCategory=onTarget$drugCategory$drug_category[
+  match(DrugBankScore_vsOurScore$drugName_stripall,
+        onTarget$drugCategory$name_stripall
+        )]
+
+colnames(DrugBankScore_vsOurScore)[c(1)]='Drugbank_Gene'
+colnames(DrugBankScore_vsOurScore)[c(4)]='Citations_Count'
+
+df2plot=as.data.frame(DrugBankScore_vsOurScore)
+
+df2plot$KnownTarget=onTarget$drugCategory$target[
+  match(df2plot$drugName_stripall,
+        onTarget$drugCategory$name_stripall
+        )]
+df2plot$Count_KnownTarget=sapply(df2plot$KnownTarget,
+                                 function(x) length(strsplit(as.character(x), '\\,')[[1]])) 
+# Create a random df unique to the input df
+randomize_DF_with_unique_Pairs<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(df2randomize[,1])
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(df2randomize[,1], sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
+}
+
+###########################################################################
+# Subset showing signal from DrugBank
+###########################################################################
+test_AUC_V1<-function(Citations_Count_thr=4, seedNumber=1, Count_KnownTarget_thr=3){
+  cond1 = df2plot$Action %in% c('inhibitor', 'inhibitor, competitive',
+                                'antagonist', 'negative modulator')
+  cond2 = df2plot$drugCategory %in% 'targeted cancer'
+  cond3=df2plot$Citations_Count>Citations_Count_thr
+  cond4=df2plot$Count_KnownTarget<Count_KnownTarget_thr
+  sum(cond1 & cond2 & cond3 & cond4)
+  drugs_forPR_try1=df2plot[cond1 & cond2 & cond3 & cond4,]
+  Positive_Set_DrugGene_Pairs=drugs_forPR_try1[,1:2]
+  print(dim(Positive_Set_DrugGene_Pairs))
+  set.seed(seedNumber)
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs$Label=1
+  Negative_Set_DrugGene_Pairs$Label=0
+  Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[
+    match(tolower(Complete_Set$Chemical.Name), tolower(onTarget$drugCategory$name))]
+  Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
+  
+  
+  Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x)
+    err_handle(corrMat_rank[
+      as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
+  roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)
+  list(roc_curve_crispr, Complete_Set)
+}
+V1_ROC=test_AUC_V1(Citations_Count_thr=5, Count_KnownTarget_thr=4)
+```
+<!-- Validation V2 - Gold Standard based on pharmacologically active drugs from DrugBank -->
+<!-- From drugbank  -->
+<!-- V2A_ROC; V2B_ROC -->
+```{r}
+load('/Users/sinhas8/Project_TrueTarget/Data/drugs2targets.RData')
+table(drugs2targets$action.simp.loose)
+numberOfTargets=table(drugs2targets$drug.name)
+drugs2targets$numberOfTargets=numberOfTargets[match(drugs2targets$drug.name, names(numberOfTargets))]
+active_drugs2targets=drugs2targets[which(drugs2targets$pharmaco.active=='yes' & 
+                                           drugs2targets$action.simp.strict=='inhibition'),]
+numberOfActiveTargets=table(as.character(active_drugs2targets$drug.name))
+active_drugs2targets$numberOfActiveTargets=numberOfActiveTargets[match(active_drugs2targets$drug.name, names(numberOfActiveTargets))]
+matched_gs3=active_drugs2targets[stripall2match(active_drugs2targets$drug.name) %in%
+                                    KnownTarget_predictions$drugName_stripall,]
+matched_gs3=na.omit(matched_gs3)
+test_AUC_V2<-function(seedNumber=1,
+                      numberOfActiveTargets_Thr=2,
+                      numberOfTargets_Thr=2, drug_type){
+  cond1=matched_gs3$numberOfActiveTargets<numberOfActiveTargets_Thr
+  cond2=matched_gs3$numberOfTargets<numberOfTargets_Thr
+  cond3=matched_gs3$action==drug_type
+  Positive_Set_DrugGene_Pairs=na.omit(data.frame(Drugbank_Gene=matched_gs3$protein.gene.symbol[cond1 & cond2 & cond3], 
+                                                 Chemical.Name=matched_gs3$drug.name[cond1 & cond2 & cond3]))
+  
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
+                                rownames(corrMat),]
+  print(dim(Positive_Set_DrugGene_Pairs))
+  set.seed(seedNumber)
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs$Label=1
+  Negative_Set_DrugGene_Pairs$Label=0
+  Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  
+  Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
+  
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[
+    match(tolower(Complete_Set$Chemical.Name), tolower(onTarget$drugCategory$name))]
+  
+  Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x)
+    err_handle(corrMat_rank[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
+  
+  Complete_Set=na.omit(Complete_Set)
+  roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)
+  list(roc_curve_crispr, Complete_Set)
+}
+# Only focusing on antagonist drugs V2A (0.72)
+V2A_ROC=test_AUC_V2(seedNumber=1, numberOfTargets_Thr=3, numberOfActiveTargets_Thr=2,
+              drug_type='antagonist')
+# OnlY focusing on antagonist drugs V2B (0.69)
+V2B_ROC=test_AUC_V2(seedNumber=1, numberOfTargets_Thr=2, numberOfActiveTargets_Thr=2,
+              drug_type='inhibitor')
+```
+<!-- Validation V5: ChemicalProbes.org Scientific Advisory Board recommendation score -->
+<!-- It is important to note that if we increase our stringency, our prediction power increases -->
+```{r}
+sab_score=readxl::read_xlsx('/Users/sinhas8/Project_TrueTarget/Data/SAB_Score_chemical_Probes.xlsx')
+sab_score$`Probe Name`=tolower(sab_score$`Probe Name`)
+sab_score[grep('EGFR',sab_score$`Protein target`),]
+sab_score_matched=sab_score[!is.na(match(stripall2match(sab_score$`Probe Name`),
+                                         KnownTarget_predictions$drugName_stripall )),]
+sab_score_matched$CountTargets=sapply(sab_score_matched$`Protein target`,
+                                      function(x) length(strsplit(x, ', ')[[1]]))
+sab_score_matched_trimmed=data.frame(ProbeName=rep(sab_score_matched$`Probe Name`, sab_score_matched$CountTargets),
+                                     Targets=unlist(sapply(sab_score_matched$`Protein target`, function(x) strsplit(x, ', ')[[1]])))
+sab_score_matched_trimmed$Targets=as.character(sab_score_matched_trimmed$Targets)
+# sab_score_matched_trimmed$Targets[grep('IDH1',sab_score_matched_trimmed$Targets)]='IDH1'
+# sab_score_matched_trimmed$Targets[grep('IDH2',sab_score_matched_trimmed$Targets)]='IDH2'
+sab_score_matched_trimmed$Targets[grep('BRAF',sab_score_matched_trimmed$Targets)]='BRAF'
+CountTargets=table(sab_score_matched_trimmed$ProbeName)
+sab_score_matched_trimmed$CountTargets=CountTargets[match(sab_score_matched_trimmed$ProbeName,
+                                                          names(CountTargets))]
+
+test_AUC_A5<-function(seedNumber=1, numberOfTargets_Thr=2, Avg_Rating_thr=3){
+  cond1=sab_score_matched_trimmed$CountTargets<numberOfTargets_Thr
+  Positive_Set_DrugGene_Pairs=na.omit(data.frame(Drugbank_Gene=sab_score_matched_trimmed$Targets[cond1], 
+                                                 Chemical.Name=sab_score_matched_trimmed$ProbeName[cond1]))
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
+                                                            rownames(corrMat),]
+  Positive_Set_DrugGene_Pairs$Avg_Rating=sab_score_matched$`Avg Rating (in cells)`[match(Positive_Set_DrugGene_Pairs$Chemical.Name, sab_score_matched$`Probe Name`)]
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Avg_Rating>Avg_Rating_thr,1:2]
+  print(dim(Positive_Set_DrugGene_Pairs))
+  set.seed(seedNumber)
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs_V2(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs$Label=1
+  Negative_Set_DrugGene_Pairs$Label=0
+  Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[match(tolower(Complete_Set$Chemical.Name), tolower(onTarget$drugCategory$name))]
+  
+  Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x)
+    err_handle(corrMat_rank[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
+  Complete_Set=na.omit(Complete_Set)
+  
+  roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)
+  list(roc_curve_crispr, Complete_Set)
+}
+V5_ROC=test_AUC_A5(seedNumber=1, numberOfTargets_Thr=2, Avg_Rating_thr=3)
+```
+<!-- Validation V6: COSMICv91 Drug Resistance file -->
+<!-- V6_ROC -->
+```{r}
+CosmicResistanceMutations=read.table('/Users/sinhas8/Project_TrueTarget/Data/CosmicResistanceMutations.tsv', sep='\t')
+dim(CosmicResistanceMutations)
+colnames(CosmicResistanceMutations)=as.character(unlist(CosmicResistanceMutations[1,]))
+head(sort(table(CosmicResistanceMutations$`Pubmed Id`), decreasing = T))
+head(CosmicResistanceMutations)
+CosmicResistanceMutations=CosmicResistanceMutations[-1,]
+CosmicResistanceMutations=CosmicResistanceMutations[-1,]
+table(CosmicResistanceMutations$`Drug Name`)
+CosmicResistanceMutations[CosmicResistanceMutations$`Drug Name`=='Ibrutinib',]
+CosmicResistanceMutations$trimmed_geneName= sapply(CosmicResistanceMutations$`Gene Name`,function(x) strsplit(as.character(x), '_')[[1]][1])
+DrugTargetPair= data.frame(drugname=CosmicResistanceMutations$`Drug Name`, GeneName=CosmicResistanceMutations$trimmed_geneName)
+Evidence_Strength=table(paste(DrugTargetPair$drugname, DrugTargetPair$GeneName))
+# Evidence_Strength=table(Evidence_Strength)
+DrugTargetPair=unique(DrugTargetPair)
+DrugTargetPair$drugName_geneName=paste(DrugTargetPair$drugname, DrugTargetPair$GeneName)
+DrugTargetPair=cbind(DrugTargetPair,
+                     Evidence_Strength=as.numeric(Evidence_Strength[
+                       match(DrugTargetPair$drugName_geneName, names(Evidence_Strength))]))
+numberofTargets=table(DrugTargetPair$drugname)
+DrugTargetPair$numberofTargets=numberofTargets[match(DrugTargetPair$drugname, names(numberofTargets))]
+
+DrugTargetPair$known_target=onTarget$drugCategory$target[
+  match(stripall2match(DrugTargetPair$drugname),
+        stripall2match(onTarget$drugCategory$name))]
+
+DrugTargetPair$is.target=apply(DrugTargetPair, 1, function(x) 
+  grepl(x[2], x[6])
+  )
+
+test_AUC_A6<-function(seedNumber=1, numberOfTargets_Thr=Inf, Evidence_Strength_thr=0){
+  cond1=DrugTargetPair$numberofTargets<numberOfTargets_Thr
+  cond2=DrugTargetPair$Evidence_Strength> Evidence_Strength_thr
+  cond3=DrugTargetPair$is.target
+  Positive_Set_DrugGene_Pairs=na.omit(data.frame(
+    Drugbank_Gene=as.character(DrugTargetPair$GeneName)[cond1 & cond2 & cond3],
+    Chemical.Name=as.character(DrugTargetPair$drugname)[cond1 & cond2 & cond3]))
+  
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
+                                                            rownames(corrMat),]
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[tolower(Positive_Set_DrugGene_Pairs$Chemical.Name)  %in%
+                                                            tolower(onTarget$drugCategory$name),]
+  print(dim(Positive_Set_DrugGene_Pairs))
+  set.seed(seedNumber)
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs_V2(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs$Label=1
+  Negative_Set_DrugGene_Pairs$Label=0
+  Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[
+    match(tolower(Complete_Set$Chemical.Name), tolower(onTarget$drugCategory$name))]
+  Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x)
+    err_handle(corrMat_rank[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
+  Complete_Set=na.omit(Complete_Set)
+  roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)
+  list(roc_curve_crispr, Complete_Set)
+}
+
+# sapply(seq(0, 100, 20),function(x)
+#   sapply(5, function(y) test_AUC(seedNumber=1, numberOfTargets_Thr=y, Evidence_Strength_thr=x) )
+#   )
+
+V6_ROC=test_AUC_A6(seedNumber=1, numberOfTargets_Thr=5, Evidence_Strength_thr=50)
+# Area under the curve: 0.9375 #size=8
+# test_AUC_A6(seedNumber=1, numberOfTargets_Thr=5, Evidence_Strength_thr=30)
+# Area under the curve: 0.8 #size=14
+```
+<!-- Validation V7: oncoKB resistance mutation is present-->
+<!-- V7_ROC -->
+```{r}
+oncokb_resistance=read.csv('/Users/sinhas8/Project_TrueTarget/Data/oncokb_biomarker_drug_associations_resistance.tsv', sep='\t')
+# Preprocessing
+split_drugnames=strsplit(oncokb_resistance$Drugs..for.therapeutic.implications.only., ', ')
+oncokb_resistance_expanded=lapply(1:nrow(oncokb_resistance), function(x)
+  cbind(oncokb_resistance[x,],split_drugnames=split_drugnames[[x]]) )
+oncokb_resistance_expanded=do.call(rbind, oncokb_resistance_expanded)
+# remove Amplification
+oncokb_resistance_expanded=oncokb_resistance_expanded[-grep('Amp',oncokb_resistance_expanded$Alterations),]
+oncokb_resistance_expanded$known_target=onTarget$drugCategory$target[match_stripall(oncokb_resistance_expanded$split_drugnames, onTarget$drugCategory$name)]
+oncokb_resistance_expanded$count_target=sapply(strsplit(as.character(oncokb_resistance_expanded$known_target), ', '), length)
+oncokb_resistance_expanded$is.target=apply(oncokb_resistance_expanded, 1, function(x) grepl(x[2], x[7]))
+
+test_AUC_A7<-function(seedNumber=1, numberOfTargets_Thr=5, which_level){
+  cond1=oncokb_resistance_expanded$count_target<numberOfTargets_Thr
+  cond2=oncokb_resistance_expanded$is.target
+  cond3= oncokb_resistance_expanded$Level %in% which_level
+  Positive_Set_DrugGene_Pairs=na.omit(data.frame(
+    Drugbank_Gene=as.character(oncokb_resistance_expanded$Gene)[cond1 & cond2 & cond3],
+    Chemical.Name=as.character(oncokb_resistance_expanded$split_drugnames)[cond1 & cond2 & cond3]))
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
+                                                            rownames(corrMat),]
+  
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[tolower(Positive_Set_DrugGene_Pairs$Chemical.Name)  %in%
+                                                            tolower(onTarget$drugCategory$name),]
+  print(dim(Positive_Set_DrugGene_Pairs))
+  set.seed(seedNumber)
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs$Label=1
+  Negative_Set_DrugGene_Pairs$Label=0
+  Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[
+    match(tolower(Complete_Set$Chemical.Name), tolower(onTarget$drugCategory$name))]
+  Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x)
+    err_handle(corrMat_rank[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
+  Complete_Set=na.omit(Complete_Set)
+  roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)
+  list(roc_curve_crispr, Complete_Set)
+}
+
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=5, which_level = c('R1'))
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R1')) 
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R2'))
+# Both with V2 or V1 method of shuffling, our results stay same: This is also the case for most of the above cases. In above case, it is still comparable.
+V7_ROC=test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R1', 'R2'))
+# Area under the curve: 0.9527
+```
+<!-- Validation V8: oncoKB mutation is present-->
+<!-- V8_ROC -->
+```{r}
+oncokb_approved=read.csv('/Users/sinhas8/Project_TrueTarget/Data/oncokb_biomarker_drug_associations_approved.tsv', sep='\t')
+# Preprocessing
+oncokb_approved
+split_drugnames=strsplit(oncokb_approved$Drugs..for.therapeutic.implications.only., ', ')
+oncokb_approved_expanded=lapply(1:nrow(oncokb_approved), function(x)
+  cbind(oncokb_approved[x,],split_drugnames=split_drugnames[[x]]) )
+oncokb_approved_expanded=do.call(rbind, oncokb_approved_expanded)
+# remove ceratin biomarker types are are not application
+to_remove_categories=c('Amp', 'Wildtype','High', 'Deletion', 'Duplication')
+maybe_categories=c('Fusion', 'Truncating',  'Oncogenic Mutations')
+to_remove_categories_id=unique(unlist(sapply(to_remove_categories, function(x) 
+  grep(x,oncokb_approved_expanded$Alterations) )))
+oncokb_approved_expanded=oncokb_approved_expanded[-to_remove_categories_id,]
+#remove combinations
+oncokb_approved_expanded=oncokb_approved_expanded[
+  -grep('\\+',oncokb_approved_expanded$split_drugnames),]
+oncokb_approved_expanded=oncokb_approved_expanded[!is.na(match_stripall(oncokb_approved_expanded$split_drugnames, onTarget$drugCategory$name)),]
+
+oncokb_approved_expanded$known_target=onTarget$drugCategory$target[match_stripall(oncokb_approved_expanded$split_drugnames, onTarget$drugCategory$name)]
+
+oncokb_approved_expanded$count_target=sapply(strsplit(as.character(oncokb_approved_expanded$known_target), ', '), length)
+#whether the biomarker is a target or not
+oncokb_approved_expanded$is.target=apply(oncokb_approved_expanded, 1, function(x) grepl(x[2], x[7]))
+
+test_AUC_A8<-function(seedNumber=1, numberOfTargets_Thr=5, which_level){
+  cond1=oncokb_approved_expanded$count_target<numberOfTargets_Thr
+  cond2=oncokb_approved_expanded$is.target
+  cond3= oncokb_approved_expanded$Level %in% which_level
+  Positive_Set_DrugGene_Pairs=na.omit(data.frame(
+    Drugbank_Gene=as.character(oncokb_approved_expanded$Gene)[cond1 & cond2 & cond3],
+    Chemical.Name=as.character(oncokb_approved_expanded$split_drugnames)[cond1 & cond2 & cond3]))
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[
+    Positive_Set_DrugGene_Pairs$Drugbank_Gene %in% rownames(corrMat),]
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  print(dim(Positive_Set_DrugGene_Pairs))
+  set.seed(seedNumber)
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs$Label=1
+  Negative_Set_DrugGene_Pairs$Label=0
+  Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[
+    match(tolower(Complete_Set$Chemical.Name), tolower(onTarget$drugCategory$name))]
+  Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x)
+    err_handle(corrMat_rank[as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
+  Complete_Set=na.omit(Complete_Set)
+  roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)
+  list(roc_curve_crispr, Complete_Set)
+}
+
+#AUC of 0.91
+V8_ROC=test_AUC_A8(seedNumber=1, numberOfTargets_Thr=10, which_level = c(1:4))
+
+
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R1')) 
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R2'))
+# # Both with V2 or V1 method of shuffling, our results stay same: This is also the case for most of the above cases. In above case, it is still comparable.
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R1', 'R2'))
+```
+<!-- Putting all the ROC together and work together -->
+```{r}
+ROC_list=list(COSMIC_resistance=V6_ROC, 
+     oncoKB_resistance=V7_ROC, 
+     FDA_mutation_approval=V8_ROC,
+     SAB=V5_ROC,
+     Biogrid_Highly_Cited=V1_ROC,
+     DrugBank_Active_Inhibitors=V2B_ROC,
+     DrugBank_Active_Antagonists=V2A_ROC
+     )
+```
+
+```{r}
+df2plot_Figure1A=data.frame(Dataset_names=names(ROC_list),
+           AUC=sapply(ROC_list, function(x) x$auc))
+
+df2plot_Figure1A$Dataset_names=factor(df2plot_Figure1A$Dataset_names, levels = as.character(df2plot_Figure1A$Dataset_names))
+
+Figure1A=ggplot(df2plot_Figure1A, aes(y=AUC,x=Dataset_names))+
+  geom_bar(stat = 'identity')+
+  theme_bw(base_size = 18) + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
+  labs(x='Gold Standard Datasets')
+Figure1A
+```
+
+```{r}
+names(ROC_list)=c('COSMIC resistance=0.94',
+                  'oncoKB resistance=0.95',
+                  'FDA mutation approval=0.91',
+                  'SAB=0.88',
+                  'Biogrid Highly Cited=0.76',
+                  'DrugBank Active Inhibitors=0.69',
+                  'DrugBank Active Antagonists=0.72')
+saveRDS(ROC_list, '/Users/sinhas8/Project_TrueTarget/Data/ROC_list.RDS')
+Figure1B <- ggroc(ROC_list)+ 
+  theme_bw(base_size = 18) + 
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.7, 0.25),
+        legend.text = element_text(size=12),
+        text = element_text(size=12)) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
+  labs(title="", x="Specificity", y="Sensitivity")
+```
+
+<!-- Finding a threshold that best divides the positve vs negative labels -->
+```{r}
+ROC_list$`COSMIC resistance=0.94`$thresholds[which.max(ROC_list$`COSMIC resistance=0.94`$sensitivities+ROC_list$`COSMIC resistance=0.94`$specificities)]
+sapply(ROC_list, function(x)
+  x$thresholds[which.max(x$sensitivities+x$specificities)] )
+(sapply(ROC_list, function(x)
+  x$thresholds[which.max(x$specificities)] ))
+sapply(ROC_list, function(x)
+  x$thresholds[which.max(x$sensitivities)] )
+```
+
+
+```{r}
+Comp_Gold_Standard=list(COSMIC_resistance=V6_ROC[[2]], 
+     oncoKB_resistance=V7_ROC[[2]], 
+     FDA_mutation_approval=V8_ROC[[2]],
+     SAB=V5_ROC[[2]],
+     Biogrid_Highly_Cited=V1_ROC[[2]],
+     DrugBank_Active_Inhibitors=V2B_ROC[[2]],
+     DrugBank_Active_Antagonists=V2A_ROC[[2]]
+     )
+```
+
+```{r}
+Comp_Gold_Standard_df=do.call(rbind, Comp_Gold_Standard)
+ROC_all_datapoints=smooth(roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr))
+```
+
+
+```{r}
+Drugs_in_morethan1Datasets=names(which(table(unlist(sapply(Comp_Gold_Standard, function(x) paste(x$Chemical.Name, x$Drugbank_Gene)[x$Label=='Positive'] )))>1))
+Drugs_in_morethan1Datasets=strsplit_customv0(Drugs_in_morethan1Datasets, infunc_split_by = ' ',retreving_onject_id = 1)
+platinum_dataset_ID=Comp_Gold_Standard_df$Chemical.Name %in% Drugs_in_morethan1Datasets
+platinum_dataset=Comp_Gold_Standard_df[platinum_dataset_ID,]
+platinum_dataset=unique(platinum_dataset)
+roc_platinum=smooth(roc(platinum_dataset$Label, platinum_dataset$crispr_corr))
+roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+```
+```{r}
+roc_overall_list=list(All_data_points=ROC_all_datapoints,
+                      platinum=roc_platinum)
+names(roc_overall_list)=c('All data points=0.80', 'Platinum Standard=0.89')
+Figure1D <- ggroc(roc_overall_list)+ 
+  theme_bw(base_size = 18) + 
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.6, 0.2),
+        legend.text = element_text(size=18),
+        text = element_text(size=12)) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
+  labs(title="", x="Specificity", y="Sensitivity")
+```
+
+```{r}
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr)
+roc_platinum$specificities
+Figure1E_df2plot=data.frame(rank_Threshold=roc_platinum$thresholds, Specificity=roc_platinum$specificities)
+Figure1E_df2plot$BestSpecificity=F
+Figure1E_df2plot$BestSpecificity[which.max(Figure1E_df2plot$Specificity)]=T
+ifelse()
+
+Figure1E<- ggplot(Figure1E_df2plot, aes(x=rank_Threshold, y=Specificity) )+
+  geom_point(aes(size=ifelse(BestSpecificity, 3, 2), 
+                 color=ifelse(BestSpecificity, 'black', 'red')) )+
+  geom_line()+
+  scale_x_reverse()+
+  theme_bw(base_size = 18)+
+  geom_vline(xintercept = Figure1E_df2plot$rank_Threshold[Figure1E_df2plot$BestSpecificity], linetype='dashed', color='blue')+
+  annotate(geom="text", x=5000, y=0.2, label="Rank Threshold\nat max specificity=523", size=6,
+              color="black")+
+  theme(legend.position='none')
+Figure1E
+```
+
+
+```{r}
+Figure1BE=ggarrange(Figure1A, Figure1B, Figure1D, Figure1E, nrow = 2, ncol=2, labels = 'AUTO', 
+                    font.label = list(size = 26))
+
+ggsave(Figure1BE, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1BE_v0.png',
+       width = 15, height = 12)
+ggsave(Figure1BE, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1BE_v0.pdf',
+       width = 15, height = 12)
+```
+
+```{r}
+Drugs_in_morethan1Datasets=names(which(table(unlist(sapply(Comp_Gold_Standard, function(x) paste(x$Chemical.Name, x$Drugbank_Gene)[x$Label=='Positive'] )))>2))
+Drugs_in_morethan1Datasets=strsplit_customv0(Drugs_in_morethan1Datasets, infunc_split_by = ' ',retreving_onject_id = 1)
+Comp_Gold_Standard_df=do.call(rbind, Comp_Gold_Standard)
+roc_overall=roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr)
+platinum_dataset_ID=Comp_Gold_Standard_df$Chemical.Name %in% Drugs_in_morethan1Datasets
+platinum_dataset=Comp_Gold_Standard_df[platinum_dataset_ID,]
+platinum_dataset=unique(platinum_dataset)
+dim(platinum_dataset)
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr)
+roc_platinum$thresholds[which.max(roc_platinum$sensitivities+roc_platinum$specificities)]
+roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+```
+

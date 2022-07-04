@@ -122,3 +122,10 @@ rowMin <- function (colData) {
 srowProd <- function (colData) {
   apply(colData, 1, prod)
 }
+
+
+match_stripall <- function(x, y){
+  x_striped=tolower(gsub('[^A-z0-9]','',x) )
+  y_striped=tolower(gsub('[^A-z0-9]','',y) )
+  match(x_striped, y_striped)
+}

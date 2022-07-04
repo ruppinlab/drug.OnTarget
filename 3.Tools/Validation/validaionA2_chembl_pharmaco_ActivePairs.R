@@ -1,4 +1,3 @@
-# Validation V2 - Gold Standard based on pharmacologically active drugs from DrugBank
 require(ggpubr)
 load('/Users/sinhas8/Downloads/drugs2targets.RData')
 table(drugs2targets$action.simp.loose)
