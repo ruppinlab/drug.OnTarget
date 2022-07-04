@@ -9,8 +9,19 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 <!-- Identify Targets at pathway level -->
 <!-- Load needed libraries, functions and data -->
 ```{r}
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0B_Data_and_Libraries.Rmd')
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0_Write_Functions.Rmd')
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
+library(fgsea)
+library(ggplot2)
+library(ggpubr)
+library(ggrepel)
+install.packages('patchwork')
+library(ggforce)
+library(tidyverse)
+library(patchwork)
+theme_set(theme_bw(18))
+
+onTarget= readRDS('../data/onTarget_v2.0.RDS')
 ```
 <!-- MOA pathway annotation -->
 ```{r}
@@ -18,33 +29,120 @@ knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0_Write_Functions.Rmd')
 # target_by_moa_unlisted=sapply(target_by_moa, unlist)
 # 
 # target_by_moa_pathways=lapply(target_by_moa_unlisted, function(y){
-#   unique(unlist(sapply(as.character(y), function(x) 
+#   unique(unlist(sapply(as.character(y), function(x)
 #   unlist(strsplit(x, ', ')) )))
 # }
 # )
 # moa_pathways=target_by_moa_pathways
-# saveRDS(moa_pathways,'/Users/sinhas8/Project_TrueTarget/Data/moa_pathways.RDS' )
+# saveRDS(moa_pathways,'../data/moa_pathways.RDS' )
 ```
 <!-- Load pathway annotation data and perform the needed preprocessing -->
 ```{r}
-moa_pathways=readRDS('/Users/sinhas8/Project_TrueTarget/Data/moa_pathways.RDS')
+moa_pathways=readRDS('../data/moa_pathways.RDS')
+
 moa_pathways=sapply(moa_pathways, na.omit)
 hist(sapply(moa_pathways, length))
 ```
 <!-- Run gene enrichment (this will take some time, ~20 mins) -->
 ```{r}
+tic()
 gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
   IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
   names(IF_corr_with_gene)  = rownames(drugVScrispr_corr_Strength)
   IF_corr_with_gene_ordered=sort(IF_corr_with_gene, decreasing = T)
+  
   gsea_enrichment=fgsea(pathways = moa_pathways,
                   stats = IF_corr_with_gene_ordered,
                   minSize=1,
                   maxSize=100)
   gsea_enrichment
 }, mc.cores = detectCores())
+toc()
 names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)
+saveRDS(gsea_enrichment_all_drugs, '../data/gsea_enrichment_all_drugs.RDS')
+
 ```
+
+```{r}
+gsea_enrichment_all_drugs_sorted=lapply(gsea_enrichment_all_drugs, function(x) x[order(x$NES, decreasing = T),] )
+
+drugs_with_moa = onTarget$drugCategory[(match(names(gsea_enrichment_all_drugs_sorted), onTarget$drugCategory$broad_id_trimmed))
+                                       ,c('name','moa','target','broad_id_trimmed')]
+
+Known_Pathway_Enrichment=do.call(rbind, lapply(1:length(drugs_with_moa$moa), function(x)
+  data.frame(rank=match(drugs_with_moa$moa[x], gsea_enrichment_all_drugs_sorted[[x]]$pathway),
+    gsea_enrichment_all_drugs_sorted[[x]][match(drugs_with_moa$moa[x], gsea_enrichment_all_drugs_sorted[[x]]$pathway),]
+    )
+  ))
+
+Known_Pathway_Enrichment$drugBroadID= names(gsea_enrichment_all_drugs_sorted)
+Known_Pathway_Enrichment = Known_Pathway_Enrichment[order(Known_Pathway_Enrichment$rank, decreasing = F),]
+
+Known_Pathway_Enrichment[grep('raf',Known_Pathway_Enrichment$pathway, ignore.case = T), ]
+
+hist(Known_Pathway_Enrichment$rank)
+```
+```{r}
+# drugs_with_moa_with_condition[grep('A49358627',drugs_with_moa_with_condition$broad_id_trimmed),]
+
+drugs_with_moa_with_condition = onTarget$drugCategory[(match(names(gsea_enrichment_all_drugs_sorted), onTarget$drugCategory$broad_id_trimmed)) &
+                                         (onTarget$drugCategory$drug_category == 'targeted cancer') &
+                                         (onTarget$drugCategory$is.inhibitor == 'TRUE')
+                                       ,c('name','moa','drug_category','target','broad_id_trimmed','is.inhibitor')]
+drugs_with_moa_with_condition= na.omit(drugs_with_moa_with_condition)
+
+Known_Pathway_Enrichment_with_condition=do.call(rbind, lapply(1:length(drugs_with_moa_with_condition$moa), function(x)
+  data.frame(rank=match(drugs_with_moa_with_condition$moa[x], gsea_enrichment_all_drugs_sorted[[x]]$pathway),
+    gsea_enrichment_all_drugs_sorted[[x]][match(drugs_with_moa_with_condition$moa[x], gsea_enrichment_all_drugs_sorted[[x]]$pathway),]
+    )
+  ))
+
+# Known_Pathway_Enrichment_with_condition$drugBroadID= names(gsea_enrichment_all_drugs_sorted)
+Known_Pathway_Enrichment_with_condition = Known_Pathway_Enrichment_with_condition[order(Known_Pathway_Enrichment_with_condition$rank, decreasing = F),]
+
+Known_Pathway_Enrichment_with_condition[Known_Pathway_Enrichment_with_condition$rank <100,]
+
+85/778
+```
+
+```{r fig.width=5,fig.height=5}
+
+library(stringr)
+
+zoomed_part_df_with_text= Known_Pathway_Enrichment_with_condition %>% filter(pval < 0.05 & NES > 0) %>% mutate( zoom = TRUE)
+    
+
+Figure_2= ggplot(na.omit(Known_Pathway_Enrichment_with_condition), aes(y= rank, x= NES, color= pval <0.05))+
+  geom_point()+
+  facet_zoom(x= pval < 0.05 & NES > 0, zoom.data = zoom)+
+  geom_text_repel(data = zoomed_part_df_with_text, aes(label = str_wrap(pathway, 30)),
+                  nudge_x = c(-1.5,1.5),
+                  nudge_y = c(-10,-700), max.overlaps = 14
+                  )+
+  scale_y_reverse()+
+  theme_bw(base_size = 18)+
+  xlab('Enrichment Score (NES)')+
+  ylab('Rank')
+
+ggsave('../result/Pathway_enrichment_plot.jpg', Figure_2,
+       width = 8, height = 6, units = 'in', dpi = 300)
+```
+
+
+
+```{r}
+hist(KnownTarget_predictions$PredictedRank, breaks = 100)
+```
+
+```{r}
+library(dplyr)
+mapping= merge(KnownTarget_predictions[1:300, c('drugName', 'drugBroadID')], 
+                                       Known_Pathway_Enrichment[1:300,c('pathway','rank', 'drugBroadID')], by= 'drugBroadID')
+na.omit(mapping)
+```
+
+
+
 
 <!-- Test example -->
 ```{r}
@@ -56,14 +154,16 @@ names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)
 #                   minSize=1,
 #                   maxSize=200)
 ```
+
 ```{r}
 # Figure2A <- ggplot(fgseaRes[fgseaRes$pval<0.05,], aes(reorder(pathway, NES), NES)) +
 #   geom_col(aes(fill=padj<0.05)) +
 #   coord_flip() +
 #   labs(x="Pathway", y="Normalized Enrichment Score",
-#        title="Hallmark pathways NES from GSEA") + 
+#        title="Hallmark pathways NES from GSEA") +
 #   theme_minimal(base_size = 10)
 ```
+
 ```{r}
 # head(colnames(drugVScrispr_corr_Strength))
 # head(onTarget$drugCategory)
