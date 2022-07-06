@@ -9,80 +9,130 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r}
 require(ggrepel)
+require(grid)
+require(cowplot)
+require(gridExtra)
+require('stringb')
 knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
 knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
 ```
-
+<!-- Filter drugs that are targeted therapy, have targets, single target, is inhibitor & is expressed -->
 ```{r}
 cond1=onTarget$drugCategory$drug_category=='targeted cancer'
 cond2=!is.na(as.character(onTarget$drugCategory$target))
 cond3=sapply(strsplit(as.character(onTarget$drugCategory$target), ', '), length)==1
 cond4=onTarget$drugCategory$is.inhibitor
+```
+
+
+```{r}
 singleCancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond3 & cond4]
-# singleCancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond4]
 singleCancerInhibitors_mapping=match_stripall(singleCancerInhibitors,
                                               KnownTarget_predictions$drugBroadID)
 df2plot_single=KnownTarget_predictions[na.omit(singleCancerInhibitors_mapping),]
+cond5=df2plot_single$KnownTarget_meanCorr>3
+df2plot_single=df2plot_single[cond5,]
 df2plot_single=unique(df2plot_single[,c('drugName', 'Maxcorr', 'MaxTargetName', 'PredictedRank')])
-Figure2A <- ggplot(df2plot_single, aes(x=Maxcorr, y=PredictedRank))+
+df2plot_single$TrueTarget_Predicted='Known Target is wrong'
+df2plot_single$TrueTarget_Predicted[df2plot_single$PredictedRank>523]='Known Target is correct'
+```
+<!-- Plot Figure 2B -->
+```{r}
+Figure2B <- ggplot(df2plot_single, aes(x=Maxcorr,
+                                       y=PredictedRank,
+                                       color=TrueTarget_Predicted))+
   geom_point()+
   theme_bw(base_size = 18)+
-  labs(x='Correlation of drug response & known target CRISPR-KO', y='Genome-Wide Rank')+
+  labs(x='Correlation of drug response\n& known target CRISPR-KO',
+       y='', color='True Target Prediction')+
   scale_y_reverse()+
   geom_text_repel(data = df2plot_single[df2plot_single$PredictedRank<10,], 
                   aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
                   nudge_y = seq(-5000, -16000,-1000),
-                  nudge_x = seq(-0.5, 0.8, 0.1), max.overlaps = 1)
+                  nudge_x = seq(-0.5, 0.8, 0.1), max.overlaps = 1)+
+  geom_hline(yintercept = 523, linetype='dashed', color='blue')
+Figure2B
 ```
+
 
 ```{r}
 cond1=onTarget$drugCategory$drug_category=='targeted cancer'
 cond2=!is.na(as.character(onTarget$drugCategory$target))
-cond3=sapply(strsplit(as.character(onTarget$drugCategory$target), ', '), length)==1
 cond4=onTarget$drugCategory$is.inhibitor
-# singleCancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond3 & cond4]
 singleCancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond4]
 singleCancerInhibitors_mapping=match_stripall(singleCancerInhibitors,
                                               KnownTarget_predictions$drugBroadID)
 df2plot=KnownTarget_predictions[na.omit(singleCancerInhibitors_mapping),]
+cond5=df2plot$KnownTarget_meanCorr>3
+df2plot=df2plot[cond5,]
 df2plot=unique(df2plot[,c('drugName', 'Maxcorr', 'MaxTargetName', 'PredictedRank')])
-Figure2B <- ggplot(df2plot, aes(x=Maxcorr, y=PredictedRank))+
+df2plot$TrueTarget_Predicted='Known Target is wrong'
+df2plot$TrueTarget_Predicted[df2plot$PredictedRank>523]='Known Target is correct'
+
+Figure2A <- ggplot(df2plot, aes(x=Maxcorr,
+                                       y=PredictedRank,
+                                       color=TrueTarget_Predicted))+
   geom_point()+
   theme_bw(base_size = 18)+
-  labs(x='Correlation of drug response & known target CRISPR-KO', y='Genome-Wide Rank')+
+  labs(x=text_wrap(''),
+       y='Genome-Wide Rank', color='True Target Prediction')+
   scale_y_reverse()+
-  geom_text_repel(data = df2plot[df2plot$Maxcorr>0.3,], 
+  geom_text_repel(data = df2plot[df2plot$PredictedRank==1 & df2plot$Maxcorr>0.35,], 
                   aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
-                  nudge_y = seq(-5000, -16000,-1000),
-                  nudge_x = seq(-0.5, 0.8, 0.1), max.overlaps = 1)
+                  nudge_y = seq(-5000, -18000,-2000),
+                  nudge_x = seq(-0.5, 0.8, 0.1), max.overlaps = 1)+
+  geom_hline(yintercept = 523, linetype='dashed', color='blue')
 ```
 
 ```{r}
 clinicalPhase=read.csv('/Users/sinhas8/Project_TrueTarget/Data/biomarkers.csv')
 df2plot$stage=clinicalPhase$phase[match_stripall(df2plot$drugName, clinicalPhase$name)]
-df2plot=na.omit(df2plot)
+# df2plot=na.omit(df2plot)
 df2plot_launched=df2plot[df2plot$stage=='Launched',]
-Figure2C <- ggplot(df2plot_launched, aes(x=Maxcorr, y=PredictedRank))+
+Figure2C <- ggplot(df2plot_launched,
+                   aes(x=Maxcorr,y=PredictedRank,color=TrueTarget_Predicted))+
   geom_point()+
   theme_bw(base_size = 18)+
-  labs(x='Correlation of drug response & known target CRISPR-KO', y='Genome-Wide Rank')+
+  labs(x=text_wrap(''),
+       y='', color='True Target Prediction')+
   scale_y_reverse()+
-  geom_text_repel(data = df2plot_launched,
-                  aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')))
+  geom_text_repel(data = df2plot_launched[df2plot_launched$PredictedRank<10,], 
+                  aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
+                    nudge_y = seq(-5000, -10000,-1000),
+                  nudge_x = seq(-0.5, 0.2, 0.1), max.overlaps = 1)+
+  geom_hline(yintercept = 523, linetype='dashed', color='blue')
+Figure2C
 ```
 
 ```{r}
-Figure2ABC=ggarrange(Figure2A, Figure2B, Figure2C, labels = 'AUTO', nrow = 3)
+Figure2ABC=ggarrange(Figure2A, Figure2B, Figure2C, 
+                     labels = 'AUTO', nrow = 1,common.legend = TRUE, legend="top")
 ggsave(Figure2ABC, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2AB_v0.png',
-       width = 8, height = 15)
+       width = 14, height = 5)
 ggsave(Figure2ABC, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2AB_v0.pdf',
-       width = 8, height = 15)
+       width = 21, height = 8)
 ```
 
 ```{r}
-sum(df2plot_single$PredictedRank<523)/length(df2plot_single$PredictedRank)
-sum(df2plot$PredictedRank==1)/length(df2plot$PredictedRank)
-sum(df2plot_launched$PredictedRank<523)/length(df2plot_launched$PredictedRank)
+figure2D_data=data.frame(Category=c('Targeted Inhibitor', 'Single Targeted Inhibitor', 'Approved Targeted Inhibitor'),
+Prop_corr_ann=c(sum(df2plot$PredictedRank<523, na.rm = T)/length(na.omit(df2plot$PredictedRank)),
+                sum(df2plot_single$PredictedRank<523)/length(df2plot_single$PredictedRank),
+                sum(df2plot_launched$PredictedRank<523)/length(df2plot_launched$PredictedRank)))
+Figure2D <- ggplot(figure2D_data, aes(y=Prop_corr_ann, x=Category))+
+  geom_segment( aes(x=Category, xend=Category, y=0, yend=Prop_corr_ann), color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6)+
+   theme_bw(base_size = 18) +
+  coord_flip()+
+  labs(y='Proportion of Drugs\n with correct known Target',x='Drugs Category')
+Figure2ABCD <- grid.arrange(Figure2ABC, Figure2D, nrow = 2,
+             layout_matrix = rbind(c(1, 1, 1),c(1, 1, 1), c(NA, 4, NA)) )
+```
+
+```{r}
+ggsave(Figure2ABCD, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2AB_v0.png',
+       width = 14, height = 7.5)
+ggsave(Figure2ABCD, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2AB_v0.pdf',
+       width = 14, height = 7.5)
 ```
 
 
