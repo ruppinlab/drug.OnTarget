@@ -11,57 +11,74 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```r
 require(parallel); require('tictoc'); library(fgsea); library(ggplot2)
-```
-
-```
-## Loading required package: parallel
-```
-
-```
-## Loading required package: tictoc
-```
-
-```
-## Registered S3 method overwritten by 'data.table':
-##   method           from
-##   print.data.table
-```
-
-```r
 require(ggpubr); require(statar); require('interactions')
-```
-
-```
-## Loading required package: ggpubr
-```
-
-```
-## Loading required package: statar
-```
-
-```
-## Loading required package: interactions
+require(stats); require(reshape2); require(pROC)
+require(data.table); 
 ```
 <!-- Data -->
 
 ```r
-onTarget=readRDS('/Users/sinhas8/Project_TrueTarget/Data/onTarget_v2.0.RDS')
-KnownTarget_predictions=readRDS('/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions.RDS')
-drugCandidates_for_secTargets=readRDS('/Users/sinhas8/Project_TrueTarget/Data/drugCandidates_for_secTargets.RDS')
+onTarget=readRDS('../Data/onTarget_v2.0.RDS')
+KnownTarget_predictions=readRDS('../Data/KnownTarget_predictions.RDS')
+drugCandidates_for_secTargets=readRDS('../Data/drugCandidates_for_secTargets.RDS')
+drugVScrispr_corr_features_list=readRDS('../Data/drugVScrispr_corr_features_list.RDS')
+drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_features_list, function(x) x[,2])
+corrMat=drugVScrispr_corr_Strength
+corrMat_rank=apply(-corrMat, 2, rank)
 ```
 <!-- Functions -->
 
 ```r
-source('/Users/sinhas8/Project_TrueTarget/Tools/myCustom_functions.R')
+source('../3.Tools/myCustom_functions.R')
 ```
+<!-- Functions for producing negative controld during primary target identification -->
 
-```
-## Warning in file(filename, "r", encoding = encoding): cannot open file '/Users/sinhas8/
-## Project_TrueTarget/Tools/myCustom_functions.R': No such file or directory
-```
+```r
+# Create a random df unique to the input df
+randomize_DF_with_unique_Pairs<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(df2randomize[,1])
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(df2randomize[,1], sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
+}
 
+randomize_DF_with_unique_Pairs_V2<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(rownames(corrMat), nrow(df2randomize))
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(rownames(onTarget$corrMat), sum(df2randomize_collapsed==new_df)),
+            fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
+}
 ```
-## Error in file(filename, "r", encoding = encoding): cannot open the connection
+<!-- Compute if a drug is inhibitor or not -->
+
+```r
+category_inhibitor=c('inhibitor', 'antagonist', 'blocker')
+category_activator=c('agonist', 'activator', 'stimulant')
+category_inhibitor_drugs_ID=sapply(category_inhibitor, function(x) grep(x, onTarget$drugCategory$moa))
+category_activator_drugs_ID=sapply(category_activator, function(x) grep(x, onTarget$drugCategory$moa))
+category_inhibitor_drugs_ID=unique(unlist(category_inhibitor_drugs_ID))
+category_activator_drugs_ID=unique(unlist(category_activator_drugs_ID))
+onTarget$drugCategory$is.inhibitor=F
+onTarget$drugCategory$is.inhibitor[category_inhibitor_drugs_ID]=T
+onTarget$drugCategory$is.activator=F
+onTarget$drugCategory$is.activator[category_activator_drugs_ID]=T
 ```
 
 
