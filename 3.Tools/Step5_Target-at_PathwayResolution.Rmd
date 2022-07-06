@@ -15,10 +15,8 @@ library(fgsea)
 library(ggplot2)
 library(ggpubr)
 library(ggrepel)
-install.packages('patchwork')
 library(ggforce)
 library(tidyverse)
-library(patchwork)
 theme_set(theme_bw(18))
 
 onTarget= readRDS('../data/onTarget_v2.0.RDS')
@@ -38,50 +36,91 @@ onTarget= readRDS('../data/onTarget_v2.0.RDS')
 ```
 <!-- Load pathway annotation data and perform the needed preprocessing -->
 ```{r}
-moa_pathways=readRDS('../data/moa_pathways.RDS')
-
-moa_pathways=sapply(moa_pathways, na.omit)
-hist(sapply(moa_pathways, length))
+# moa_pathways=readRDS('../data/moa_pathways.RDS')
+# 
+# moa_pathways=sapply(moa_pathways, na.omit)
+# hist(sapply(moa_pathways, length))
 ```
 <!-- Run gene enrichment (this will take some time, ~20 mins) -->
 ```{r}
-tic()
-gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
-  IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
-  names(IF_corr_with_gene)  = rownames(drugVScrispr_corr_Strength)
-  IF_corr_with_gene_ordered=sort(IF_corr_with_gene, decreasing = T)
-  
-  gsea_enrichment=fgsea(pathways = moa_pathways,
-                  stats = IF_corr_with_gene_ordered,
-                  minSize=1,
-                  maxSize=100)
-  gsea_enrichment
-}, mc.cores = detectCores())
-toc()
-names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)
-saveRDS(gsea_enrichment_all_drugs, '../data/gsea_enrichment_all_drugs.RDS')
-
+# tic()
+# gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
+#   IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
+#   names(IF_corr_with_gene)  = rownames(drugVScrispr_corr_Strength)
+#   IF_corr_with_gene_ordered=sort(IF_corr_with_gene, decreasing = T)
+#   
+#   gsea_enrichment=fgsea(pathways = moa_pathways,
+#                   stats = IF_corr_with_gene_ordered,
+#                   minSize=1,
+#                   maxSize=100)
+#   gsea_enrichment
+# }, mc.cores = detectCores())
+# toc()
+# names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)
+# saveRDS(gsea_enrichment_all_drugs, '../data/gsea_enrichment_all_drugs.RDS')
 ```
 
 ```{r}
-gsea_enrichment_all_drugs_sorted=lapply(gsea_enrichment_all_drugs, function(x) x[order(x$NES, decreasing = T),] )
+gsea_enrichment_all_drugs= readRDS('../Data/gsea_enrichment_all_drugs.RDS')
+```
 
+<!--Finding the pathway enrichment test with all drug: removing NAN and no targets one-->
+```{r}
+gsea_enrichment_all_drugs_sorted=lapply(gsea_enrichment_all_drugs, function(x) x[order(x$NES, decreasing = T),] )
 drugs_with_moa = onTarget$drugCategory[(match(names(gsea_enrichment_all_drugs_sorted), onTarget$drugCategory$broad_id_trimmed))
                                        ,c('name','moa','target','broad_id_trimmed')]
 
+drugs_with_moa= drugs_with_moa[!(is.na(drugs_with_moa$target) | is.na(drugs_with_moa$moa)),]
+```
+
+<!--Finding the pathway enrichment test with all drug: No condition-->
+```{r}
 Known_Pathway_Enrichment=do.call(rbind, lapply(1:length(drugs_with_moa$moa), function(x)
   data.frame(rank=match(drugs_with_moa$moa[x], gsea_enrichment_all_drugs_sorted[[x]]$pathway),
+             drugBroadID= names(gsea_enrichment_all_drugs_sorted[x]),
     gsea_enrichment_all_drugs_sorted[[x]][match(drugs_with_moa$moa[x], gsea_enrichment_all_drugs_sorted[[x]]$pathway),]
     )
   ))
 
-Known_Pathway_Enrichment$drugBroadID= names(gsea_enrichment_all_drugs_sorted)
+### Adding drug broad id is adding 253 NA broad ID value: one reason could be repeatetion
+# Known_Pathway_Enrichment= Known_Pathway_Enrichment %>% mutate(drugBroadID= drugs_with_moa$broad_id_trimmed[match(drugs_with_moa$broad_id_trimmed,names(gsea_enrichment_all_drugs_sorted))]) %>% relocate(drugBroadID, .after = rank)
 Known_Pathway_Enrichment = Known_Pathway_Enrichment[order(Known_Pathway_Enrichment$rank, decreasing = F),]
-
-Known_Pathway_Enrichment[grep('raf',Known_Pathway_Enrichment$pathway, ignore.case = T), ]
-
+Known_Pathway_Enrichment= Known_Pathway_Enrichment[!(is.na(Known_Pathway_Enrichment$rank)),]
 hist(Known_Pathway_Enrichment$rank)
+
+
+## best specisity threshold
+threshold = 1295*523/nrow(onTarget$avana_22Q2)
+
+Known_Pathway_Enrichment[Known_Pathway_Enrichment$rank < threshold,]
+sum(Known_Pathway_Enrichment$rank < threshold)/ length(Known_Pathway_Enrichment$rank)
 ```
+<!--Plot1: including all the genes without any condition-->
+```{r fig.width=5,fig.height=5}
+dfplot1_pathway_all= Known_Pathway_Enrichment
+zoomed_part_df_with_text= dfplot1_pathway_all %>% filter(pval < 0.05 & NES > 0) %>% mutate( zoom = TRUE)
+    
+Figure_1= ggplot(dfplot1_pathway_all, aes(y= rank, x= NES, color= pval <0.05))+
+  geom_point()+
+  facet_zoom(x= pval < 0.05 & NES > 0, zoom.data = zoom)+
+  geom_text_repel(data = zoomed_part_df_with_text, aes(label = str_wrap(paste(pathway,":",drugBroadID), 30)),
+                  nudge_x = c(-1.5,1.5),
+                  nudge_y = c(-10,-750), max.overlaps = 14,
+                  size= 3)+
+  scale_y_reverse()+
+  theme_bw(base_size = 18)+
+  xlab('Enrichment Score (NES)')+
+  ylab('Rank')
+
+ggsave('../result/Pathway_enrichment_plot1_all.jpg', Figure_1,
+       width = 8, height = 6, units = 'in', dpi = 300)
+```
+
+<!--Finding the pathway enrichment test with all drug: Four condition
+Cond 1: targeted therapy
+Cond 2: single target
+Cond 3: inihibitor drugs only
+Cond 4: -->
 ```{r}
 # drugs_with_moa_with_condition[grep('A49358627',drugs_with_moa_with_condition$broad_id_trimmed),]
 
@@ -99,8 +138,6 @@ Known_Pathway_Enrichment_with_condition=do.call(rbind, lapply(1:length(drugs_wit
 
 # Known_Pathway_Enrichment_with_condition$drugBroadID= names(gsea_enrichment_all_drugs_sorted)
 Known_Pathway_Enrichment_with_condition = Known_Pathway_Enrichment_with_condition[order(Known_Pathway_Enrichment_with_condition$rank, decreasing = F),]
-
-Known_Pathway_Enrichment_with_condition[Known_Pathway_Enrichment_with_condition$rank <100,]
 
 85/778
 ```

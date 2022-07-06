@@ -16,10 +16,10 @@ require(data.table);
 ```
 <!-- Data -->
 ```{r}
-onTarget=readRDS('/Users/sinhas8/Project_TrueTarget/Data/onTarget_v2.0.RDS')
-KnownTarget_predictions=readRDS('/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions.RDS')
-drugCandidates_for_secTargets=readRDS('/Users/sinhas8/Project_TrueTarget/Data/drugCandidates_for_secTargets.RDS')
-drugVScrispr_corr_features_list=readRDS('/Users/sinhas8/Project_TrueTarget/Data/drugVScrispr_corr_features_list.RDS')
+onTarget=readRDS('../Data/onTarget_v2.0.RDS')
+KnownTarget_predictions=readRDS('../Data/KnownTarget_predictions.RDS')
+drugCandidates_for_secTargets=readRDS('../Data/drugCandidates_for_secTargets.RDS')
+drugVScrispr_corr_features_list=readRDS('../Data/drugVScrispr_corr_features_list.RDS')
 drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_features_list, function(x) x[,2])
 corrMat=drugVScrispr_corr_Strength
 corrMat_rank=apply(-corrMat, 2, rank)
