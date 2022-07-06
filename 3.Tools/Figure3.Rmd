@@ -25,15 +25,14 @@ CancerInhibitors=KnownTarget_predictions[na.omit(CancerInhibitors_mapping),]
 CancerInhibitors=unique(CancerInhibitors)
 dim(CancerInhibitors)
 ```
-<!-- How many drugs are wrongly annotated -->
+<!-- How many drugs are wrongly annotated after removing the low-expressed ones-->
 ```{r}
 remove_not_expressed=CancerInhibitors$KnownTarget_meanCorr>3
 launched=CancerInhibitors$phase=='Launched'
 sum(CancerInhibitors$PredictedRank[remove_not_expressed & launched]<523,
     na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed & launched)])
-sum(CancerInhibitors$PredictedRank[remove_not_expressed]>523,
+sum(CancerInhibitors$PredictedRank[remove_not_expressed]<523,
     na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed)])
-dim(KnownTarget_predictions)
 ```
 <!-- How many drugs are wrongly annotated -->
 ```{r}
@@ -55,26 +54,40 @@ sum(is.na(CancerInhibitors$category))
 remove_not_expressedID=which(remove_not_expressed)
 Figure3A <- ggplot(CancerInhibitors[remove_not_expressedID,], aes(y=BestTargetCorr, x=Maxcorr, color=category))+
   geom_point()+
-  theme_bw()+
+  theme_bw(base_size = 18)+
   coord_fixed()+
-  theme(legend.position = 'top')
+  theme(legend.position = 'top')+
+  guides(color=guide_legend(nrow=2,byrow=TRUE))+
+  labs(x='Correlation with Known Target', y='Correlation with Best\n Predicted Target')
 ```
+<!-- How many wrong-known target drugs have a significant prediction from our pipeline -->
+```{r}
+sum(CancerInhibitors[remove_not_expressedID,]$PredictedRank>523 &
+      CancerInhibitors[remove_not_expressedID,]$BestTargetCorrP<0.001)
+```
+
+
 ```{r}
 ggsave(Figure3A, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3A.pdf',
-       width = 4.5, height = 4)
+       width = 5, height = 4.5)
 ggsave(Figure3A, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3A.png',
-       width = 4.5, height = 4)
+       width = 5, height = 4.5)
 ```
 
 
-
 ```{r}
-ggplot(CancerInhibitors, aes(y=BestTargetCorr, x=PredictedRank,
-                             color= PredictedRank>523 & BestTargetCorrP<0.01 ))+
+FigureS5 <- ggplot(CancerInhibitors[remove_not_expressedID,], aes(y=BestTargetCorr, x=PredictedRank,
+                             color= category ))+
   geom_point()+
   geom_vline(xintercept = 523, linetype='dashed', color='blue')+
   theme_bw(base_size = 18)+
-  theme(legend.position = 'none')
+  theme(legend.position = 'top')+
+  guides(color=guide_legend(nrow=2,byrow=TRUE))+
+  labs(x='Rank of Known Target', y='Correlation with Best\n Predicted Target')
+ggsave(FigureS5, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5.pdf',
+       width = 5, height = 4.5)
+ggsave(FigureS5, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5.png',
+       width = 5, height = 4.5)
 ```
 
 ```{r}
