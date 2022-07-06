@@ -7,11 +7,12 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 <!-- Compute which drugs whose target KO and drug response viability similarity dimnishes when target expression is not expressed -->
+<!-- Function and libraries used -->
 ```{r}
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0B_Data_and_Libraries.Rmd')
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0_Write_Functions.Rmd')
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
 ```
-Add BTK as target manually
+<!-- Add BTK as target manually -->
 ```{r}
 KnownTarget_predictions[grep('ibru',KnownTarget_predictions$drugName),]
 KnownTarget_predictions$MaxTargetName[grep('ibru',KnownTarget_predictions$drugName)][1]='BTK'
@@ -118,7 +119,7 @@ ggplot(na.omit(KnownTarget_predictions),
 drugs_wdBoth_interaction_andTrueKnownTarget=KnownTarget_predictions$PredictedRank < 100 & KnownTarget_predictions$Whether_interaction
 drugCandidates_for_secTargets=KnownTarget_predictions[which(drugs_wdBoth_interaction_andTrueKnownTarget),]
 sort(table(KnownTarget_predictions$MaxTargetName[which(drugs_wdBoth_interaction_andTrueKnownTarget)]))
-saveRDS(drugCandidates_for_secTargets, '../Data/drugCandidates_for_secTargets.RDS')
+# saveRDS(drugCandidates_for_secTargets, '../data/drugCandidates_for_secTargets.RDS')
 # saveRDS(KnownTarget_predictions, '../Data/KnownTarget_predictions.RDS')
 # KnownTarget_predictions=readRDS('../Data/KnownTarget_predictions.RDS')
 ```
@@ -128,12 +129,4 @@ KnownTarget_predictions$Maxcorr=sapply(1:nrow(KnownTarget_predictions), function
   err_handle(drugVScrispr_corr_Strength[KnownTarget_predictions$MaxTargetName[x],
                                         KnownTarget_predictions$drugBroadID[x]]) )
 ```
-
-
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 

@@ -27,7 +27,7 @@ corrMat_rank=apply(-corrMat, 2, rank)
 ```
 <!-- Functions -->
 ```{r}
-source('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/myCustom_functions.R')
+source('../3.Tools/myCustom_functions.R')
 ```
 <!-- Functions for producing negative controld during primary target identification -->
 ```{r}
