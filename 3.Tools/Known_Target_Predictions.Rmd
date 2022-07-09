@@ -1,0 +1,53 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+#best Hit name
+BestTargetName=apply(corrMat[,match(KnownTarget_predictions$drugBroadID, colnames(corrMat))],
+                                      2, function(x) rownames(corrMat)[which.max(x)] )
+BestTargetName[sapply(BestTargetName, length)==0]=NA
+KnownTarget_predictions$BestTargetName=unlist(BestTargetName)
+
+#best hit score
+BestTargetCorr=apply(corrMat[,match(KnownTarget_predictions$drugBroadID, colnames(corrMat))],
+                                      2, function(x) max(x, na.rm = T) )
+KnownTarget_predictions$BestTargetCorr=BestTargetCorr
+
+# Best Hit Significance
+KnownTarget_predictions$BestTargetCorrP = sapply(1:nrow(KnownTarget_predictions), function(x) 
+  err_handle(corrMat_P[KnownTarget_predictions[x,'BestTargetName'], KnownTarget_predictions[x,'drugBroadID']]) ) 
+# Known Target Significance
+KnownTarget_predictions$KnownTargetCorrP = sapply(1:nrow(KnownTarget_predictions), function(x) 
+  err_handle(corrMat_P[KnownTarget_predictions[x,'MaxTargetName'], KnownTarget_predictions[x,'drugBroadID']]) ) 
+
+corrMat_FDR=apply(corrMat_P, 2, function(x) fdrcorr(x))
+# Best Hit Significance - FDR corrected
+KnownTarget_predictions$BestTargetCorrFDR = sapply(1:nrow(KnownTarget_predictions), function(x) 
+  err_handle(corrMat_FDR[KnownTarget_predictions[x,'BestTargetName'], KnownTarget_predictions[x,'drugBroadID']]) ) 
+# Known Target Significance - FDR corrected
+KnownTarget_predictions$KnownTargetCorrFDR = sapply(1:nrow(KnownTarget_predictions), function(x) 
+  err_handle(corrMat_FDR[KnownTarget_predictions[x,'MaxTargetName'], KnownTarget_predictions[x,'drugBroadID']]) ) 
+
+
+#Mean Expression
+matched_cellLines_withExp=matched_cellLines[matched_cellLines %in% colnames(onTarget$expression_20Q4)]
+KnownTarget_predictions$KnownTarget_meanCorr=sapply(KnownTarget_predictions$MaxTargetName, function(x)
+  err_handle(mean(onTarget$expression_20Q4[x,matched_cellLines_withExp])) )
+
+#Integrate Clinical Phase
+KnownTarget_predictions$phase=clinicalPhase$phase[match_stripall(KnownTarget_predictions$drugName, clinicalPhase$name)]
+
+saveRDS(KnownTarget_predictions, '/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions_v2.RDS')
+```
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
