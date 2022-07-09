@@ -1773,91 +1773,282 @@ Notebook. When you execute code within the notebook, the results appear
 beneath the code.</p>
 <p>Try executing this chunk by clicking the <em>Run</em> button within
 the chunk or by placing your cursor inside it and pressing
-<em>Cmd+Shift+Enter</em>. <!-- Atomic inputs needed to run a code -->
-<!-- Libraries --></p>
+<em>Cmd+Shift+Enter</em>. <!-- Figure 4 --></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVxdWlyZShwYXJhbGxlbCk7IHJlcXVpcmUoJ3RpY3RvYycpOyBsaWJyYXJ5KGZnc2VhKTsgbGlicmFyeShnZ3Bsb3QyKVxucmVxdWlyZShnZ3B1YnIpOyByZXF1aXJlKHN0YXRhcik7IHJlcXVpcmUoJ2ludGVyYWN0aW9ucycpXG5yZXF1aXJlKHN0YXRzKTsgcmVxdWlyZShyZXNoYXBlMik7IHJlcXVpcmUocFJPQylcbnJlcXVpcmUoZGF0YS50YWJsZSk7IFxucmVxdWlyZShnZ3JlcGVsKVxucmVxdWlyZShncmlkKVxucmVxdWlyZShjb3dwbG90KVxucmVxdWlyZShncmlkRXh0cmEpXG5yZXF1aXJlKCdzdHJpbmdiJylcbmBgYCJ9 -->
-<pre class="r"><code>require(parallel); require(&#39;tictoc&#39;); library(fgsea); library(ggplot2)
-require(ggpubr); require(statar); require(&#39;interactions&#39;)
-require(stats); require(reshape2); require(pROC)
-require(data.table); 
-require(ggrepel)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVxdWlyZShnZ3JlcGVsKVxucmVxdWlyZShncmlkKVxucmVxdWlyZShjb3dwbG90KVxucmVxdWlyZShncmlkRXh0cmEpXG5yZXF1aXJlKCdzdHJpbmdiJylcbnJlcXVpcmUoJ2dnYWx0JylcbnJlcXVpcmUoJ2dnZm9yY2UnKVxua25pdHI6OmtuaXQoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9Ub29sc19naXRodWIvMy5Ub29scy9TdGVwMF9Xcml0ZV9GdW5jdGlvbnMuUm1kJylcbmtuaXRyOjprbml0KCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvVG9vbHNfZ2l0aHViLzMuVG9vbHMvU3RlcDBCX0RhdGFfYW5kX0xpYnJhcmllcy5SbWQnKVxuYGBgIn0= -->
+<pre class="r"><code>require(ggrepel)
 require(grid)
 require(cowplot)
 require(gridExtra)
-require(&#39;stringb&#39;)</code></pre>
+require(&#39;stringb&#39;)
+require(&#39;ggalt&#39;)
+require(&#39;ggforce&#39;)
+knitr::knit(&#39;/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd&#39;)
+knitr::knit(&#39;/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd&#39;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<!-- Data -->
+<!-- Predicting targets for drugs with no targets -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc291cmNlKCczLlRvb2xzL215Q3VzdG9tX2Z1bmN0aW9ucy5SJylcblxuYGBgIn0= -->
-<pre class="r"><code>source(&#39;3.Tools/myCustom_functions.R&#39;)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtKGNvbmQyLCBuYS5ybSA9IFQpXG5cbmBgYCJ9 -->
+<pre class="r"><code>sum(cond2, na.rm = T)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZyBpbiBmaWxlKGZpbGVuYW1lLCBcInJcIiwgZW5jb2RpbmcgPSBlbmNvZGluZykgOlxuICBjYW5ub3Qgb3BlbiBmaWxlICczLlRvb2xzL215Q3VzdG9tX2Z1bmN0aW9ucy5SJzogTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeVxuRXJyb3IgaW4gZmlsZShmaWxlbmFtZSwgXCJyXCIsIGVuY29kaW5nID0gZW5jb2RpbmcpIDogXG4gIGNhbm5vdCBvcGVuIHRoZSBjb25uZWN0aW9uXG4ifQ== -->
-<pre><code>Warning in file(filename, &quot;r&quot;, encoding = encoding) :
-  cannot open file &#39;3.Tools/myCustom_functions.R&#39;: No such file or directory
-Error in file(filename, &quot;r&quot;, encoding = encoding) : 
-  cannot open the connection</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDEyMjJcbiJ9 -->
+<pre><code>[1] 1222</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<!-- Functions for producing negative controld during primary target identification -->
+<!-- Predicting targets for drugs with wrong targets -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDcmVhdGUgYSByYW5kb20gZGYgdW5pcXVlIHRvIHRoZSBpbnB1dCBkZlxucmFuZG9taXplX0RGX3dpdGhfdW5pcXVlX1BhaXJzPC1mdW5jdGlvbihkZjJyYW5kb21pemU9UG9zaXRpdmVfU2V0X0RydWdHZW5lX1BhaXJzKXtcbiAgZGYycmFuZG9taXplX2NvbGxhcHNlZD1wYXN0ZShkZjJyYW5kb21pemVbLDFdLCBkZjJyYW5kb21pemVbLDJdLCBzZXAgPSAnXycpXG4gIGZpeGVkQ29sPWRmMnJhbmRvbWl6ZVssMl1cbiAgc2h1ZmZsZWRDb2w9c2FtcGxlKGRmMnJhbmRvbWl6ZVssMV0pXG4gIG5ld19kZj1wYXN0ZShzaHVmZmxlZENvbCwgZml4ZWRDb2wsIHNlcCA9ICdfJylcbiAgd2hpbGUoc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZik+MCl7XG4gICAgbmV3X2RmW2RmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZl09XG4gICAgICBwYXN0ZShzYW1wbGUoZGYycmFuZG9taXplWywxXSwgc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZikpLCBmaXhlZENvbFtkZjJyYW5kb21pemVfY29sbGFwc2VkPT1uZXdfZGZdLCBzZXAgPSAnXycpXG4gIH1cbiAgZGYycmV0dXJuPWRvLmNhbGwocmJpbmQsIHN0cnNwbGl0KG5ld19kZiwgJ18nKSlcbiAgZGYycmV0dXJuPWRhdGEuZnJhbWUoZGYycmV0dXJuWywxXSwgZGYycmV0dXJuWywyXSlcbiAgY29sbmFtZXMoZGYycmV0dXJuKT1jb2xuYW1lcyhkZjJyYW5kb21pemUpXG4gIGRmMnJldHVyblxufVxuXG5yYW5kb21pemVfREZfd2l0aF91bmlxdWVfUGFpcnNfVjI8LWZ1bmN0aW9uKGRmMnJhbmRvbWl6ZT1Qb3NpdGl2ZV9TZXRfRHJ1Z0dlbmVfUGFpcnMpe1xuICBkZjJyYW5kb21pemVfY29sbGFwc2VkPXBhc3RlKGRmMnJhbmRvbWl6ZVssMV0sIGRmMnJhbmRvbWl6ZVssMl0sIHNlcCA9ICdfJylcbiAgZml4ZWRDb2w9ZGYycmFuZG9taXplWywyXVxuICBzaHVmZmxlZENvbD1zYW1wbGUocm93bmFtZXMoY29yck1hdCksIG5yb3coZGYycmFuZG9taXplKSlcbiAgbmV3X2RmPXBhc3RlKHNodWZmbGVkQ29sLCBmaXhlZENvbCwgc2VwID0gJ18nKVxuICB3aGlsZShzdW0oZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmKT4wKXtcbiAgICBuZXdfZGZbZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmXT1cbiAgICAgIHBhc3RlKHNhbXBsZShyb3duYW1lcyhvblRhcmdldCRjb3JyTWF0KSwgc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZikpLFxuICAgICAgICAgICAgZml4ZWRDb2xbZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmXSwgc2VwID0gJ18nKVxuICB9XG4gIGRmMnJldHVybj1kby5jYWxsKHJiaW5kLCBzdHJzcGxpdChuZXdfZGYsICdfJykpXG4gIGRmMnJldHVybj1kYXRhLmZyYW1lKGRmMnJldHVyblssMV0sIGRmMnJldHVyblssMl0pXG4gIGNvbG5hbWVzKGRmMnJldHVybik9Y29sbmFtZXMoZGYycmFuZG9taXplKVxuICBkZjJyZXR1cm5cbn1cblxuYGBgIn0= -->
-<pre class="r"><code># Create a random df unique to the input df
-randomize_DF_with_unique_Pairs&lt;-function(df2randomize=Positive_Set_DrugGene_Pairs){
-  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = &#39;_&#39;)
-  fixedCol=df2randomize[,2]
-  shuffledCol=sample(df2randomize[,1])
-  new_df=paste(shuffledCol, fixedCol, sep = &#39;_&#39;)
-  while(sum(df2randomize_collapsed==new_df)&gt;0){
-    new_df[df2randomize_collapsed==new_df]=
-      paste(sample(df2randomize[,1], sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = &#39;_&#39;)
-  }
-  df2return=do.call(rbind, strsplit(new_df, &#39;_&#39;))
-  df2return=data.frame(df2return[,1], df2return[,2])
-  colnames(df2return)=colnames(df2randomize)
-  df2return
-}
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGltKENhbmNlckluaGliaXRvcnNfbm9UYXJnZXRzKVxuXG5gYGAifQ== -->
+<pre class="r"><code>dim(CancerInhibitors_noTargets)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDU4IDE5XG4ifQ== -->
+<pre><code>[1] 58 19</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- Ones where we can identify significant target & target correlation is greater than 0.25-->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MjAsIm5jb2wiOjksInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGYgWzIwIMOXIDldIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQTlWV2Yyd1RWUnkvZGUxK2RESTJOaVF3RVpZUUlNS04zVjI3WHVlNGw3YmJvTFRyU3J2Q1VHQmVyOGQ2c2IwcjEydTJBZUUzRVRjUk1RSk9jVTZXU05BSnhqOElqdkJEeDY5STJNWXZaWkJnd285b1RBd3MwWUNBdyt1NGQ5MHFSUDZVSnRmM3ZwL3ZlNS92OS91Kzc3M3Y4NVRYRXZwYVBZSWdxWWhXSS8vcjVDNmk4OVZVb2lReWhDQXBpQmJKakxlTnNqcFA3c1NGSFBuTFZ4UlpqT0Rud3F6RThaeGZnZEl0cjVXVEJGR3NpSmx1TytGQTdTNFVoL3A2bHVjaUhLK0k0OEowazBUelVZNFhRaWdYRmZ3eHFVbWtKUmFPdGk0b1I0MDRvWWk2S3BRd0dCUkJIK0g4TEwrQ0N3dWhZYlp4UXdrR1I5YzZTWkpVaEd5R2pRVHBrQkNtZVo3aklYOFd5d1JsMCtFbVJ2Vkk3L0xhVUFJem0vQVNCVW1UQVV3MW0rRjExYUk0aHNHQTB1WTVVSXhVbmZLTE1ZYWxlVW5sUzNjc1JIR0RDZnFoRjNoR3BPVjRVZWhtaHF2S2kxYVlUVVRTNG1xdEhrc2xETVZiWFl2Qk5VMXoyeDJFelFKVkZvZmRyWEo1WEJadnhWemNCamxzZHBjYlRxdnl1TDBKdDMzV0NudytuS2YxT2kycVpvSE43YWlxZ2U2N0toMVd1eE5McklYTGhjMUpNbWQ1aW5tZHhiYklEWG0xYnJzTExwUE81M1ViU2xSRmhXcE81N0pWVzZCQzU3UlhPZkI0OHVMTEFpNWIvOTdidmpzR0xvM2VYOEtOMlFRdVNGbTVieUNId1BuT2pyYm0zbVp3L3Yxai90Q1ZFRGkvYVVySEd0TlVjSTdybk9iYmNCK2NtK1UrZHZ6QUx0QjNzS1dPeExlQ3ZzNGxEOWRPL2gzMGJWNXg2bTc3RnRENzlmcUxOeng3UWE5M1dYdExSeW5velNFbXBuWTNnSjc3aTlObXJ1NEhQWmNIeGk0eUZJS2VvM3QyUGhpY0JIcEtkMWdiTzZlQXM5Zm5tUWxOREp6cDNMNzd1N29DNk9mczVUZVAzTGxuejUvZC9aNSsyK0tlVlZUT0tiMnhzM1V2Wlk0T2t1TlBUYUQ2WnZ4V3pER1BxTGtmdFoxMnpsaE9pYTkvU1kzenphTTJ6dm1tc1BMaUY5VE9sNi8ySHcwMFV4OFdIby9jei82QjJ0YnoxcFh4VzVkUys0aExMVVU3cDFHSHhpNVkrTlBtSXFwN1ZWZmwzVmVEVkZkdllQS0E4QlhWbmU4b1hWcmFSUjBwRzNQOWxyYWFPazZjYUYvM2FaRHErL2J0ZzJmM2ZFTDllV3p0N01ZWGZORFBOWGZpQno1OTkvKzFmWTc4ekVFU3h6YkRTY2Q0SnNnRzRBRnlCK2tvT3hrYktjSkRrZVVXV1NZazM1OE1IWG82TkZyaG1QV2ZrNVBvVmVQeVRmeEkvajIxZlFMaE02dWUzYnNra3FIMFVwNkhONm5BUFNmVmV2akdQbnpVQURWdzlrQjQ0KzNib0VDenVveWNzQjkwN0xoNmJhQXdIYnhTY09IZHNyeS9nSGZsaTBLQjJBcllUWWEyU2VkMmdjYk5QejQ0dlM0RE5IMjgvYVgxL2Q4RHo2MzVpekptdFFCMnlSbjY4d2dETmt6L3RXTDh6N25nbmRFMU0vUFd4a0NyMUhEdHhNUTY4QUZBL3BpZW5RSkVYNkRzbDdhVFlOM1VhTzNLam43dzJWSC9GczBERnJTZFBMeThvMVI4ZnJiaGlKcXQ0K2t3RzFYMlppYmNtd0V4VnUrU0ZiQW9XdG1vVkVPTDlhejBaTlFtaUNMTThrZ1VWcFVjQnk4MDhQL0c4NGZoZFdHNUlnNmowa1hpRzBVUmNrZnlWcFo3Rk1XWUpPYTRabVNNbWFMUVVEUThUbmdHVTNFajNJV3BKZ044UFdpeFlqTXNMYWtsQklSVERRWThnUnBobHpRYTFBRkdVcVV3NFBBa3A2ajFDOFBNS2hsbUxGWmhvOWtFWWJNNUFlTUVwanBYQXUxcHlJVEhadFV5aVpzU3poTjRjbzZaRUIyRnNVTlFINkFsdW1pWkdNOG5nZ3dtVFVrWEloSW44UElrVGZ4QnAwdWFuQ0ltQVRreFByN0FBWlFKeHZnM1VTTCtTTkVQNlI5L281UTJmMWcvODdGTnpTT0ZTd2ZmRGl4Zm4zaDY2VUswbjRVWFE3YWN5YUZFRmtWRWpwZGdLRElhTFpJRVNiMUE5SXdRZ3NoUWNNamdQenp0eTZiSUNnQUEifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["drugName"],"name":[1],"type":["chr"],"align":["left"]},{"label":["BestTargetName"],"name":[2],"type":["chr"],"align":["left"]},{"label":["BestTargetCorr"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["BestTargetCorrP"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["KnownTargetCorrP"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["KnownTarget_meanCorr"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["phase"],"name":[7],"type":["chr"],"align":["left"]},{"label":["BestTargetCorrFDR"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["KnownTargetCorrFDR"],"name":[9],"type":["dbl"],"align":["right"]}],"data":[{"1":"cobimetinib","2":"BRAF","3":"0.3790888","4":"1.017130e-12","5":"NA","6":"NA","7":"Launched","8":"1.768382e-08","9":"NA","_rn_":"252"},{"1":"AZD8330","2":"SOX10","3":"0.3290823","4":"3.558427e-11","5":"NA","6":"NA","7":"Phase 1","8":"3.835820e-07","9":"NA","_rn_":"743"},{"1":"PI3K-IN-2","2":"PIK3CA","3":"0.3039577","4":"9.765790e-10","5":"NA","6":"NA","7":"Phase 2","8":"1.697880e-05","9":"NA","_rn_":"1096"},{"1":"genipin","2":"AKIP1","3":"0.2917871","4":"5.926261e-09","5":"NA","6":"NA","7":"Preclinical","8":"1.030340e-04","9":"NA","_rn_":"633"},{"1":"maytansinol-isobutyrate","2":"RNASEH2C","3":"0.2902070","4":"3.855596e-06","5":"NA","6":"NA","7":"Preclinical","8":"3.826034e-02","9":"NA","_rn_":"442"},{"1":"BVD-523","2":"CINP","3":"0.2893764","4":"1.145712e-08","5":"NA","6":"NA","7":"Phase 1/Phase 2","8":"1.991935e-04","9":"NA","_rn_":"635"},{"1":"M-344","2":"MRPS12","3":"0.2720747","4":"6.838918e-08","5":"NA","6":"NA","7":"Preclinical","8":"1.189014e-03","9":"NA","_rn_":"854"},{"1":"pibenzimol","2":"UBE2Q1","3":"0.2685129","4":"1.510982e-07","5":"NA","6":"NA","7":"Phase 2","8":"2.626994e-03","9":"NA","_rn_":"458"},{"1":"AZD2461","2":"SLA2","3":"0.2612637","4":"3.445229e-07","5":"NA","6":"NA","7":"Phase 1","8":"5.989876e-03","9":"NA","_rn_":"1421"},{"1":"XL888","2":"VCPKMT","3":"0.2605205","4":"3.595934e-07","5":"NA","6":"NA","7":"NA","8":"6.251891e-03","9":"NA","_rn_":"6"},{"1":"cephalomannine","2":"NFKBIL1","3":"0.2583301","4":"2.653414e-07","5":"NA","6":"NA","7":"NA","8":"1.153306e-03","9":"NA","_rn_":"1193"},{"1":"echinomycin","2":"SCNN1G","3":"0.2475742","4":"9.001040e-07","5":"NA","6":"NA","7":"NA","8":"2.608201e-03","9":"NA","_rn_":"150"},{"1":"NSC-319726","2":"RNASEH2A","3":"0.2447327","4":"1.614293e-06","5":"NA","6":"NA","7":"NA","8":"9.355368e-03","9":"NA","_rn_":"1597"},{"1":"SC-144","2":"RNASEH2C","3":"0.2426819","4":"2.323057e-06","5":"NA","6":"NA","7":"Preclinical","8":"1.370111e-02","9":"NA","_rn_":"990"},{"1":"SNX-2112","2":"ACYP2","3":"0.2420154","4":"1.598008e-06","5":"NA","6":"NA","7":"NA","8":"2.485835e-02","9":"NA","_rn_":"1231"},{"1":"JK-184","2":"PIN4","3":"0.2409955","4":"2.274427e-06","5":"NA","6":"NA","7":"Preclinical","8":"1.977159e-02","9":"NA","_rn_":"765"},{"1":"bruceantin","2":"USP46","3":"0.2402238","4":"1.802126e-06","5":"NA","6":"NA","7":"NA","8":"4.475967e-03","9":"NA","_rn_":"82"},{"1":"KW-2478","2":"PEMT","3":"0.2361629","4":"2.408294e-06","5":"NA","6":"NA","7":"Phase 1/Phase 2","8":"8.374120e-03","9":"NA","_rn_":"794"},{"1":"oncrasin-1","2":"NCOA6","3":"0.2334683","4":"3.987493e-06","5":"NA","6":"NA","7":"Preclinical","8":"3.466328e-02","9":"NA","_rn_":"827"},{"1":"NMS-E973","2":"LIMK2","3":"0.2162044","4":"2.074428e-05","5":"NA","6":"NA","7":"Preclinical","8":"3.005501e-02","9":"NA","_rn_":"1032"}],"options":{"columns":{"min":{},"max":[10],"total":[9]},"rows":{"min":[10],"max":[10],"total":[20]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NCwibmNvbCI6MTksInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGYgWzQgw5cgMTldIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQTdWVVRXZ1RRUlNlTmxscklxbXRDZDQ4ZW14SXNrbTZBZTFpVWlxbGFheHBwTDFJbU94T3UwczNNM0YyUW9zZ2VwR2V2Q2xlcGRTRGVGRFBTa0ZQSWdoZUNub3NGT2xKQ3g0c3FLMno3VXk2U1dtcFlCZG0zcHZ2dlhuL08rWGhhVFU4SFFZQUJFQ3dtKzhLWjRGeW96SXlvSUZkQkhTQklBaDVkSUdMbzV6eFZoOWZRU0U0WTVDYVhVZk14blpOUUdHYjFCQ2ViVUtNSk1KUW5UUUluYkd4UkxCZEp4VGVKZzVxR1FRZ3RNTy9JMml2cDNkMzA0dXlaK2t3eXJlSXAzZVBiLzUxQk81UEtEU1dVTlZjSXF0bFdrQmExYklKTGJNUFpOWEJaQ3FYeWJXQXdWd3luY21tTkMrelEzd2NOL2IvclhkQ3pkcVRCUFBsS3lPQ1Z3cWxTa2tWaDBDcFVCVHNxY21KMGRLWUprUFdQK2YvUEh1eTFOUS94UXF2enYvNm9uKzhQL250NnN0Ri9jUE41ZVdObjArbDN1VmI2eXViVzZNeC9lSzdGK1BaSDcxREc0dUJ0VHZQVmYzQ0t2cnFQZzZkY0tsT0YyRVRHeFl5Ly9rcy9BMlZmNjhQbVZ0Ri9mdWE4UURPQlBTM0R4T2wwSnRWZlgzbDlhVkg3eXZIajZ2dFIxUXdyQ05YQkJ1VnprM2FuQzF4Z1RoSHh1RkNCZEpaeEh4Z0R3Y05RcWs0eGd6a09FVWJJN2M2YnpPcmVHMEtMVFRrUUF2VjZuVTVPSjZEUENYUUhCMFdVSFRLUXN4Q3RHcGpoaWcwbUUza3ZFUW1LREp0Z3lHekRQR2M5T2ZUcTdxTThxRmpscnpnbDAwSXNGOG01V25iRGVnNFF0Q2JSeTQ3a0o0UExleG5lYllkbGJiN3hqQ1p4d2Z4bUErdjFoSEVQbE5LdzRLdTlOYmZibmRrdUN3RTV6b3NlNUwyRG9Zb21ZLzd1eWhITHBES3BDU3JxZkpQQ2lhVHlYU0xWOVZNNTBBWURuU2xLUW1HVGNoZ2ZJWjY1UUZndStOS0QybDRsZWFYdXIzblhPbTQzRVU3Z0w0bTl1STFCd3lyaWVjRzFEVFllK2E2eElvSUd2VHgwVDJmM1R2Q2xpSmZBOTUzdS9YV0tBNnNvVlpmZVdGMjZ4SnZVRDRRTWhXT3VuRkdHSlI2WVlNNEV0bE5EbXovQmV0Q05wTEtCZ0FBIn0= -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["drugName"],"name":[1],"type":["chr"],"align":["left"]},{"label":["MaxTargetName"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Maxcorr"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["cellLines_withLOWexp"],"name":[4],"type":["int"],"align":["right"]},{"label":["Maxcorr_Q"],"name":[5],"type":["int"],"align":["right"]},{"label":["drugBroadID"],"name":[6],"type":["chr"],"align":["left"]},{"label":["Whether_interaction"],"name":[7],"type":["lgl"],"align":["right"]},{"label":["PredictedRank"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["interaction_strength"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["interaction_P"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["drugName_stripall"],"name":[11],"type":["chr"],"align":["left"]},{"label":["BestTargetName"],"name":[12],"type":["chr"],"align":["left"]},{"label":["BestTargetCorr"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["BestTargetCorrP"],"name":[14],"type":["dbl"],"align":["right"]},{"label":["KnownTargetCorrP"],"name":[15],"type":["dbl"],"align":["right"]},{"label":["KnownTarget_meanCorr"],"name":[16],"type":["dbl"],"align":["right"]},{"label":["phase"],"name":[17],"type":["chr"],"align":["left"]},{"label":["BestTargetCorrFDR"],"name":[18],"type":["dbl"],"align":["right"]},{"label":["KnownTargetCorrFDR"],"name":[19],"type":["dbl"],"align":["right"]}],"data":[{"1":"cobimetinib","2":"NA","3":"NA","4":"NA","5":"NA","6":"K03390685","7":"NA","8":"NA","9":"NA","10":"NA","11":"cobimetinib","12":"BRAF","13":"0.3790888","14":"1.017130e-12","15":"NA","16":"NA","17":"Launched","18":"1.768382e-08","19":"NA","_rn_":"252"},{"1":"iobenguane","2":"NA","3":"NA","4":"NA","5":"NA","6":"K43860855","7":"NA","8":"NA","9":"NA","10":"NA","11":"iobenguane","12":"CNTN3","13":"0.2512368","14":"1.660193e-04","15":"NA","16":"NA","17":"Launched","18":"9.962633e-01","19":"NA","_rn_":"833"},{"1":"temoporfin","2":"NA","3":"NA","4":"NA","5":"NA","6":"K63712959","7":"NA","8":"NA","9":"NA","10":"NA","11":"temoporfin","12":"NCL","13":"0.2306313","14":"1.169558e-05","15":"NA","16":"NA","17":"Launched","18":"1.373349e-01","19":"NA","_rn_":"1114"},{"1":"nimorazole","2":"NA","3":"NA","4":"NA","5":"NA","6":"K79145628","7":"NA","8":"NA","9":"NA","10":"NA","11":"nimorazole","12":"SPINK8","13":"0.2059828","14":"1.138061e-04","15":"NA","16":"NA","17":"Launched","18":"6.482826e-01","19":"NA","_rn_":"1335"}],"options":{"columns":{"min":{},"max":[10],"total":[19]},"rows":{"min":[10],"max":[10],"total":[4]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- How many drugs are wrongly annotated after removing the low-expressed ones-->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVtb3ZlX25vdF9leHByZXNzZWQ9Q2FuY2VySW5oaWJpdG9ycyRLbm93blRhcmdldF9tZWFuQ29ycj4zXG5sYXVuY2hlZD1DYW5jZXJJbmhpYml0b3JzJHBoYXNlPT0nTGF1bmNoZWQnXG5zdW0oQ2FuY2VySW5oaWJpdG9ycyRQcmVkaWN0ZWRSYW5rW3JlbW92ZV9ub3RfZXhwcmVzc2VkICYgbGF1bmNoZWRdPDUyMyxcbiAgICBuYS5ybSA9IFQpL2xlbmd0aChDYW5jZXJJbmhpYml0b3JzJFByZWRpY3RlZFJhbmtbd2hpY2gocmVtb3ZlX25vdF9leHByZXNzZWQgJiBsYXVuY2hlZCldKVxuc3VtKENhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFua1tyZW1vdmVfbm90X2V4cHJlc3NlZF08NTIzLFxuICAgIG5hLnJtID0gVCkvbGVuZ3RoKENhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFua1t3aGljaChyZW1vdmVfbm90X2V4cHJlc3NlZCldKVxuYGBgIn0= -->
+<pre class="r"><code>remove_not_expressed=CancerInhibitors$KnownTarget_meanCorr&gt;3
+launched=CancerInhibitors$phase==&#39;Launched&#39;
+sum(CancerInhibitors$PredictedRank[remove_not_expressed &amp; launched]&lt;523,
+    na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed &amp; launched)])
+sum(CancerInhibitors$PredictedRank[remove_not_expressed]&lt;523,
+    na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed)])</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- How many drugs are wrongly annotated -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVtb3ZlX25vdF9leHByZXNzZWQ9Q2FuY2VySW5oaWJpdG9ycyRLbm93blRhcmdldF9tZWFuQ29ycj4zXG5sYXVuY2hlZD1DYW5jZXJJbmhpYml0b3JzJHBoYXNlPT0nTGF1bmNoZWQnXG5DYW5jZXJJbmhpYml0b3JzJGltcHJvdmVtZW50X292ZXJfa25vd249Q2FuY2VySW5oaWJpdG9ycyRCZXN0VGFyZ2V0Q29yciAtIENhbmNlckluaGliaXRvcnMkTWF4Y29yclxuc3VtKENhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFua1tyZW1vdmVfbm90X2V4cHJlc3NlZCAmIGxhdW5jaGVkXTw1MjMsXG4gICAgbmEucm0gPSBUKS9sZW5ndGgoQ2FuY2VySW5oaWJpdG9ycyRQcmVkaWN0ZWRSYW5rW3doaWNoKHJlbW92ZV9ub3RfZXhwcmVzc2VkICYgbGF1bmNoZWQpXSlcbnN1bShDYW5jZXJJbmhpYml0b3JzJFByZWRpY3RlZFJhbmtbcmVtb3ZlX25vdF9leHByZXNzZWRdPDUyMyxcbiAgICBuYS5ybSA9IFQpL2xlbmd0aChDYW5jZXJJbmhpYml0b3JzJFByZWRpY3RlZFJhbmtbd2hpY2gocmVtb3ZlX25vdF9leHByZXNzZWQpXSlcbmBgYCJ9 -->
+<pre class="r"><code>remove_not_expressed=CancerInhibitors$KnownTarget_meanCorr&gt;3
+launched=CancerInhibitors$phase==&#39;Launched&#39;
+CancerInhibitors$improvement_over_known=CancerInhibitors$BestTargetCorr - CancerInhibitors$Maxcorr
+sum(CancerInhibitors$PredictedRank[remove_not_expressed &amp; launched]&lt;523,
+    na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed &amp; launched)])
+sum(CancerInhibitors$PredictedRank[remove_not_expressed]&lt;523,
+    na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed)])</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtKENhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFuaz41MjMgJiBDYW5jZXJJbmhpYml0b3JzJEJlc3RUYXJnZXRDb3JyRkRSPDAuMSlcbnN1bShDYW5jZXJJbmhpYml0b3JzJFByZWRpY3RlZFJhbms+NTIzICZcbiAgICAgIENhbmNlckluaGliaXRvcnMkQmVzdFRhcmdldENvcnJGRFI8MC4xICZcbiAgICAgIENhbmNlckluaGliaXRvcnMkaW1wcm92ZW1lbnRfb3Zlcl9rbm93bj4wLjIpXG5gYGAifQ== -->
+<pre class="r"><code>sum(CancerInhibitors$PredictedRank&gt;523 &amp; CancerInhibitors$BestTargetCorrFDR&lt;0.1)
+sum(CancerInhibitors$PredictedRank&gt;523 &amp;
+      CancerInhibitors$BestTargetCorrFDR&lt;0.1 &amp;
+      CancerInhibitors$improvement_over_known&gt;0.2)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- Provide Annotations -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQ2FuY2VySW5oaWJpdG9ycyRjYXRlZ29yeT0nV3JvbmcgS25vd24gdGFyZ2V0O1xcbiBObyBTaWduaWZpY2FudCBUYXJnZXQgZnJvbSBUcnVlVGFyZ2V0J1xuQ2FuY2VySW5oaWJpdG9ycyRjYXRlZ29yeVtDYW5jZXJJbmhpYml0b3JzJFByZWRpY3RlZFJhbms8NTIzXT0nQ29ycmVjdCBLbm93biB0YXJnZXQnXG5DYW5jZXJJbmhpYml0b3JzJGNhdGVnb3J5W0NhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFuaz41MjMgJlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIENhbmNlckluaGliaXRvcnMkQmVzdFRhcmdldENvcnJGRFI8MC4xICYgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgQ2FuY2VySW5oaWJpdG9ycyRpbXByb3ZlbWVudF9vdmVyX2tub3duPjAuMl09J1dyb25nIEtub3duIHRhcmdldDtcXG4gU2lnbmlmaWNhbnQgVGFyZ2V0IGZyb20gVHJ1ZVRhcmdldCdcblxucmVtb3ZlX25vdF9leHByZXNzZWRJRD13aGljaChyZW1vdmVfbm90X2V4cHJlc3NlZClcbkNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwPUNhbmNlckluaGliaXRvcnNbcmVtb3ZlX25vdF9leHByZXNzZWRJRCxdXG5GaWd1cmUzQSA8LSBnZ3Bsb3QoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAsXG4gICAgICAgICAgICAgICAgICAgYWVzKHk9QmVzdFRhcmdldENvcnIsIHg9TWF4Y29ycixcbiAgICAgICAgICAgICAgICAgICAgICAgY29sb3I9Y2F0ZWdvcnlcbiAgICAgICAgICAgICAgICAgICAgICAgKSkrXG4gIGdlb21fcG9pbnQoKStcbiAgdGhlbWVfYncoYmFzZV9zaXplID0gMTgpK1xuICBjb29yZF9maXhlZCgpK1xuICB0aGVtZShsZWdlbmQucG9zaXRpb24gPSAndG9wJykrXG4gIGd1aWRlcyhjb2xvcj1ndWlkZV9sZWdlbmQobnJvdz0zLGJ5cm93PVRSVUUpKStcbiAgbGFicyh4PSdDb3JyZWxhdGlvbiB3aXRoIEtub3duIFRhcmdldCcsIHk9J0NvcnJlbGF0aW9uIHdpdGggQmVzdFxcbiBQcmVkaWN0ZWQgVGFyZ2V0JykrXG4gIGdlb21fbWFya19lbGxpcHNlKGV4cGFuZCA9IDApXG5GaWd1cmUzQVxuYGBgIn0= -->
+<pre class="r"><code>CancerInhibitors$category=&#39;Wrong Known target;\n No Significant Target from TrueTarget&#39;
+CancerInhibitors$category[CancerInhibitors$PredictedRank&lt;523]=&#39;Correct Known target&#39;
+CancerInhibitors$category[CancerInhibitors$PredictedRank&gt;523 &amp;
+                            CancerInhibitors$BestTargetCorrFDR&lt;0.1 &amp; 
+                            CancerInhibitors$improvement_over_known&gt;0.2]=&#39;Wrong Known target;\n Significant Target from TrueTarget&#39;
 
-randomize_DF_with_unique_Pairs_V2&lt;-function(df2randomize=Positive_Set_DrugGene_Pairs){
-  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = &#39;_&#39;)
-  fixedCol=df2randomize[,2]
-  shuffledCol=sample(rownames(corrMat), nrow(df2randomize))
-  new_df=paste(shuffledCol, fixedCol, sep = &#39;_&#39;)
-  while(sum(df2randomize_collapsed==new_df)&gt;0){
-    new_df[df2randomize_collapsed==new_df]=
-      paste(sample(rownames(onTarget$corrMat), sum(df2randomize_collapsed==new_df)),
-            fixedCol[df2randomize_collapsed==new_df], sep = &#39;_&#39;)
-  }
-  df2return=do.call(rbind, strsplit(new_df, &#39;_&#39;))
-  df2return=data.frame(df2return[,1], df2return[,2])
-  colnames(df2return)=colnames(df2randomize)
-  df2return
-}
+remove_not_expressedID=which(remove_not_expressed)
+CancerInhibitors_removeNotExp=CancerInhibitors[remove_not_expressedID,]
+Figure3A &lt;- ggplot(CancerInhibitors_removeNotExp,
+                   aes(y=BestTargetCorr, x=Maxcorr,
+                       color=category
+                       ))+
+  geom_point()+
+  theme_bw(base_size = 18)+
+  coord_fixed()+
+  theme(legend.position = &#39;top&#39;)+
+  guides(color=guide_legend(nrow=3,byrow=TRUE))+
+  labs(x=&#39;Correlation with Known Target&#39;, y=&#39;Correlation with Best\n Predicted Target&#39;)+
+  geom_mark_ellipse(expand = 0)
+Figure3A</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBbb3JkZXIoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkaW1wcm92ZW1lbnRfb3Zlcl9rbm93biwgZGVjcmVhc2luZyA9IFQpLF1cbmBgYCJ9 -->
+<pre class="r"><code>CancerInhibitors_removeNotExp[order(CancerInhibitors_removeNotExp$improvement_over_known, decreasing = T),]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dzYXZlKEZpZ3VyZTNBLCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQS5wZGYnLFxuICAgICAgIHdpZHRoID0gNiwgaGVpZ2h0ID0gNilcbmdnc2F2ZShGaWd1cmUzQSwgZmlsZW5hbWUgPSAnL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0L1Jlc3VsdHMvRmlndXJlM0EucG5nJyxcbiAgICAgICB3aWR0aCA9IDYsIGhlaWdodCA9IDYpXG5gYGAifQ== -->
+<pre class="r"><code>ggsave(Figure3A, filename = &#39;/Users/sinhas8/Project_TrueTarget/Results/Figure3A.pdf&#39;,
+       width = 6, height = 6)
+ggsave(Figure3A, filename = &#39;/Users/sinhas8/Project_TrueTarget/Results/Figure3A.png&#39;,
+       width = 6, height = 6)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- How many wrong-known target drugs have a significant prediction from our pipeline -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuRmlndXJlM0IgPC0gZ2dwbG90KENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwLCBhZXMoeT1CZXN0VGFyZ2V0Q29yciwgeD1QcmVkaWN0ZWRSYW5rLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2xvcj0gY2F0ZWdvcnkgKSkrXG4gIGdlb21fcG9pbnQoKStcbiAgZ2VvbV92bGluZSh4aW50ZXJjZXB0ID0gNTIzLCBsaW5ldHlwZT0nZGFzaGVkJywgY29sb3I9J2JsdWUnKStcbiAgdGhlbWVfYncoYmFzZV9zaXplID0gMTgpK1xuICB0aGVtZShsZWdlbmQucG9zaXRpb24gPSAndG9wJykrXG4gIGd1aWRlcyhjb2xvcj1ndWlkZV9sZWdlbmQobnJvdz0zLGJ5cm93PVRSVUUpKStcbiAgbGFicyh4PSdSYW5rIG9mIEtub3duIFRhcmdldCcsIHk9J0NvcnJlbGF0aW9uIHdpdGggQmVzdFxcbiBQcmVkaWN0ZWQgVGFyZ2V0JylcbmBgYCJ9 -->
+<pre class="r"><code>Figure3B &lt;- ggplot(CancerInhibitors_removeNotExp, aes(y=BestTargetCorr, x=PredictedRank,
+                             color= category ))+
+  geom_point()+
+  geom_vline(xintercept = 523, linetype=&#39;dashed&#39;, color=&#39;blue&#39;)+
+  theme_bw(base_size = 18)+
+  theme(legend.position = &#39;top&#39;)+
+  guides(color=guide_legend(nrow=3,byrow=TRUE))+
+  labs(x=&#39;Rank of Known Target&#39;, y=&#39;Correlation with Best\n Predicted Target&#39;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dzYXZlKEZpZ3VyZTNCLCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQi5wZGYnLFxuICAgICAgIHdpZHRoID0gNiwgaGVpZ2h0ID0gNilcbmdnc2F2ZShGaWd1cmUzQiwgZmlsZW5hbWUgPSAnL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0L1Jlc3VsdHMvRmlndXJlM0IucG5nJyxcbiAgICAgICB3aWR0aCA9IDYsIGhlaWdodCA9IDYpXG5gYGAifQ== -->
+<pre class="r"><code>ggsave(Figure3B, filename = &#39;/Users/sinhas8/Project_TrueTarget/Results/Figure3B.pdf&#39;,
+       width = 6, height = 6)
+ggsave(Figure3B, filename = &#39;/Users/sinhas8/Project_TrueTarget/Results/Figure3B.png&#39;,
+       width = 6, height = 6)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkZHJ1Z19hbm49JydcbmNvcl9UaHJlc2hvbGQ9MC4zXG5Ub19hbm5vdGF0ZT1DYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRpbXByb3ZlbWVudF9vdmVyX2tub3duPmNvcl9UaHJlc2hvbGQgJiBcbiAgQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkY2F0ZWdvcnk9PXVuaXF1ZShDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRjYXRlZ29yeSlbM11cblxuI0FkZCBkcnVnOyBrbm93bjsgcHJlZGljdGVkXG5DYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRkcnVnX2tub3duX3ByZWRpY3RlZF9hbm5vdGF0aW9uPXBhc3RlKENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwJGRydWdOYW1lLCBDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRNYXhUYXJnZXROYW1lLCBDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRCZXN0VGFyZ2V0TmFtZSwgc2VwPSc7JyApXG5DYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRkcnVnX2FubltUb19hbm5vdGF0ZV09Q2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkZHJ1Z19rbm93bl9wcmVkaWN0ZWRfYW5ub3RhdGlvbltUb19hbm5vdGF0ZV1cbmBgYCJ9 -->
+<pre class="r"><code>CancerInhibitors_removeNotExp$drug_ann=&#39;&#39;
+cor_Threshold=0.3
+To_annotate=CancerInhibitors_removeNotExp$improvement_over_known&gt;cor_Threshold &amp; 
+  CancerInhibitors_removeNotExp$category==unique(CancerInhibitors_removeNotExp$category)[3]
+
+#Add drug; known; predicted
+CancerInhibitors_removeNotExp$drug_known_predicted_annotation=paste(CancerInhibitors_removeNotExp$drugName, CancerInhibitors_removeNotExp$MaxTargetName, CancerInhibitors_removeNotExp$BestTargetName, sep=&#39;;&#39; )
+CancerInhibitors_removeNotExp$drug_ann[To_annotate]=CancerInhibitors_removeNotExp$drug_known_predicted_annotation[To_annotate]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- These are drugs whose predicted target is incorrect & we can predict a high confidence Target-->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQ2FuY2VySW5oaWJpdG9yc19XVF9IQz1DYW5jZXJJbmhpYml0b3JzX1dUX0hDW29yZGVyKENhbmNlckluaGliaXRvcnNfV1RfSEMkaW1wcm92ZW1lbnRfb3Zlcl9rbm93biwgZGVjcmVhc2luZyA9IFQpLF1cbkNhbmNlckluaGliaXRvcnNfV1RfSENbd2hpY2goQ2FuY2VySW5oaWJpdG9yc19XVF9IQyRwaGFzZT09J0xhdW5jaGVkJyksXVxudGFibGUoQ2FuY2VySW5oaWJpdG9yc19XVF9IQyRwaGFzZSlcbmBgYCJ9 -->
+<pre class="r"><code>CancerInhibitors_WT_HC=CancerInhibitors_WT_HC[order(CancerInhibitors_WT_HC$improvement_over_known, decreasing = T),]
+CancerInhibitors_WT_HC[which(CancerInhibitors_WT_HC$phase==&#39;Launched&#39;),]
+table(CancerInhibitors_WT_HC$phase)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuRmlndXJlM0MgPC0gZ2dwbG90KENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwLCBhZXMoeT1pbXByb3ZlbWVudF9vdmVyX2tub3duLCB4PVByZWRpY3RlZFJhbmssXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbG9yPSBjYXRlZ29yeSxsYWJlbD1kcnVnX2FubikpK1xuICBnZW9tX3BvaW50KCkrXG4gIGdlb21fbGFiZWxfcmVwZWwoc2l6ZT0yKStcbiAgdGhlbWVfYncoYmFzZV9zaXplID0gMTgpK1xuICAjIHRoZW1lKGxlZ2VuZC5wb3NpdGlvbiA9ICdub25lJykrXG4gIGdlb21fdmxpbmUoeGludGVyY2VwdCA9IDUyMywgbGluZXR5cGU9J2Rhc2hlZCcsIGNvbG9yPSdibHVlJykrXG4gIGxhYnMoeD0nUHJlZGljdGVkIFJhbmsgb2YgS25vd24gVGFyZ2V0JywgeT0nSW1wcm92ZW1lbnQgc2NvcmUgb2ZcXG5QcmVkaWN0ZWQgVGFyZ2V0IG92ZXIgS25vd24nKVxuYGBgIn0= -->
+<pre class="r"><code>Figure3C &lt;- ggplot(CancerInhibitors_removeNotExp, aes(y=improvement_over_known, x=PredictedRank,
+                             color= category,label=drug_ann))+
+  geom_point()+
+  geom_label_repel(size=2)+
+  theme_bw(base_size = 18)+
+  # theme(legend.position = &#39;none&#39;)+
+  geom_vline(xintercept = 523, linetype=&#39;dashed&#39;, color=&#39;blue&#39;)+
+  labs(x=&#39;Predicted Rank of Known Target&#39;, y=&#39;Improvement score of\nPredicted Target over Known&#39;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuRmlndXJlM0FCQz1nZ2FycmFuZ2UoRmlndXJlM0EsIEZpZ3VyZTNCLCBGaWd1cmUzQywgXG4gICAgICAgICAgICAgICAgICAgICBsYWJlbHMgPSAnQVVUTycsIG5yb3cgPSAyLG5jb2wgPSAyLFxuICAgICAgICAgICAgICAgICAgICAgY29tbW9uLmxlZ2VuZCA9IFRSVUUsXG4gICAgICAgICAgICAgICAgICAgICBsZWdlbmQ9XCJ0b3BcIilcbmdnc2F2ZShGaWd1cmUzQUJDLCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQUJDX3YwLnBuZycsXG4gICAgICAgd2lkdGggPSAxMiwgaGVpZ2h0ID0gMTIpXG5nZ3NhdmUoRmlndXJlM0FCQywgZmlsZW5hbWUgPSAnL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0L1Jlc3VsdHMvRmlndXJlM0FCQ192MC5wZGYnLFxuICAgICAgIHdpZHRoID0gMTIsIGhlaWdodCA9IDEyKVxuYGBgIn0= -->
+<pre class="r"><code>Figure3ABC=ggarrange(Figure3A, Figure3B, Figure3C, 
+                     labels = &#39;AUTO&#39;, nrow = 2,ncol = 2,
+                     common.legend = TRUE,
+                     legend=&quot;top&quot;)
+ggsave(Figure3ABC, filename = &#39;/Users/sinhas8/Project_TrueTarget/Results/Figure3ABC_v0.png&#39;,
+       width = 12, height = 12)
+ggsave(Figure3ABC, filename = &#39;/Users/sinhas8/Project_TrueTarget/Results/Figure3ABC_v0.pdf&#39;,
+       width = 12, height = 12)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2F0X29mSW50ZXJlc3Q9Q2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkY2F0ZWdvcnk9PXVuaXF1ZShDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRjYXRlZ29yeSlbM11cbkNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwX2NhdF9vZkludGVyZXN0PUNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwW2NhdF9vZkludGVyZXN0LF1cbkNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwX2NhdF9vZkludGVyZXN0W2dyZXAoJ0xhdW5jaGVkJyxDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cF9jYXRfb2ZJbnRlcmVzdCRwaGFzZSksXVxuQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3RbZ3JlcCgnTGF1bmNoZWQnLENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwX2NhdF9vZkludGVyZXN0JHBoYXNlKSxdXG5gYGAifQ== -->
+<pre class="r"><code>cat_ofInterest=CancerInhibitors_removeNotExp$category==unique(CancerInhibitors_removeNotExp$category)[3]
+CancerInhibitors_removeNotExp_cat_ofInterest=CancerInhibitors_removeNotExp[cat_ofInterest,]
+CancerInhibitors_removeNotExp_cat_ofInterest[grep(&#39;Launched&#39;,CancerInhibitors_removeNotExp_cat_ofInterest$phase),]
+CancerInhibitors_removeNotExp_cat_ofInterest[grep(&#39;Launched&#39;,CancerInhibitors_removeNotExp_cat_ofInterest$phase),]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- Figure 3D data -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlndXJlM0RfZGF0YT1kYXRhLmZyYW1lKHRhYmxlKENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwX2NhdF9vZkludGVyZXN0JHBoYXNlKSlcbkZpZ3VyZTNEIDwtIGdncGxvdChmaWd1cmUzRF9kYXRhLCBhZXMoeT1GcmVxLCB4PVZhcjEpKStcbiAgZ2VvbV9zZWdtZW50KCBhZXMoeD1WYXIxLCB4ZW5kPVZhcjEsIHk9MCwgeWVuZD1GcmVxKSwgY29sb3I9XCJza3libHVlXCIpICtcbiAgZ2VvbV9wb2ludCggY29sb3I9XCJibHVlXCIsIHNpemU9NCwgYWxwaGE9MC42KStcbiAgIHRoZW1lX2J3KGJhc2Vfc2l6ZSA9IDE4KSArXG4gIGNvb3JkX2ZsaXAoKStcbiAgbGFicyh5PSdEcnVncyB3aXRoIGFsdGVybmF0aXZlXFxucHJlZGljdGVkIHRhcmdldCcseD0nRHJ1Z3MgQ2F0ZWdvcnknKVxuXG5GaWd1cmUzQUJDRCA8LSBncmlkLmFycmFuZ2UoRmlndXJlM0FCQywgRmlndXJlM0QsIG5yb3cgPSAyLFxuICAgICAgICAgICAgIGxheW91dF9tYXRyaXggPSByYmluZChjKDEsIDEsIDEpLGMoMSwgMSwgMSksYygxLCAxLCAxKSwgYygxLCAxLCAxKSwgYyhOQSwgMiwgTkEpKSApXG5cbmBgYCJ9 -->
+<pre class="r"><code>figure3D_data=data.frame(table(CancerInhibitors_removeNotExp_cat_ofInterest$phase))
+Figure3D &lt;- ggplot(figure3D_data, aes(y=Freq, x=Var1))+
+  geom_segment( aes(x=Var1, xend=Var1, y=0, yend=Freq), color=&quot;skyblue&quot;) +
+  geom_point( color=&quot;blue&quot;, size=4, alpha=0.6)+
+   theme_bw(base_size = 18) +
+  coord_flip()+
+  labs(y=&#39;Drugs with alternative\npredicted target&#39;,x=&#39;Drugs Category&#39;)
+
+Figure3ABCD &lt;- grid.arrange(Figure3ABC, Figure3D, nrow = 2,
+             layout_matrix = rbind(c(1, 1, 1),c(1, 1, 1),c(1, 1, 1), c(1, 1, 1), c(NA, 2, NA)) )
 </code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<!-- Compute if a drug is inhibitor or not -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2F0ZWdvcnlfaW5oaWJpdG9yPWMoJ2luaGliaXRvcicsICdhbnRhZ29uaXN0JywgJ2Jsb2NrZXInKVxuY2F0ZWdvcnlfYWN0aXZhdG9yPWMoJ2Fnb25pc3QnLCAnYWN0aXZhdG9yJywgJ3N0aW11bGFudCcpXG5jYXRlZ29yeV9pbmhpYml0b3JfZHJ1Z3NfSUQ9c2FwcGx5KGNhdGVnb3J5X2luaGliaXRvciwgZnVuY3Rpb24oeCkgZ3JlcCh4LCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKSlcbmNhdGVnb3J5X2FjdGl2YXRvcl9kcnVnc19JRD1zYXBwbHkoY2F0ZWdvcnlfYWN0aXZhdG9yLCBmdW5jdGlvbih4KSBncmVwKHgsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpKVxuY2F0ZWdvcnlfaW5oaWJpdG9yX2RydWdzX0lEPXVuaXF1ZSh1bmxpc3QoY2F0ZWdvcnlfaW5oaWJpdG9yX2RydWdzX0lEKSlcbmNhdGVnb3J5X2FjdGl2YXRvcl9kcnVnc19JRD11bmlxdWUodW5saXN0KGNhdGVnb3J5X2FjdGl2YXRvcl9kcnVnc19JRCkpXG5vblRhcmdldCRkcnVnQ2F0ZWdvcnkkaXMuaW5oaWJpdG9yPUZcbm9uVGFyZ2V0JGRydWdDYXRlZ29yeSRpcy5pbmhpYml0b3JbY2F0ZWdvcnlfaW5oaWJpdG9yX2RydWdzX0lEXT1UXG5vblRhcmdldCRkcnVnQ2F0ZWdvcnkkaXMuYWN0aXZhdG9yPUZcbm9uVGFyZ2V0JGRydWdDYXRlZ29yeSRpcy5hY3RpdmF0b3JbY2F0ZWdvcnlfYWN0aXZhdG9yX2RydWdzX0lEXT1UXG5gYGAifQ== -->
-<pre class="r"><code>category_inhibitor=c(&#39;inhibitor&#39;, &#39;antagonist&#39;, &#39;blocker&#39;)
-category_activator=c(&#39;agonist&#39;, &#39;activator&#39;, &#39;stimulant&#39;)
-category_inhibitor_drugs_ID=sapply(category_inhibitor, function(x) grep(x, onTarget$drugCategory$moa))
-category_activator_drugs_ID=sapply(category_activator, function(x) grep(x, onTarget$drugCategory$moa))
-category_inhibitor_drugs_ID=unique(unlist(category_inhibitor_drugs_ID))
-category_activator_drugs_ID=unique(unlist(category_activator_drugs_ID))
-onTarget$drugCategory$is.inhibitor=F
-onTarget$drugCategory$is.inhibitor[category_inhibitor_drugs_ID]=T
-onTarget$drugCategory$is.activator=F
-onTarget$drugCategory$is.activator[category_activator_drugs_ID]=T</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dzYXZlKEZpZ3VyZTNBQkNELCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQUJDRF92MC5wbmcnLFxuICAgICAgIHdpZHRoID0gMTIsIGhlaWdodCA9IDE1KVxuZ2dzYXZlKEZpZ3VyZTNBQkNELCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQUJDRF92MC5wZGYnLFxuICAgICAgIHdpZHRoID0gMTIsIGhlaWdodCA9IDE1KVxuYGBgIn0= -->
+<pre class="r"><code>ggsave(Figure3ABCD, filename = &#39;/Users/sinhas8/Project_TrueTarget/Results/Figure3ABCD_v0.png&#39;,
+       width = 12, height = 15)
+ggsave(Figure3ABCD, filename = &#39;/Users/sinhas8/Project_TrueTarget/Results/Figure3ABCD_v0.pdf&#39;,
+       width = 12, height = 15)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxub25UYXJnZXQkZHJ1Z0NhdGVnb3J5W2dyZXAoJ2RlY2l0YWJpbmUnLG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRuYW1lKSxdXG5cbkNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwW2NhdF9vZkludGVyZXN0LF0kcGhhc2VcbkNhbmNlckluaGliaXRvcnNbZ3JlcCgnRE5NVDEnLCBDYW5jZXJJbmhpYml0b3JzJE1heFRhcmdldE5hbWUgKSxdXG5gYGAifQ== -->
+<pre class="r"><code>onTarget$drugCategory[grep(&#39;decitabine&#39;,onTarget$drugCategory$name),]
+
+CancerInhibitors_removeNotExp[cat_ofInterest,]$phase
+CancerInhibitors[grep(&#39;DNMT1&#39;, CancerInhibitors$MaxTargetName ),]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3Rbb3JkZXIoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3QkaW1wcm92ZW1lbnRfb3Zlcl9rbm93biwgZGVjcmVhc2luZyA9IFQpLC1jKDQ6MTEsMTQ6MTYpXVxuQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3Rbb3JkZXIoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3QkQmVzdFRhcmdldENvcnIsIGRlY3JlYXNpbmcgPSBUKSwtYyg0OjExLDE0OjE2KV1cbkNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwX2NhdF9vZkludGVyZXN0W2dyZXAoJ0xhdW5jaGVkJyxDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cF9jYXRfb2ZJbnRlcmVzdCRwaGFzZSksXVxuYGBgIn0= -->
+<pre class="r"><code>CancerInhibitors_removeNotExp_cat_ofInterest[order(CancerInhibitors_removeNotExp_cat_ofInterest$improvement_over_known, decreasing = T),-c(4:11,14:16)]
+CancerInhibitors_removeNotExp_cat_ofInterest[order(CancerInhibitors_removeNotExp_cat_ofInterest$BestTargetCorr, decreasing = T),-c(4:11,14:16)]
+CancerInhibitors_removeNotExp_cat_ofInterest[grep(&#39;Launched&#39;,CancerInhibitors_removeNotExp_cat_ofInterest$phase),]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2F0KENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwX2NhdF9vZkludGVyZXN0JE1heFRhcmdldE5hbWUsIHNlcCA9ICdcXG4nKVxuYGBgIn0= -->
+<pre class="r"><code>cat(CancerInhibitors_removeNotExp_cat_ofInterest$MaxTargetName, sep = &#39;\n&#39;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1872,7 +2063,7 @@ run any R code chunks. Instead, the output of the chunk when it was last
 run in the editor is displayed.</p>
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKVGhpcyBpcyBhbiBbUiBNYXJrZG93bl0oaHR0cDovL3JtYXJrZG93bi5yc3R1ZGlvLmNvbSkgTm90ZWJvb2suIFdoZW4geW91IGV4ZWN1dGUgY29kZSB3aXRoaW4gdGhlIG5vdGVib29rLCB0aGUgcmVzdWx0cyBhcHBlYXIgYmVuZWF0aCB0aGUgY29kZS4gCgpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ21kK1NoaWZ0K0VudGVyKi4gCjwhLS0gQXRvbWljIGlucHV0cyBuZWVkZWQgdG8gcnVuIGEgY29kZSAtLT4KPCEtLSBMaWJyYXJpZXMgLS0+CmBgYHtyfQpyZXF1aXJlKHBhcmFsbGVsKTsgcmVxdWlyZSgndGljdG9jJyk7IGxpYnJhcnkoZmdzZWEpOyBsaWJyYXJ5KGdncGxvdDIpCnJlcXVpcmUoZ2dwdWJyKTsgcmVxdWlyZShzdGF0YXIpOyByZXF1aXJlKCdpbnRlcmFjdGlvbnMnKQpyZXF1aXJlKHN0YXRzKTsgcmVxdWlyZShyZXNoYXBlMik7IHJlcXVpcmUocFJPQykKcmVxdWlyZShkYXRhLnRhYmxlKTsgCnJlcXVpcmUoZ2dyZXBlbCkKcmVxdWlyZShncmlkKQpyZXF1aXJlKGNvd3Bsb3QpCnJlcXVpcmUoZ3JpZEV4dHJhKQpyZXF1aXJlKCdzdHJpbmdiJykKYGBgCjwhLS0gRGF0YSAtLT4KYGBge3J9CnNldHdkKCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvVG9vbHNfZ2l0aHViLycpCm9uVGFyZ2V0PXJlYWRSRFMoJy4uL0RhdGEvb25UYXJnZXRfdjIuMC5SRFMnKQpLbm93blRhcmdldF9wcmVkaWN0aW9ucz1yZWFkUkRTKCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvRGF0YS9Lbm93blRhcmdldF9wcmVkaWN0aW9uc192Mi5SRFMnKQpkcnVnQ2FuZGlkYXRlc19mb3Jfc2VjVGFyZ2V0cz1yZWFkUkRTKCcuLi9EYXRhL2RydWdDYW5kaWRhdGVzX2Zvcl9zZWNUYXJnZXRzLlJEUycpCmRydWdWU2NyaXNwcl9jb3JyX2ZlYXR1cmVzX2xpc3Q9cmVhZFJEUygnLi4vRGF0YS9kcnVnVlNjcmlzcHJfY29ycl9mZWF0dXJlc19saXN0LlJEUycpCmRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoPXNhcHBseShkcnVnVlNjcmlzcHJfY29ycl9mZWF0dXJlc19saXN0LCBmdW5jdGlvbih4KSB4WywyXSkKY29yck1hdF9QPXNhcHBseShkcnVnVlNjcmlzcHJfY29ycl9mZWF0dXJlc19saXN0LCBmdW5jdGlvbih4KSB4WywxXSkKY29yck1hdD1kcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aApjb3JyTWF0X3Jhbms9YXBwbHkoLWNvcnJNYXQsIDIsIHJhbmspCgojRnVuY3Rpb25zIG5lZWRlZApzb3VyY2UoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9Ub29sc19naXRodWIvMy5Ub29scy9teUN1c3RvbV9mdW5jdGlvbnMuUicpCmBgYAo8IS0tIEZ1bmN0aW9ucyBmb3IgcHJvZHVjaW5nIG5lZ2F0aXZlIGNvbnRyb2xkIGR1cmluZyBwcmltYXJ5IHRhcmdldCBpZGVudGlmaWNhdGlvbiAtLT4KYGBge3J9CiMgQ3JlYXRlIGEgcmFuZG9tIGRmIHVuaXF1ZSB0byB0aGUgaW5wdXQgZGYKcmFuZG9taXplX0RGX3dpdGhfdW5pcXVlX1BhaXJzPC1mdW5jdGlvbihkZjJyYW5kb21pemU9UG9zaXRpdmVfU2V0X0RydWdHZW5lX1BhaXJzKXsKICBkZjJyYW5kb21pemVfY29sbGFwc2VkPXBhc3RlKGRmMnJhbmRvbWl6ZVssMV0sIGRmMnJhbmRvbWl6ZVssMl0sIHNlcCA9ICdfJykKICBmaXhlZENvbD1kZjJyYW5kb21pemVbLDJdCiAgc2h1ZmZsZWRDb2w9c2FtcGxlKGRmMnJhbmRvbWl6ZVssMV0pCiAgbmV3X2RmPXBhc3RlKHNodWZmbGVkQ29sLCBmaXhlZENvbCwgc2VwID0gJ18nKQogIHdoaWxlKHN1bShkZjJyYW5kb21pemVfY29sbGFwc2VkPT1uZXdfZGYpPjApewogICAgbmV3X2RmW2RmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZl09CiAgICAgIHBhc3RlKHNhbXBsZShkZjJyYW5kb21pemVbLDFdLCBzdW0oZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmKSksIGZpeGVkQ29sW2RmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZl0sIHNlcCA9ICdfJykKICB9CiAgZGYycmV0dXJuPWRvLmNhbGwocmJpbmQsIHN0cnNwbGl0KG5ld19kZiwgJ18nKSkKICBkZjJyZXR1cm49ZGF0YS5mcmFtZShkZjJyZXR1cm5bLDFdLCBkZjJyZXR1cm5bLDJdKQogIGNvbG5hbWVzKGRmMnJldHVybik9Y29sbmFtZXMoZGYycmFuZG9taXplKQogIGRmMnJldHVybgp9CgpyYW5kb21pemVfREZfd2l0aF91bmlxdWVfUGFpcnNfVjI8LWZ1bmN0aW9uKGRmMnJhbmRvbWl6ZT1Qb3NpdGl2ZV9TZXRfRHJ1Z0dlbmVfUGFpcnMpewogIGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9cGFzdGUoZGYycmFuZG9taXplWywxXSwgZGYycmFuZG9taXplWywyXSwgc2VwID0gJ18nKQogIGZpeGVkQ29sPWRmMnJhbmRvbWl6ZVssMl0KICBzaHVmZmxlZENvbD1zYW1wbGUocm93bmFtZXMoY29yck1hdCksIG5yb3coZGYycmFuZG9taXplKSkKICBuZXdfZGY9cGFzdGUoc2h1ZmZsZWRDb2wsIGZpeGVkQ29sLCBzZXAgPSAnXycpCiAgd2hpbGUoc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZik+MCl7CiAgICBuZXdfZGZbZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmXT0KICAgICAgcGFzdGUoc2FtcGxlKHJvd25hbWVzKG9uVGFyZ2V0JGNvcnJNYXQpLCBzdW0oZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmKSksCiAgICAgICAgICAgIGZpeGVkQ29sW2RmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZl0sIHNlcCA9ICdfJykKICB9CiAgZGYycmV0dXJuPWRvLmNhbGwocmJpbmQsIHN0cnNwbGl0KG5ld19kZiwgJ18nKSkKICBkZjJyZXR1cm49ZGF0YS5mcmFtZShkZjJyZXR1cm5bLDFdLCBkZjJyZXR1cm5bLDJdKQogIGNvbG5hbWVzKGRmMnJldHVybik9Y29sbmFtZXMoZGYycmFuZG9taXplKQogIGRmMnJldHVybgp9CgpgYGAKPCEtLSBDb21wdXRlIGlmIGEgZHJ1ZyBpcyBpbmhpYml0b3Igb3Igbm90IC0tPgpgYGB7cn0KY2F0ZWdvcnlfaW5oaWJpdG9yPWMoJ2luaGliaXRvcicsICdhbnRhZ29uaXN0JywgJ2Jsb2NrZXInKQpjYXRlZ29yeV9hY3RpdmF0b3I9YygnYWdvbmlzdCcsICdhY3RpdmF0b3InLCAnc3RpbXVsYW50JykKY2F0ZWdvcnlfaW5oaWJpdG9yX2RydWdzX0lEPXNhcHBseShjYXRlZ29yeV9pbmhpYml0b3IsIGZ1bmN0aW9uKHgpIGdyZXAoeCwgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkpCmNhdGVnb3J5X2FjdGl2YXRvcl9kcnVnc19JRD1zYXBwbHkoY2F0ZWdvcnlfYWN0aXZhdG9yLCBmdW5jdGlvbih4KSBncmVwKHgsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpKQpjYXRlZ29yeV9pbmhpYml0b3JfZHJ1Z3NfSUQ9dW5pcXVlKHVubGlzdChjYXRlZ29yeV9pbmhpYml0b3JfZHJ1Z3NfSUQpKQpjYXRlZ29yeV9hY3RpdmF0b3JfZHJ1Z3NfSUQ9dW5pcXVlKHVubGlzdChjYXRlZ29yeV9hY3RpdmF0b3JfZHJ1Z3NfSUQpKQpvblRhcmdldCRkcnVnQ2F0ZWdvcnkkaXMuaW5oaWJpdG9yPUYKb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JGlzLmluaGliaXRvcltjYXRlZ29yeV9pbmhpYml0b3JfZHJ1Z3NfSURdPVQKb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JGlzLmFjdGl2YXRvcj1GCm9uVGFyZ2V0JGRydWdDYXRlZ29yeSRpcy5hY3RpdmF0b3JbY2F0ZWdvcnlfYWN0aXZhdG9yX2RydWdzX0lEXT1UCmBgYAoKCkFkZCBhIG5ldyBjaHVuayBieSBjbGlja2luZyB0aGUgKkluc2VydCBDaHVuayogYnV0dG9uIG9uIHRoZSB0b29sYmFyIG9yIGJ5IHByZXNzaW5nICpDbWQrT3B0aW9uK0kqLgoKV2hlbiB5b3Ugc2F2ZSB0aGUgbm90ZWJvb2ssIGFuIEhUTUwgZmlsZSBjb250YWluaW5nIHRoZSBjb2RlIGFuZCBvdXRwdXQgd2lsbCBiZSBzYXZlZCBhbG9uZ3NpZGUgaXQgKGNsaWNrIHRoZSAqUHJldmlldyogYnV0dG9uIG9yIHByZXNzICpDbWQrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4gCgpUaGUgcHJldmlldyBzaG93cyB5b3UgYSByZW5kZXJlZCBIVE1MIGNvcHkgb2YgdGhlIGNvbnRlbnRzIG9mIHRoZSBlZGl0b3IuIENvbnNlcXVlbnRseSwgdW5saWtlICpLbml0KiwgKlByZXZpZXcqIGRvZXMgbm90IHJ1biBhbnkgUiBjb2RlIGNodW5rcy4gSW5zdGVhZCwgdGhlIG91dHB1dCBvZiB0aGUgY2h1bmsgd2hlbiBpdCB3YXMgbGFzdCBydW4gaW4gdGhlIGVkaXRvciBpcyBkaXNwbGF5ZWQuCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKVGhpcyBpcyBhbiBbUiBNYXJrZG93bl0oaHR0cDovL3JtYXJrZG93bi5yc3R1ZGlvLmNvbSkgTm90ZWJvb2suIFdoZW4geW91IGV4ZWN1dGUgY29kZSB3aXRoaW4gdGhlIG5vdGVib29rLCB0aGUgcmVzdWx0cyBhcHBlYXIgYmVuZWF0aCB0aGUgY29kZS4gCgpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ21kK1NoaWZ0K0VudGVyKi4gCjwhLS0gRmlndXJlIDQgLS0+CmBgYHtyfQpyZXF1aXJlKGdncmVwZWwpCnJlcXVpcmUoZ3JpZCkKcmVxdWlyZShjb3dwbG90KQpyZXF1aXJlKGdyaWRFeHRyYSkKcmVxdWlyZSgnc3RyaW5nYicpCnJlcXVpcmUoJ2dnYWx0JykKcmVxdWlyZSgnZ2dmb3JjZScpCmtuaXRyOjprbml0KCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvVG9vbHNfZ2l0aHViLzMuVG9vbHMvU3RlcDBfV3JpdGVfRnVuY3Rpb25zLlJtZCcpCmtuaXRyOjprbml0KCcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvVG9vbHNfZ2l0aHViLzMuVG9vbHMvU3RlcDBCX0RhdGFfYW5kX0xpYnJhcmllcy5SbWQnKQpgYGAKCjwhLS0gUHJlZGljdGluZyB0YXJnZXRzIGZvciBkcnVncyB3aXRoIG5vIHRhcmdldHMgLS0+CmBgYHtyfQpjb25kMT1vblRhcmdldCRkcnVnQ2F0ZWdvcnkkZHJ1Z19jYXRlZ29yeT09J3RhcmdldGVkIGNhbmNlcicKY29uZDI9aXMubmEoYXMuY2hhcmFjdGVyKG9uVGFyZ2V0JGRydWdDYXRlZ29yeSR0YXJnZXQpKQpgYGAKPCEtLSBQcmVkaWN0aW5nIHRhcmdldHMgZm9yIGRydWdzIHdpdGggd3JvbmcgdGFyZ2V0cyAtLT4KYGBge3J9CkNhbmNlckluaGliaXRvcnNfbm9UYXJnZXRzPW9uVGFyZ2V0JGRydWdDYXRlZ29yeSRicm9hZF9pZF90cmltbWVkW2NvbmQxICYgY29uZDJdCkNhbmNlckluaGliaXRvcnNfbWFwcGluZz1tYXRjaF9zdHJpcGFsbChDYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0cywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEtub3duVGFyZ2V0X3ByZWRpY3Rpb25zJGRydWdCcm9hZElEKQpDYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0cz1Lbm93blRhcmdldF9wcmVkaWN0aW9uc1tuYS5vbWl0KENhbmNlckluaGliaXRvcnNfbWFwcGluZyksXQpDYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0cz11bmlxdWUoQ2FuY2VySW5oaWJpdG9yc19ub1RhcmdldHMpCmRpbShDYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0cykKYGBgCjwhLS0gT25lcyB3aGVyZSB3ZSBjYW4gaWRlbnRpZnkgc2lnbmlmaWNhbnQgdGFyZ2V0ICYgdGFyZ2V0IGNvcnJlbGF0aW9uIGlzIGdyZWF0ZXIgdGhhbiAwLjI1LS0+CmBgYHtyfQpjb25kMz1DYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0cyRCZXN0VGFyZ2V0Q29yckZEUjwwLjA1CiMgY29uZDQ9Q2FuY2VySW5oaWJpdG9yc19ub1RhcmdldHMkQmVzdFRhcmdldENvcnI+MC4yNQpDYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0c193aXRoc2lnVGFyZ2V0cz1DYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0c1tjb25kMywtKDI6MTEpXQpDYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0c193aXRoc2lnVGFyZ2V0c1tvcmRlcihDYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0c193aXRoc2lnVGFyZ2V0cyRCZXN0VGFyZ2V0Q29yciwgZGVjcmVhc2luZyA9IFQpLF0KCmBgYAoKYGBge3J9CkNhbmNlckluaGliaXRvcnNfbm9UYXJnZXRzW2dyZXAoJ0xhdW5jaGVkJyxDYW5jZXJJbmhpYml0b3JzX25vVGFyZ2V0cyRwaGFzZSksXQpgYGAKCjwhLS0gSG93IG1hbnkgZHJ1Z3MgYXJlIHdyb25nbHkgYW5ub3RhdGVkIGFmdGVyIHJlbW92aW5nIHRoZSBsb3ctZXhwcmVzc2VkIG9uZXMtLT4KYGBge3J9CnJlbW92ZV9ub3RfZXhwcmVzc2VkPUNhbmNlckluaGliaXRvcnMkS25vd25UYXJnZXRfbWVhbkNvcnI+MwpsYXVuY2hlZD1DYW5jZXJJbmhpYml0b3JzJHBoYXNlPT0nTGF1bmNoZWQnCnN1bShDYW5jZXJJbmhpYml0b3JzJFByZWRpY3RlZFJhbmtbcmVtb3ZlX25vdF9leHByZXNzZWQgJiBsYXVuY2hlZF08NTIzLAogICAgbmEucm0gPSBUKS9sZW5ndGgoQ2FuY2VySW5oaWJpdG9ycyRQcmVkaWN0ZWRSYW5rW3doaWNoKHJlbW92ZV9ub3RfZXhwcmVzc2VkICYgbGF1bmNoZWQpXSkKc3VtKENhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFua1tyZW1vdmVfbm90X2V4cHJlc3NlZF08NTIzLAogICAgbmEucm0gPSBUKS9sZW5ndGgoQ2FuY2VySW5oaWJpdG9ycyRQcmVkaWN0ZWRSYW5rW3doaWNoKHJlbW92ZV9ub3RfZXhwcmVzc2VkKV0pCmBgYAo8IS0tIEhvdyBtYW55IGRydWdzIGFyZSB3cm9uZ2x5IGFubm90YXRlZCAtLT4KYGBge3J9CnJlbW92ZV9ub3RfZXhwcmVzc2VkPUNhbmNlckluaGliaXRvcnMkS25vd25UYXJnZXRfbWVhbkNvcnI+MwpsYXVuY2hlZD1DYW5jZXJJbmhpYml0b3JzJHBoYXNlPT0nTGF1bmNoZWQnCkNhbmNlckluaGliaXRvcnMkaW1wcm92ZW1lbnRfb3Zlcl9rbm93bj1DYW5jZXJJbmhpYml0b3JzJEJlc3RUYXJnZXRDb3JyIC0gQ2FuY2VySW5oaWJpdG9ycyRNYXhjb3JyCnN1bShDYW5jZXJJbmhpYml0b3JzJFByZWRpY3RlZFJhbmtbcmVtb3ZlX25vdF9leHByZXNzZWQgJiBsYXVuY2hlZF08NTIzLAogICAgbmEucm0gPSBUKS9sZW5ndGgoQ2FuY2VySW5oaWJpdG9ycyRQcmVkaWN0ZWRSYW5rW3doaWNoKHJlbW92ZV9ub3RfZXhwcmVzc2VkICYgbGF1bmNoZWQpXSkKc3VtKENhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFua1tyZW1vdmVfbm90X2V4cHJlc3NlZF08NTIzLAogICAgbmEucm0gPSBUKS9sZW5ndGgoQ2FuY2VySW5oaWJpdG9ycyRQcmVkaWN0ZWRSYW5rW3doaWNoKHJlbW92ZV9ub3RfZXhwcmVzc2VkKV0pCmBgYApgYGB7cn0Kc3VtKENhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFuaz41MjMgJiBDYW5jZXJJbmhpYml0b3JzJEJlc3RUYXJnZXRDb3JyRkRSPDAuMSkKc3VtKENhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFuaz41MjMgJgogICAgICBDYW5jZXJJbmhpYml0b3JzJEJlc3RUYXJnZXRDb3JyRkRSPDAuMSAmCiAgICAgIENhbmNlckluaGliaXRvcnMkaW1wcm92ZW1lbnRfb3Zlcl9rbm93bj4wLjIpCmBgYAoKPCEtLSBQcm92aWRlIEFubm90YXRpb25zIC0tPgpgYGB7cn0KQ2FuY2VySW5oaWJpdG9ycyRjYXRlZ29yeT0nV3JvbmcgS25vd24gdGFyZ2V0O1xuIE5vIFNpZ25pZmljYW50IFRhcmdldCBmcm9tIFRydWVUYXJnZXQnCkNhbmNlckluaGliaXRvcnMkY2F0ZWdvcnlbQ2FuY2VySW5oaWJpdG9ycyRQcmVkaWN0ZWRSYW5rPDUyM109J0NvcnJlY3QgS25vd24gdGFyZ2V0JwpDYW5jZXJJbmhpYml0b3JzJGNhdGVnb3J5W0NhbmNlckluaGliaXRvcnMkUHJlZGljdGVkUmFuaz41MjMgJgogICAgICAgICAgICAgICAgICAgICAgICAgICAgQ2FuY2VySW5oaWJpdG9ycyRCZXN0VGFyZ2V0Q29yckZEUjwwLjEgJiAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIENhbmNlckluaGliaXRvcnMkaW1wcm92ZW1lbnRfb3Zlcl9rbm93bj4wLjJdPSdXcm9uZyBLbm93biB0YXJnZXQ7XG4gU2lnbmlmaWNhbnQgVGFyZ2V0IGZyb20gVHJ1ZVRhcmdldCcKCnJlbW92ZV9ub3RfZXhwcmVzc2VkSUQ9d2hpY2gocmVtb3ZlX25vdF9leHByZXNzZWQpCkNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwPUNhbmNlckluaGliaXRvcnNbcmVtb3ZlX25vdF9leHByZXNzZWRJRCxdCkZpZ3VyZTNBIDwtIGdncGxvdChDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCwKICAgICAgICAgICAgICAgICAgIGFlcyh5PUJlc3RUYXJnZXRDb3JyLCB4PU1heGNvcnIsCiAgICAgICAgICAgICAgICAgICAgICAgY29sb3I9Y2F0ZWdvcnkKICAgICAgICAgICAgICAgICAgICAgICApKSsKICBnZW9tX3BvaW50KCkrCiAgdGhlbWVfYncoYmFzZV9zaXplID0gMTgpKwogIGNvb3JkX2ZpeGVkKCkrCiAgdGhlbWUobGVnZW5kLnBvc2l0aW9uID0gJ3RvcCcpKwogIGd1aWRlcyhjb2xvcj1ndWlkZV9sZWdlbmQobnJvdz0zLGJ5cm93PVRSVUUpKSsKICBsYWJzKHg9J0NvcnJlbGF0aW9uIHdpdGggS25vd24gVGFyZ2V0JywgeT0nQ29ycmVsYXRpb24gd2l0aCBCZXN0XG4gUHJlZGljdGVkIFRhcmdldCcpKwogIGdlb21fbWFya19lbGxpcHNlKGV4cGFuZCA9IDApCkZpZ3VyZTNBCmBgYApgYGB7cn0KQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBbb3JkZXIoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkaW1wcm92ZW1lbnRfb3Zlcl9rbm93biwgZGVjcmVhc2luZyA9IFQpLF0KYGBgCgpgYGB7cn0KZ2dzYXZlKEZpZ3VyZTNBLCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQS5wZGYnLAogICAgICAgd2lkdGggPSA2LCBoZWlnaHQgPSA2KQpnZ3NhdmUoRmlndXJlM0EsIGZpbGVuYW1lID0gJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9SZXN1bHRzL0ZpZ3VyZTNBLnBuZycsCiAgICAgICB3aWR0aCA9IDYsIGhlaWdodCA9IDYpCmBgYAoKPCEtLSBIb3cgbWFueSB3cm9uZy1rbm93biB0YXJnZXQgZHJ1Z3MgaGF2ZSBhIHNpZ25pZmljYW50IHByZWRpY3Rpb24gZnJvbSBvdXIgcGlwZWxpbmUgLS0+CmBgYHtyfQpGaWd1cmUzQiA8LSBnZ3Bsb3QoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAsIGFlcyh5PUJlc3RUYXJnZXRDb3JyLCB4PVByZWRpY3RlZFJhbmssCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY29sb3I9IGNhdGVnb3J5ICkpKwogIGdlb21fcG9pbnQoKSsKICBnZW9tX3ZsaW5lKHhpbnRlcmNlcHQgPSA1MjMsIGxpbmV0eXBlPSdkYXNoZWQnLCBjb2xvcj0nYmx1ZScpKwogIHRoZW1lX2J3KGJhc2Vfc2l6ZSA9IDE4KSsKICB0aGVtZShsZWdlbmQucG9zaXRpb24gPSAndG9wJykrCiAgZ3VpZGVzKGNvbG9yPWd1aWRlX2xlZ2VuZChucm93PTMsYnlyb3c9VFJVRSkpKwogIGxhYnMoeD0nUmFuayBvZiBLbm93biBUYXJnZXQnLCB5PSdDb3JyZWxhdGlvbiB3aXRoIEJlc3RcbiBQcmVkaWN0ZWQgVGFyZ2V0JykKYGBgCgpgYGB7cn0KZ2dzYXZlKEZpZ3VyZTNCLCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQi5wZGYnLAogICAgICAgd2lkdGggPSA2LCBoZWlnaHQgPSA2KQpnZ3NhdmUoRmlndXJlM0IsIGZpbGVuYW1lID0gJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9SZXN1bHRzL0ZpZ3VyZTNCLnBuZycsCiAgICAgICB3aWR0aCA9IDYsIGhlaWdodCA9IDYpCmBgYAoKYGBge3J9CkNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwJGRydWdfYW5uPScnCmNvcl9UaHJlc2hvbGQ9MC4zClRvX2Fubm90YXRlPUNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwJGltcHJvdmVtZW50X292ZXJfa25vd24+Y29yX1RocmVzaG9sZCAmIAogIENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwJGNhdGVnb3J5PT11bmlxdWUoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkY2F0ZWdvcnkpWzNdCgojQWRkIGRydWc7IGtub3duOyBwcmVkaWN0ZWQKQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkZHJ1Z19rbm93bl9wcmVkaWN0ZWRfYW5ub3RhdGlvbj1wYXN0ZShDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRkcnVnTmFtZSwgQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkTWF4VGFyZ2V0TmFtZSwgQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkQmVzdFRhcmdldE5hbWUsIHNlcD0nOycgKQpDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRkcnVnX2FubltUb19hbm5vdGF0ZV09Q2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkZHJ1Z19rbm93bl9wcmVkaWN0ZWRfYW5ub3RhdGlvbltUb19hbm5vdGF0ZV0KYGBgCjwhLS0gVGhlc2UgYXJlIGRydWdzIHdob3NlIHByZWRpY3RlZCB0YXJnZXQgaXMgaW5jb3JyZWN0ICYgd2UgY2FuIHByZWRpY3QgYSBoaWdoIGNvbmZpZGVuY2UgVGFyZ2V0LS0+CmBgYHtyfQpDYW5jZXJJbmhpYml0b3JzX1dUX0hDPUNhbmNlckluaGliaXRvcnNfV1RfSENbb3JkZXIoQ2FuY2VySW5oaWJpdG9yc19XVF9IQyRpbXByb3ZlbWVudF9vdmVyX2tub3duLCBkZWNyZWFzaW5nID0gVCksXQpDYW5jZXJJbmhpYml0b3JzX1dUX0hDW3doaWNoKENhbmNlckluaGliaXRvcnNfV1RfSEMkcGhhc2U9PSdMYXVuY2hlZCcpLF0KdGFibGUoQ2FuY2VySW5oaWJpdG9yc19XVF9IQyRwaGFzZSkKYGBgCgoKYGBge3J9CkZpZ3VyZTNDIDwtIGdncGxvdChDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCwgYWVzKHk9aW1wcm92ZW1lbnRfb3Zlcl9rbm93biwgeD1QcmVkaWN0ZWRSYW5rLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbG9yPSBjYXRlZ29yeSxsYWJlbD1kcnVnX2FubikpKwogIGdlb21fcG9pbnQoKSsKICBnZW9tX2xhYmVsX3JlcGVsKHNpemU9MikrCiAgdGhlbWVfYncoYmFzZV9zaXplID0gMTgpKwogICMgdGhlbWUobGVnZW5kLnBvc2l0aW9uID0gJ25vbmUnKSsKICBnZW9tX3ZsaW5lKHhpbnRlcmNlcHQgPSA1MjMsIGxpbmV0eXBlPSdkYXNoZWQnLCBjb2xvcj0nYmx1ZScpKwogIGxhYnMoeD0nUHJlZGljdGVkIFJhbmsgb2YgS25vd24gVGFyZ2V0JywgeT0nSW1wcm92ZW1lbnQgc2NvcmUgb2ZcblByZWRpY3RlZCBUYXJnZXQgb3ZlciBLbm93bicpCmBgYAoKYGBge3J9CkZpZ3VyZTNBQkM9Z2dhcnJhbmdlKEZpZ3VyZTNBLCBGaWd1cmUzQiwgRmlndXJlM0MsIAogICAgICAgICAgICAgICAgICAgICBsYWJlbHMgPSAnQVVUTycsIG5yb3cgPSAyLG5jb2wgPSAyLAogICAgICAgICAgICAgICAgICAgICBjb21tb24ubGVnZW5kID0gVFJVRSwKICAgICAgICAgICAgICAgICAgICAgbGVnZW5kPSJ0b3AiKQpnZ3NhdmUoRmlndXJlM0FCQywgZmlsZW5hbWUgPSAnL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0L1Jlc3VsdHMvRmlndXJlM0FCQ192MC5wbmcnLAogICAgICAgd2lkdGggPSAxMiwgaGVpZ2h0ID0gMTIpCmdnc2F2ZShGaWd1cmUzQUJDLCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQUJDX3YwLnBkZicsCiAgICAgICB3aWR0aCA9IDEyLCBoZWlnaHQgPSAxMikKYGBgCgpgYGB7cn0KY2F0X29mSW50ZXJlc3Q9Q2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHAkY2F0ZWdvcnk9PXVuaXF1ZShDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cCRjYXRlZ29yeSlbM10KQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3Q9Q2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBbY2F0X29mSW50ZXJlc3QsXQpDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cF9jYXRfb2ZJbnRlcmVzdFtncmVwKCdMYXVuY2hlZCcsQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3QkcGhhc2UpLF0KQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3RbZ3JlcCgnTGF1bmNoZWQnLENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwX2NhdF9vZkludGVyZXN0JHBoYXNlKSxdCmBgYAo8IS0tIEZpZ3VyZSAzRCBkYXRhIC0tPgpgYGB7cn0KZmlndXJlM0RfZGF0YT1kYXRhLmZyYW1lKHRhYmxlKENhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwX2NhdF9vZkludGVyZXN0JHBoYXNlKSkKRmlndXJlM0QgPC0gZ2dwbG90KGZpZ3VyZTNEX2RhdGEsIGFlcyh5PUZyZXEsIHg9VmFyMSkpKwogIGdlb21fc2VnbWVudCggYWVzKHg9VmFyMSwgeGVuZD1WYXIxLCB5PTAsIHllbmQ9RnJlcSksIGNvbG9yPSJza3libHVlIikgKwogIGdlb21fcG9pbnQoIGNvbG9yPSJibHVlIiwgc2l6ZT00LCBhbHBoYT0wLjYpKwogICB0aGVtZV9idyhiYXNlX3NpemUgPSAxOCkgKwogIGNvb3JkX2ZsaXAoKSsKICBsYWJzKHk9J0RydWdzIHdpdGggYWx0ZXJuYXRpdmVcbnByZWRpY3RlZCB0YXJnZXQnLHg9J0RydWdzIENhdGVnb3J5JykKCkZpZ3VyZTNBQkNEIDwtIGdyaWQuYXJyYW5nZShGaWd1cmUzQUJDLCBGaWd1cmUzRCwgbnJvdyA9IDIsCiAgICAgICAgICAgICBsYXlvdXRfbWF0cml4ID0gcmJpbmQoYygxLCAxLCAxKSxjKDEsIDEsIDEpLGMoMSwgMSwgMSksIGMoMSwgMSwgMSksIGMoTkEsIDIsIE5BKSkgKQoKYGBgCgpgYGB7cn0KZ2dzYXZlKEZpZ3VyZTNBQkNELCBmaWxlbmFtZSA9ICcvVXNlcnMvc2luaGFzOC9Qcm9qZWN0X1RydWVUYXJnZXQvUmVzdWx0cy9GaWd1cmUzQUJDRF92MC5wbmcnLAogICAgICAgd2lkdGggPSAxMiwgaGVpZ2h0ID0gMTUpCmdnc2F2ZShGaWd1cmUzQUJDRCwgZmlsZW5hbWUgPSAnL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0L1Jlc3VsdHMvRmlndXJlM0FCQ0RfdjAucGRmJywKICAgICAgIHdpZHRoID0gMTIsIGhlaWdodCA9IDE1KQpgYGAKCmBgYHtyfQpvblRhcmdldCRkcnVnQ2F0ZWdvcnlbZ3JlcCgnZGVjaXRhYmluZScsb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG5hbWUpLF0KCkNhbmNlckluaGliaXRvcnNfcmVtb3ZlTm90RXhwW2NhdF9vZkludGVyZXN0LF0kcGhhc2UKQ2FuY2VySW5oaWJpdG9yc1tncmVwKCdETk1UMScsIENhbmNlckluaGliaXRvcnMkTWF4VGFyZ2V0TmFtZSApLF0KYGBgCgpgYGB7cn0KQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3Rbb3JkZXIoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3QkaW1wcm92ZW1lbnRfb3Zlcl9rbm93biwgZGVjcmVhc2luZyA9IFQpLC1jKDQ6MTEsMTQ6MTYpXQpDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cF9jYXRfb2ZJbnRlcmVzdFtvcmRlcihDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cF9jYXRfb2ZJbnRlcmVzdCRCZXN0VGFyZ2V0Q29yciwgZGVjcmVhc2luZyA9IFQpLC1jKDQ6MTEsMTQ6MTYpXQpDYW5jZXJJbmhpYml0b3JzX3JlbW92ZU5vdEV4cF9jYXRfb2ZJbnRlcmVzdFtncmVwKCdMYXVuY2hlZCcsQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3QkcGhhc2UpLF0KYGBgCmBgYHtyfQpjYXQoQ2FuY2VySW5oaWJpdG9yc19yZW1vdmVOb3RFeHBfY2F0X29mSW50ZXJlc3QkTWF4VGFyZ2V0TmFtZSwgc2VwID0gJ1xuJykKYGBgCgpBZGQgYSBuZXcgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpJbnNlcnQgQ2h1bmsqIGJ1dHRvbiBvbiB0aGUgdG9vbGJhciBvciBieSBwcmVzc2luZyAqQ21kK09wdGlvbitJKi4KCldoZW4geW91IHNhdmUgdGhlIG5vdGVib29rLCBhbiBIVE1MIGZpbGUgY29udGFpbmluZyB0aGUgY29kZSBhbmQgb3V0cHV0IHdpbGwgYmUgc2F2ZWQgYWxvbmdzaWRlIGl0IChjbGljayB0aGUgKlByZXZpZXcqIGJ1dHRvbiBvciBwcmVzcyAqQ21kK1NoaWZ0K0sqIHRvIHByZXZpZXcgdGhlIEhUTUwgZmlsZSkuIAoKVGhlIHByZXZpZXcgc2hvd3MgeW91IGEgcmVuZGVyZWQgSFRNTCBjb3B5IG9mIHRoZSBjb250ZW50cyBvZiB0aGUgZWRpdG9yLiBDb25zZXF1ZW50bHksIHVubGlrZSAqS25pdCosICpQcmV2aWV3KiBkb2VzIG5vdCBydW4gYW55IFIgY29kZSBjaHVua3MuIEluc3RlYWQsIHRoZSBvdXRwdXQgb2YgdGhlIGNodW5rIHdoZW4gaXQgd2FzIGxhc3QgcnVuIGluIHRoZSBlZGl0b3IgaXMgZGlzcGxheWVkLgoK</div>
 
 
 
@@ -1919,7 +2110,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("Step0B_Data_and_Libraries.Rmd");
+  window.initializeSourceEmbed("NoTargets_drugs_annotation.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>

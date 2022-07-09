@@ -508,7 +508,6 @@ roc_platinum$specificities
 Figure1E_df2plot=data.frame(rank_Threshold=roc_platinum$thresholds, Specificity=roc_platinum$specificities)
 Figure1E_df2plot$BestSpecificity=F
 Figure1E_df2plot$BestSpecificity[which.max(Figure1E_df2plot$Specificity)]=T
-ifelse()
 
 Figure1E<- ggplot(Figure1E_df2plot, aes(x=rank_Threshold, y=Specificity) )+
   geom_point(aes(size=ifelse(BestSpecificity, 3, 2), 
@@ -533,7 +532,7 @@ ggsave(Figure1BE, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1B
 ggsave(Figure1BE, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1BE_v0.pdf',
        width = 15, height = 12)
 ```
-
+#Diamond dataset
 ```{r}
 Drugs_in_morethan1Datasets=names(which(table(unlist(sapply(Comp_Gold_Standard, function(x) paste(x$Chemical.Name, x$Drugbank_Gene)[x$Label=='Positive'] )))>2))
 Drugs_in_morethan1Datasets=strsplit_customv0(Drugs_in_morethan1Datasets, infunc_split_by = ' ',retreving_onject_id = 1)
@@ -547,4 +546,9 @@ roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr)
 roc_platinum$thresholds[which.max(roc_platinum$sensitivities+roc_platinum$specificities)]
 roc_platinum$thresholds[which.max(roc_platinum$specificities)]
 ```
+```{r}
+Comp_Gold_Standard_df[grep('cobimetinib',Comp_Gold_Standard_df$Chemical.Name, ignore.case = T),]
+Comp_Gold_Standard_df[grep('cobimetinib',Comp_Gold_Standard_df$Chemical.Name, ignore.case = T),]
+```
+
 

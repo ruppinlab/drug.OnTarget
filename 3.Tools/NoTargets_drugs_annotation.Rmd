@@ -6,7 +6,7 @@ output: html_notebook
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
-<!-- Figure 3 -->
+<!-- Figure 4 -->
 ```{r}
 require(ggrepel)
 require(grid)
@@ -19,23 +19,33 @@ knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_
 knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
 ```
 
-<!-- Predicting targets for drugs with wrongly annotated drugs or no targets -->
+<!-- Predicting targets for drugs with no targets -->
 ```{r}
 cond1=onTarget$drugCategory$drug_category=='targeted cancer'
-cond2=!is.na(as.character(onTarget$drugCategory$target))
-cond3=sapply(strsplit(as.character(onTarget$drugCategory$target), ', '), length)==1
-cond4=onTarget$drugCategory$is.inhibitor
+cond2=is.na(as.character(onTarget$drugCategory$target))
 ```
 <!-- Predicting targets for drugs with wrong targets -->
 ```{r}
-CancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond4]
-# CancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond3 & cond4]
-CancerInhibitors_mapping=match_stripall(CancerInhibitors,
+CancerInhibitors_noTargets=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2]
+CancerInhibitors_mapping=match_stripall(CancerInhibitors_noTargets,
                                         KnownTarget_predictions$drugBroadID)
-CancerInhibitors=KnownTarget_predictions[na.omit(CancerInhibitors_mapping),]
-CancerInhibitors=unique(CancerInhibitors)
-dim(CancerInhibitors)
+CancerInhibitors_noTargets=KnownTarget_predictions[na.omit(CancerInhibitors_mapping),]
+CancerInhibitors_noTargets=unique(CancerInhibitors_noTargets)
+dim(CancerInhibitors_noTargets)
 ```
+<!-- Ones where we can identify significant target & target correlation is greater than 0.25-->
+```{r}
+cond3=CancerInhibitors_noTargets$BestTargetCorrFDR<0.05
+# cond4=CancerInhibitors_noTargets$BestTargetCorr>0.25
+CancerInhibitors_noTargets_withsigTargets=CancerInhibitors_noTargets[cond3,-(2:11)]
+CancerInhibitors_noTargets_withsigTargets[order(CancerInhibitors_noTargets_withsigTargets$BestTargetCorr, decreasing = T),]
+
+```
+
+```{r}
+CancerInhibitors_noTargets[grep('Launched',CancerInhibitors_noTargets$phase),]
+```
+
 <!-- How many drugs are wrongly annotated after removing the low-expressed ones-->
 ```{r}
 remove_not_expressed=CancerInhibitors$KnownTarget_meanCorr>3

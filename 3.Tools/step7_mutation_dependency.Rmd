@@ -1,0 +1,139 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- Whether drug bind more specifically to mutant or WT forms. -->
+```{r}
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+```
+<!-- MATCHED MATRIX -->
+```{r}
+matched_cellLines=Reduce(intersect,
+                         list(colnames(onTarget$mutations_matrix),
+                              colnames(onTarget$avana_22Q2),
+                              colnames(onTarget$secondary_prism)))
+mutation_matched=onTarget$mutations_matrix[,matched_cellLines]
+avana_matched=onTarget$avana_22Q2[,matched_cellLines]
+drug_matched=onTarget$secondary_prism[,matched_cellLines]
+```
+<!-- Compute interaction -->
+<!-- Preprocessing -->
+```{r}
+# Compute interaction in all cases
+x=1
+interaction_Features=lapply(1:nrow(KnownTarget_predictions), function(x)
+  {
+  infunc_drug_matched=err_handle(drug_matched[KnownTarget_predictions$drugBroadID[x],])
+  infunc_avana_matched=err_handle(avana_matched[KnownTarget_predictions$MaxTargetName[x],])
+  infunc_mutation_matched=err_handle(mutation_matched[KnownTarget_predictions$MaxTargetName[x],])
+  err_handle(summary(lm(infunc_drug_matched ~ 
+                infunc_avana_matched*infunc_mutation_matched))$coefficients[4,c(1,4)])
+  }
+  )
+names(interaction_Features)=KnownTarget_predictions$drugName
+# This is an interaction where the where cell lines with low expression (<2, Trues in above vector) will have "lower" correlation strength than cell lines with high expression (>2, Falses in above vector)
+KnownTarget_predictions$mutation_interaction_strength=sapply(interaction_Features, function(x) x[1])
+KnownTarget_predictions$mutation_interaction_P=sapply(interaction_Features, function(x) x[2])
+```
+<!-- function to compute mutation interaction given a genename and drugname -->
+```{r}
+compute_mutation_interaction<- function(infunc_geneName, infunc_drugID){
+  infunc_drug_matched=err_handle(drug_matched[infunc_drugID,])
+  infunc_avana_matched=err_handle(avana_matched[infunc_geneName,])
+  infunc_mutation_matched=err_handle(mutation_matched[infunc_geneName,])
+  err_handle(summary(lm(infunc_drug_matched ~ 
+                infunc_avana_matched*infunc_mutation_matched))$coefficients[4,c(1,4)])
+  }
+
+```
+
+
+<!-- Test case: BRAF -->
+```{r}
+KnownTarget_predictions[grep('BRAF',KnownTarget_predictions$MaxTargetName),]
+```
+```{r}
+oncokb_resistance=read.csv('/Users/sinhas8/Project_TrueTarget/Data/oncokb_biomarker_drug_associations_resistance.tsv', sep='\t')
+# Preprocessing
+split_drugnames=strsplit(oncokb_resistance$Drugs..for.therapeutic.implications.only., ', ')
+oncokb_resistance_expanded=lapply(1:nrow(oncokb_resistance), function(x)
+  cbind(oncokb_resistance[x,],split_drugnames=split_drugnames[[x]]) )
+oncokb_resistance_expanded=do.call(rbind, oncokb_resistance_expanded)
+# remove Amplification
+oncokb_resistance_expanded=oncokb_resistance_expanded[-grep('Amp',oncokb_resistance_expanded$Alterations),]
+oncokb_resistance_expanded$known_target=onTarget$drugCategory$target[match_stripall(oncokb_resistance_expanded$split_drugnames, onTarget$drugCategory$name)]
+oncokb_resistance_expanded$count_target=sapply(strsplit(as.character(oncokb_resistance_expanded$known_target), ', '), length)
+oncokb_resistance_expanded$is.target=apply(oncokb_resistance_expanded, 1, function(x) grepl(x[2], x[7]))
+
+test_AUC_A7<-function(seedNumber=1, numberOfTargets_Thr=10, which_level){
+  cond1=oncokb_resistance_expanded$count_target<numberOfTargets_Thr
+  cond2=oncokb_resistance_expanded$is.target
+  cond3= oncokb_resistance_expanded$Level %in% which_level
+  Positive_Set_DrugGene_Pairs=na.omit(data.frame(
+    Drugbank_Gene=as.character(oncokb_resistance_expanded$Gene)[cond1 & cond2 & cond3],
+    Chemical.Name=as.character(oncokb_resistance_expanded$split_drugnames)[cond1 & cond2 & cond3]))
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
+                                                            rownames(corrMat),]
+  
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[tolower(Positive_Set_DrugGene_Pairs$Chemical.Name)  %in%
+                                                            tolower(onTarget$drugCategory$name),]
+  print(dim(Positive_Set_DrugGene_Pairs))
+  set.seed(seedNumber)
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs$Label=1
+  Negative_Set_DrugGene_Pairs$Label=0
+  Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[
+    match(tolower(Complete_Set$Chemical.Name), tolower(onTarget$drugCategory$name))]
+  interactionDF=as.data.frame(do.call(rbind, lapply(1:nrow(Complete_Set), function(x)
+    err_handle(compute_mutation_interaction(infunc_geneName=Complete_Set$Drugbank_Gene[x],
+                                 infunc_drugID=Complete_Set$drug_BroadID[x])) )))
+  Complete_Set_wdinteraction=cbind(Complete_Set, interactionDF)
+  Complete_Set_wdinteraction=na.omit(Complete_Set_wdinteraction)
+  ggplot(Complete_Set_wdinteraction, aes(x=Label, y=`Pr(>|t|)`))+
+    geom_boxplot()+
+    stat_compare_means()
+  ggplot(Complete_Set_wdinteraction, aes(x=Label, y=Estimate))+
+    geom_boxplot()+
+    stat_compare_means()
+  roc_curve_crispr=roc(Complete_Set_wdinteraction$Label,
+                       Complete_Set_wdinteraction$`Pr(>|t|)`)
+  list(roc_curve_crispr, Complete_Set_wdinteraction)
+}
+
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=5, which_level = c('R1'))
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R1')) 
+# test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R2'))
+# Both with V2 or V1 method of shuffling, our results stay same: This is also the case for most of the above cases. In above case, it is still comparable.
+V7_ROC_mut_interaction=test_AUC_A7(seedNumber=1,
+                                   numberOfTargets_Thr=10,
+                                   which_level = c('R1'))
+roc(V7_ROC_mut_interaction[[2]]$Label,
+    V7_ROC_mut_interaction[[2]]$`Pr(>|t|)`)
+```
+
+
+```{r}
+KnownTarget_predictions$predicted_resistance_mutation=
+  KnownTarget_predictions$mutation_interaction_P<0.2 & 
+  KnownTarget_predictions$mutation_interaction_strength<0
+
+onTarget$drugCategory$name[onTarget$drugCategory$drug_category=='targeted cancer']
+
+drugs_wd_mutInt=KnownTarget_predictions[,]
+dim(drugs_wd_mutInt)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

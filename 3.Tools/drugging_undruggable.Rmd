@@ -1,0 +1,100 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+```
+
+```{r}
+COSMIC=read.csv('/Users/sinhas8/Project_TrueTarget/Data/COSMIC.csv', sep='\t')
+# oncogenes=COSMIC$Gene.Symbol[grep('oncogene',COSMIC$Role.in.Cancer)]
+oncogenes=COSMIC$Gene.Symbol[COSMIC$Role.in.Cancer=='oncogene']
+length(oncogenes)
+table(COSMIC$Role.in.Cancer)
+```
+<!-- Undruggable oncogenes -->
+```{r}
+# Target_annotation_broken=strsplit(as.character(onTarget$drugCategory$target), split = ', ')
+# sum(oncogenes %!in% KnownTarget_predictions$MaxTargetName)
+# oncogenes_noDrugs=oncogenes[sapply(oncogenes, function(x)
+#   sum(grepl(x, na.omit(unlist(Target_annotation_broken))))==0
+#   )]
+# sort(oncogenes_noDrugs)
+```
+<!-- Find drugs for a given gene -->
+```{r}
+oncogenes_noDrugsInScreen=intersect(oncogenes, rownames(corrMat))
+length(oncogenes_noDrugsInScreen)
+corrMat_oncogenes_noDrugs=corrMat[oncogenes_noDrugsInScreen,]
+corrMatP_oncogenes_noDrugs=corrMat_FDR[oncogenes_noDrugsInScreen,]
+corrMatrank_oncogenes_noDrugs=corrMat_rank[oncogenes_noDrugsInScreen,]
+```
+
+```{r}
+BestRankingDrug=rowMin(corrMatrank_oncogenes_noDrugs)
+best_drugID=apply(corrMatrank_oncogenes_noDrugs, 1, which.min)
+best_drugID_df=data.frame(geneID=names(best_drugID),
+                          drugID=colnames(corrMatrank_oncogenes_noDrugs)[best_drugID])
+PredictedBestDrug=data.frame(gene=best_drugID_df$geneID,
+           drugName=onTarget$drugCategory$name[match(best_drugID_df$drugID, onTarget$drugCategory$broad_id_trimmed)],
+           Rank=apply(best_drugID_df, 1, function(x) corrMatrank_oncogenes_noDrugs[x[1],x[2]]),
+           cor=apply(best_drugID_df, 1, function(x) corrMat_oncogenes_noDrugs[x[1],x[2]]),
+           P=apply(best_drugID_df, 1, function(x) corrMatP_oncogenes_noDrugs[x[1],x[2]])
+           # , KnownTarget_predictions[match(best_drugID_df$drugID, KnownTarget_predictions$drugBroadID),],
+           )
+```
+
+```{r}
+PredictedBestDrug$Actionability='Druggable'
+PredictedBestDrug$Actionability[PredictedBestDrug$gene %!in% KnownTarget_predictions$MaxTargetName]='Undruggable'
+
+PredictedBestDrug$drugName[grep('PPM1',PredictedBestDrug$gene)]='GSK2830371'
+PredictedBestDrug$ann=''
+PredictedBestDrug$ann[PredictedBestDrug$Rank<5 & PredictedBestDrug$P<0.05 ]=
+  paste(PredictedBestDrug$gene, PredictedBestDrug$drugName)[PredictedBestDrug$Rank<5 & PredictedBestDrug$P<0.05 ]
+famous_oncogenes=c('KRAS', 'MYCN', 'HRAS', 'NRAS', 'MYC', 'GNAQ')
+famous_oncogenes_id=PredictedBestDrug$gene %in% famous_oncogenes
+PredictedBestDrug$ann[famous_oncogenes_id]=
+  paste(PredictedBestDrug$gene, PredictedBestDrug$drugName)[famous_oncogenes_id]
+PredictedBestDrug$undruggable_with_newTarget=PredictedBestDrug$Rank<5 & PredictedBestDrug$P<0.05 &
+  PredictedBestDrug$Actionability=='Undruggable'
+
+Figure4E <-  ggplot(PredictedBestDrug, aes(x=cor, y=Rank, label=ann,
+                                     color=Actionability))+
+  geom_point()+
+  theme_bw(base_size = 18)+
+  scale_y_reverse()+
+  geom_label_repel(nudge_y = c(-50,-100, -200))+
+  labs(x='Correlation between drug Response\n and oncogene CRISPR-KO', 
+       y='Oncogene target rank\n vs the rest of the gennes')+
+  guides(color=guide_legend(nrow=2,byrow=TRUE))+
+  theme(legend.position = 'top')
+Figure4E
+```
+
+```{r}
+ggsave(Figure4E, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4E_v0.png',
+       width = 6, height = 6)
+ggsave(Figure4E, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4E_v0.pdf',
+       width = 6, height = 6)
+```
+
+```{r}
+table(PredictedBestDrug$undruggable_with_newTarget)
+PredictedBestDrug$phase=KnownTarget_predictions$phase[match(PredictedBestDrug$drugName, KnownTarget_predictions$drugName)]
+PredictedBestDrug[which(PredictedBestDrug$undruggable_with_newTarget),]
+PredictedBestDrug[PredictedBestDrug$gene %in% famous_oncogenes,]
+```
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
