@@ -1,0 +1,60 @@
+---
+title: "EGFR"
+output: html_document
+---
+
+```{r}
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
+library(ggplot2)
+library(ggpubr)
+library(ggrepel)
+library(ggforce)
+theme_set(theme_bw(18))
+
+clinical_data= read.csv('../Data/biomarkers.csv')
+head(clinical_data)
+```
+
+
+```{r}
+head(KnownTarget_predictions)
+EGFR_drug= filter(KnownTarget_predictions, grepl('EGFR',MaxTargetName)) %>% distinct(drugName, .keep_all= T)
+hist(EGFR_drug$Maxcorr)
+```
+```{r fig.width=4,fig.height=2}
+df2plot_EGFR_distribution= EGFR_drug
+ggplot(df2plot_EGFR_distribution, aes(x= Maxcorr, y= interaction_P, color= Maxcorr > 0.2))+
+  geom_jitter()+
+   geom_text_repel(data = df2plot_EGFR_distribution[df2plot_EGFR_distribution$Maxcorr >0.2,], 
+                   aes(label = paste(MaxTargetName,":",drugName)), max.overlaps = 14, 
+                  size= 3)+
+  theme_bw(base_size = 18)+
+  xlab('Specificity Score')+
+  ylab('interaction pval')
+```
+
+```{r fig.width=4,fig.height=2}
+colnames(clinical_data)[3] = 'drugName'
+df2plot_join_with_launch_data= left_join(df2plot_EGFR_distribution[, c('drugName','MaxTargetName','Maxcorr', 'drugBroadID', 'PredictedRank')], 
+                                         clinical_data[clinical_data$drugName %in% intersect(EGFR_drug$drugName, clinical_data$drugName),c('drugName','dose','phase')], by= 'drugName')
+
+df2plot_join_with_launch_data = df2plot_join_with_launch_data %>% mutate(phase = replace(phase, phase == 'Phase 1/Phase 2', 'Phase 2'))
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Preclinical'] = 1
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 1'] = 2
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 2'] = 3
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 3'] = 4
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Launched'] = 5
+
+
+combnations= combn(unique(df2plot_join_with_launch_data$phase),2, simplify = F)
+ggplot(df2plot_join_with_launch_data, aes(x= reorder(factor(phase),clinical_stage), 
+                                          y= Maxcorr,
+                                          color= clinical_stage))+
+  geom_boxplot()+
+  stat_compare_means(comparisons = combnations)+
+  theme_bw(base_size = 18)+
+  ylab('Specificity Score')+
+  xlab('stage')
+```
+
