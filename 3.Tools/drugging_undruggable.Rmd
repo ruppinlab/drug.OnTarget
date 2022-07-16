@@ -33,6 +33,7 @@ table(COSMIC$Role.in.Cancer)
 oncogenes_noDrugsInScreen=intersect(oncogenes, rownames(corrMat))
 length(oncogenes_noDrugsInScreen)
 corrMat_oncogenes_noDrugs=corrMat[oncogenes_noDrugsInScreen,]
+corrMat_FDR=apply(corrMat_P, 2, fdrcorr)
 corrMatP_oncogenes_noDrugs=corrMat_FDR[oncogenes_noDrugsInScreen,]
 corrMatrank_oncogenes_noDrugs=corrMat_rank[oncogenes_noDrugsInScreen,]
 ```
@@ -92,6 +93,12 @@ PredictedBestDrug$phase=KnownTarget_predictions$phase[match(PredictedBestDrug$dr
 PredictedBestDrug[which(PredictedBestDrug$undruggable_with_newTarget),]
 PredictedBestDrug[PredictedBestDrug$gene %in% famous_oncogenes,]
 ```
+<!-- Finding drugs that specifically binds to the mutated form of the protein -->
+```{r}
+
+```
+
+
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 

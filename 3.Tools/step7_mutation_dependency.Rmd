@@ -49,14 +49,8 @@ compute_mutation_interaction<- function(infunc_geneName, infunc_drugID){
   err_handle(summary(lm(infunc_drug_matched ~ 
                 infunc_avana_matched*infunc_mutation_matched))$coefficients[4,c(1,4)])
   }
-
 ```
-
-
-<!-- Test case: BRAF -->
-```{r}
-KnownTarget_predictions[grep('BRAF',KnownTarget_predictions$MaxTargetName),]
-```
+<!-- Validation A1 for mutation -->
 ```{r}
 oncokb_resistance=read.csv('/Users/sinhas8/Project_TrueTarget/Data/oncokb_biomarker_drug_associations_resistance.tsv', sep='\t')
 # Preprocessing
@@ -70,7 +64,7 @@ oncokb_resistance_expanded$known_target=onTarget$drugCategory$target[match_strip
 oncokb_resistance_expanded$count_target=sapply(strsplit(as.character(oncokb_resistance_expanded$known_target), ', '), length)
 oncokb_resistance_expanded$is.target=apply(oncokb_resistance_expanded, 1, function(x) grepl(x[2], x[7]))
 
-test_AUC_A7<-function(seedNumber=1, numberOfTargets_Thr=10, which_level){
+test_mut_AUC_V1<-function(seedNumber=1, numberOfTargets_Thr=10, which_level){
   cond1=oncokb_resistance_expanded$count_target<numberOfTargets_Thr
   cond2=oncokb_resistance_expanded$is.target
   cond3= oncokb_resistance_expanded$Level %in% which_level
@@ -97,14 +91,8 @@ test_AUC_A7<-function(seedNumber=1, numberOfTargets_Thr=10, which_level){
                                  infunc_drugID=Complete_Set$drug_BroadID[x])) )))
   Complete_Set_wdinteraction=cbind(Complete_Set, interactionDF)
   Complete_Set_wdinteraction=na.omit(Complete_Set_wdinteraction)
-  ggplot(Complete_Set_wdinteraction, aes(x=Label, y=`Pr(>|t|)`))+
-    geom_boxplot()+
-    stat_compare_means()
-  ggplot(Complete_Set_wdinteraction, aes(x=Label, y=Estimate))+
-    geom_boxplot()+
-    stat_compare_means()
   roc_curve_crispr=roc(Complete_Set_wdinteraction$Label,
-                       Complete_Set_wdinteraction$`Pr(>|t|)`)
+                       Complete_Set_wdinteraction$Estimate)
   list(roc_curve_crispr, Complete_Set_wdinteraction)
 }
 
@@ -112,28 +100,238 @@ test_AUC_A7<-function(seedNumber=1, numberOfTargets_Thr=10, which_level){
 # test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R1')) 
 # test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R2'))
 # Both with V2 or V1 method of shuffling, our results stay same: This is also the case for most of the above cases. In above case, it is still comparable.
-V7_ROC_mut_interaction=test_AUC_A7(seedNumber=1,
-                                   numberOfTargets_Thr=10,
-                                   which_level = c('R1'))
+V7_ROC_mut_interaction=test_mut_AUC_V1(seedNumber=1,
+                                   numberOfTargets_Thr=3,
+                                   which_level = c('R1','R2'))
+V7_ROC_mut_interaction[[2]]$whether_interaction=
+  V7_ROC_mut_interaction[[2]]$Estimate<0 & V7_ROC_mut_interaction[[2]]$`Pr(>|t|)`<0.2
+V7_ROC_mut_interaction[[2]]$interaction_withP=
+  (V7_ROC_mut_interaction[[2]]$Estimate)*(-log10(V7_ROC_mut_interaction[[2]]$`Pr(>|t|)`))
 roc(V7_ROC_mut_interaction[[2]]$Label,
-    V7_ROC_mut_interaction[[2]]$`Pr(>|t|)`)
+    V7_ROC_mut_interaction[[2]]$Estimate )
+```
+<!-- Figure 4A: Draw boc plot showing our predicted values -->
+```{r}
+Figure4A_data=V7_ROC_mut_interaction[[2]]
+levels(Figure4A_data$Label)=c('Negative\ncontrol','Resistance\nMutation')
+Figure4A <- ggplot(Figure4A_data, aes(x=Label, y=Estimate))+
+    geom_boxplot()+
+    stat_compare_means(label.y.npc = 0.9)+
+  theme_bw(base_size = 18)+
+  labs(x='', y='Differential targeting to\nmutant vs WT')+
+  theme(axis.title.y = element_text(size=15))
+Figure4A
+```
+
+```{r}
+roc_list_resistance=list(`Resistance Mutation=0.79`=smooth(V7_ROC_mut_interaction[[1]]))
+Figure4B <- ggroc(roc_list_resistance)+
+  theme_bw(base_size = 18) + 
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.6, 0.2),
+        legend.text = element_text(size=10),
+        text = element_text(size=8)) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
+  labs(title="", x="Specificity", y="Sensitivity")
+Figure4B
+```
+<!-- Differential targeting vs various clinical phases -->
+```{r}
+# drugs_wd_mutInt=KnownTarget_predictions
+KnownTarget_predictions$drugCategory=onTarget$drugCategory$drug_category[match(KnownTarget_predictions$drugName, onTarget$drugCategory$name)]
+cond1=KnownTarget_predictions$drugCategory=='targeted cancer'
+KnownTarget_predictions$predicted_resistance_mutation=
+  KnownTarget_predictions$mutation_interaction_P<0.1
+Binding_differentially=table(KnownTarget_predictions$predicted_resistance_mutation[cond1],
+      KnownTarget_predictions$phase[cond1])
+Binding_differentially[2,]/colSums(Binding_differentially)
+```
+<!-- identify the top most mutated variants and compute a mutation interaction analysis accordingly -->
+```{r}
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+```
+<!-- Load CCLE mutation data-->
+```{r}
+CCLE_mutations=read.csv('/Users/sinhas8/Project_TrueTarget/Data/CCLE_mutations.csv')
+where_crispr_drug_also_available=CCLE_mutations$DepMap_ID %in% matched_cellLines
+CCLE_mutations_matched=CCLE_mutations[where_crispr_drug_also_available,]
+# remove silent
+CCLE_mutations_matched=CCLE_mutations_matched[CCLE_mutations_matched$Variant_Classification!='Silent',]
+```
+<!-- Find the most frequent variant -->
+```{r}
+egfr_id=CCLE_mutations_matched$Hugo_Symbol %in% 'EGFR'
+sort(table(CCLE_mutations_matched$Protein_Change[egfr_id]), decreasing = T)
+# "Protein_Change" columnd has variant informations
+CCLE_mutations_matched$gene_variant=paste(CCLE_mutations_matched$Protein_Change, CCLE_mutations_matched$Hugo_Symbol, sep=';')
+genes_wd_drugs_available=CCLE_mutations_matched$Hugo_Symbol %in% KnownTarget_predictions$MaxTargetName
+Protein_Change_freq=table(CCLE_mutations_matched$gene_variant[genes_wd_drugs_available])
+Protein_Change_freq_filteresLowout=Protein_Change_freq[Protein_Change_freq>5]
+Protein_Change_freq_filteresLowout=sort(Protein_Change_freq_filteresLowout, decreasing = T)
+most_frequent_varints=do.call(rbind, strsplit(names(Protein_Change_freq_filteresLowout), split = ';'))
+most_frequent_varints_df=data.frame(most_frequent_varints)
+colnames(most_frequent_varints_df)=c('variant', 'gene')
+most_frequent_varints_df$variant_clean=gsub('p.','',most_frequent_varints_df$variant)
+most_frequent_varints_df$freq=Protein_Change_freq_filteresLowout
+```
+<!-- Loading and preprocessing all bioactive compounds -->
+```{r}
+all_bioactive_compounds=readxl::read_xlsx('/Users/sinhas8/Project_TrueTarget/Data/20220609-L1700-Bioactive-Compound-Library-I-96-well.xlsx', sheet = 2)
+all_bioactive_compounds$Name_stripped=stripall2match(all_bioactive_compounds$Name)
+KnownTarget_predictions$name_drugSellChem=sapply(stripall2match(KnownTarget_predictions$drugName), function(x)
+  all_bioactive_compounds$Name_stripped[grep(x, all_bioactive_compounds$Name_stripped)[1]] )
+all_bioactive_compounds$known_target_single=KnownTarget_predictions$MaxTargetName[
+  match_stripall(all_bioactive_compounds$Name_stripped, KnownTarget_predictions$name_drugSellChem)]
+all_bioactive_compounds_matched=all_bioactive_compounds[!is.na(all_bioactive_compounds$known_target_single),]
+all_bioactive_compounds_matched$PRISM_name=KnownTarget_predictions$drugName[match(all_bioactive_compounds_matched$Name_stripped, KnownTarget_predictions$name_drugSellChem)]
+all_bioactive_compounds_matched$known_target=onTarget$drugCategory$target[
+  match_stripall(all_bioactive_compounds_matched$PRISM_name, onTarget$drugCategory$name)]
+all_bioactive_compounds_matched$count_target=sapply(strsplit(as.character(all_bioactive_compounds_matched$known_target), ', '), length)
+```
+<!-- Subset the ones where the target gene has one of the most frequent variant -->
+```{r}
+most_frequent_varints_df_gene_id=all_bioactive_compounds_matched$known_target %in% most_frequent_varints_df$gene
+all_bioactive_compounds_matched_only_mostfreqtargets=all_bioactive_compounds_matched[most_frequent_varints_df_gene_id,]
+# remove BRAF
+braf_id=grep('BRAF',all_bioactive_compounds_matched_only_mostfreqtargets$known_target_single)
+all_bioactive_compounds_matched_only_mostfreqtargets=all_bioactive_compounds_matched_only_mostfreqtargets[-braf_id,]
+write.csv(all_bioactive_compounds_matched_only_mostfreqtargets, 
+          '/Users/sinhas8/Project_TrueTarget/Data/drugs_targeting_most_freq_drugs.csv')
+# None of the above are useful
+```
+
+```{r}
+all_bioactive_compounds_matched[grep('RAF',stripall2match(all_bioactive_compounds_matched$Target), ignore.case = T),]
+```
+```{r}
+braf_inhibitors_in_screen=onTarget$drugCategory$name[grep('RAF',onTarget$drugCategory$target)]
+braf_inhibitors_in_screen=data.frame(PRISM_drugname=braf_inhibitors_in_screen)
+
+braf_inhibitors_in_screen$name_drugSellChem=sapply(stripall2match(braf_inhibitors_in_screen$PRISM_drugname),
+                                                   function(x) c(na.omit(all_bioactive_compounds$Name_stripped[which(all_bioactive_compounds$Name_stripped==x)]),
+  na.omit(all_bioactive_compounds$Name_stripped[grep(x, all_bioactive_compounds$Name_stripped)]))[1]  
+  )
+braf_inhibitors_in_screen=na.omit(braf_inhibitors_in_screen)
+all_bioactive_compounds_braf_inscreen=all_bioactive_compounds[match(braf_inhibitors_in_screen$name_drugSellChem, all_bioactive_compounds$Name_stripped),]
+write.csv(all_bioactive_compounds_braf_inscreen, 
+          '/Users/sinhas8/Project_TrueTarget/Data/braf_compounds_inscreen.csv')
+```
+<!-- We perfomred a manual annotation of BRAF binding selectivity and added to above "braf_compounds_inscreen.csv" file-->
+```{r}
+all_bioactive_compounds_braf_inscreen=read.csv('/Users/sinhas8/Project_TrueTarget/Data/braf_compounds_inscreen.csv')
+table(all_bioactive_compounds_braf_inscreen$Differential_Binding)
+all_bioactive_compounds_braf_inscreen$prism_name=braf_inhibitors_in_screen$PRISM_drugname[match(all_bioactive_compounds_braf_inscreen$Name_stripped, braf_inhibitors_in_screen$name_drugSellChem)]
+twoScreen_map=match_stripall(all_bioactive_compounds_braf_inscreen$prism_name, KnownTarget_predictions$drugName)
+df2plot=cbind(all_bioactive_compounds_braf_inscreen[!is.na(twoScreen_map),c('Name',
+                                                                    'Differential_Binding',
+                                                                    'BRAF_WT','BRAF_V600E','FC_more_to_WT')],
+      KnownTarget_predictions[na.omit(twoScreen_map),] )
+```
+
+```{r}
+df2plot$Differential_Binding=factor(df2plot$Differential_Binding)
+unique(df2plot$Name[order(df2plot$mutation_interaction_strength, decreasing = T)])
+df2plot=unique(df2plot)
+df2plot$effect_into_sign=df2plot$mutation_interaction_strength*(-log10(df2plot$mutation_interaction_P))
+
+levels(df2plot$Differential_Binding)=c('Same Binding to\n both WT & V600E',
+                                       'BRAF V600E\ninhibitors')
+Figure4E <- ggplot(df2plot, aes(x=Differential_Binding, y=effect_into_sign))+
+  geom_boxplot()+
+  theme_bw(base_size = 18)+
+  stat_compare_means(method.args = list(alternative='l'), label.y.npc = 0.9)+
+  labs(y='', x='Ground Truth')+
+  theme(axis.text.x = element_text(size=12, angle = -15, vjust = 0))
+Figure4E
 ```
 
 
 ```{r}
-KnownTarget_predictions$predicted_resistance_mutation=
-  KnownTarget_predictions$mutation_interaction_P<0.2 & 
-  KnownTarget_predictions$mutation_interaction_strength<0
-
-onTarget$drugCategory$name[onTarget$drugCategory$drug_category=='targeted cancer']
-
-drugs_wd_mutInt=KnownTarget_predictions[,]
-dim(drugs_wd_mutInt)
+Figure4F_data=list(`BRAF V600E mutant\nvs WT=0.74`=
+                     smooth(roc(df2plot$Differential_Binding,df2plot$effect_into_sign)))
+Figure4F <- ggroc(Figure4F_data)+
+  theme_bw(base_size = 18) + 
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.6, 0.2),
+        legend.text = element_text(size=10),
+        text = element_text(size=12)) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
+  labs(title="", x="Specificity", y="Sensitivity")
+Figure4F
 ```
+
+
+```{r}
+all_braf_inhibitors_df_with_binding=df2plot
+test_mut_AUC_V3<-function(seedNumber=1){
+  cond1=all_braf_inhibitors_df_with_binding$Differential_Binding==1
+  Positive_Set_DrugGene_Pairs=data.frame(
+    Drugbank_Gene='BRAF',
+    Chemical.Name=as.character(all_braf_inhibitors_df_with_binding$drugName)[cond1])
+  Positive_Set_DrugGene_Pairs=unique(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs=Positive_Set_DrugGene_Pairs[Positive_Set_DrugGene_Pairs$Drugbank_Gene %in%
+                                                            rownames(corrMat),]
+  set.seed(seedNumber)
+  Negative_Set_DrugGene_Pairs=randomize_DF_with_unique_Pairs_V2(Positive_Set_DrugGene_Pairs)
+  Positive_Set_DrugGene_Pairs$Label=1
+  Negative_Set_DrugGene_Pairs$Label=0
+  Complete_Set=rbind(Positive_Set_DrugGene_Pairs, Negative_Set_DrugGene_Pairs)
+  Complete_Set$Label= factor(Complete_Set$Label, labels = c('Negative', 'Positive'))
+  Complete_Set$drug_BroadID=onTarget$drugCategory$broad_id_trimmed[
+    match_stripall(Complete_Set$Chemical.Name, onTarget$drugCategory$name)]
+  interactionDF=as.data.frame(do.call(rbind, lapply(1:nrow(Complete_Set), function(x)
+    err_handle(compute_mutation_interaction(infunc_geneName=Complete_Set$Drugbank_Gene[x],
+                                 infunc_drugID=Complete_Set$drug_BroadID[x])) )))
+  Complete_Set_wdinteraction=cbind(Complete_Set, interactionDF)
+  Complete_Set_wdinteraction=na.omit(Complete_Set_wdinteraction)
+  Complete_Set_wdinteraction$eff_into_sign=Complete_Set_wdinteraction$Estimate*
+    (-log10(Complete_Set_wdinteraction$`Pr(>|t|)`))
+  roc_curve_crispr=roc(Complete_Set_wdinteraction$Label,
+                       Complete_Set_wdinteraction$eff_into_sign)
+  list(roc_curve_crispr, Complete_Set_wdinteraction)
+}
+
+ROC_V2_mut=test_mut_AUC_V3(seedNumber=10)
+robust_AUC=sapply(1:100, function(x)test_mut_AUC_V3(seedNumber=x)[[1]]$auc)
+```
+<!-- Draw boc plot showing our predicted values -->
+```{r}
+Figure4C_data=ROC_V2_mut[[2]]
+levels(Figure4C_data$Label)=c('Negative\ncontrol','BRAF V600E\ninhibitors')
+Figure4C <- ggplot(Figure4C_data, aes(x=Label, y=eff_into_sign))+
+    geom_boxplot()+
+    stat_compare_means(method.args = list(alternative='l'), label.y.npc = 0.9)+
+  theme_bw(base_size = 18)+
+  labs(x='', y='')
+Figure4C
+```
+<!-- Plot Figure4D -->
+```{r}
+Figure4D_data=list(`BRAF V600E inhibitors=0.78`=smooth(ROC_V2_mut[[1]]))
+Figure4D <- ggroc(Figure4D_data)+
+  theme_bw(base_size = 18) + 
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.6, 0.2),
+        legend.text = element_text(size=10),
+        text = element_text(size=12)) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
+  labs(title="", x="Specificity", y="Sensitivity")
+Figure4D
+```
+<!-- Combine them -->
+```{r}
+Figure4=ggarrange(Figure4A, Figure4E, Figure4C, Figure4B,Figure4F,Figure4D, nrow = 2, ncol=3, labels = 'AUTO',
+                    font.label = list(size = 20))
+ggsave(Figure4, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4_v0.png',
+       width = 14, height = 8)
+ggsave(Figure4, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4_v0.pdf',
+       width = 14, height = 8)
+```
+
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
 
 The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-

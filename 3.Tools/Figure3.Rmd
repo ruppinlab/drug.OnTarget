@@ -38,7 +38,7 @@ dim(CancerInhibitors)
 ```
 <!-- How many drugs are wrongly annotated after removing the low-expressed ones-->
 ```{r}
-remove_not_expressed=CancerInhibitors$KnownTarget_meanCorr>3
+remove_not_expressed=CancerInhibitors$KnownTarget_meanExp>3
 launched=CancerInhibitors$phase=='Launched'
 sum(CancerInhibitors$PredictedRank[remove_not_expressed & launched]<523,
     na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed & launched)])
@@ -47,7 +47,7 @@ sum(CancerInhibitors$PredictedRank[remove_not_expressed]<523,
 ```
 <!-- How many drugs are wrongly annotated -->
 ```{r}
-remove_not_expressed=CancerInhibitors$KnownTarget_meanCorr>3
+remove_not_expressed=CancerInhibitors$KnownTarget_meanExp>3
 launched=CancerInhibitors$phase=='Launched'
 CancerInhibitors$improvement_over_known=CancerInhibitors$BestTargetCorr - CancerInhibitors$Maxcorr
 sum(CancerInhibitors$PredictedRank[remove_not_expressed & launched]<523,
@@ -77,42 +77,28 @@ Figure3A <- ggplot(CancerInhibitors_removeNotExp,
                        color=category
                        ))+
   geom_point()+
-  theme_bw(base_size = 18)+
-  coord_fixed()+
+  theme_bw(base_size = 12)+
+  # coord_fixed()+
   theme(legend.position = 'top')+
   guides(color=guide_legend(nrow=3,byrow=TRUE))+
   labs(x='Correlation with Known Target', y='Correlation with Best\n Predicted Target')+
   geom_mark_ellipse(expand = 0)
 Figure3A
 ```
+
 ```{r}
 CancerInhibitors_removeNotExp[order(CancerInhibitors_removeNotExp$improvement_over_known, decreasing = T),]
 ```
-
-```{r}
-ggsave(Figure3A, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3A.pdf',
-       width = 6, height = 6)
-ggsave(Figure3A, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3A.png',
-       width = 6, height = 6)
-```
-
 <!-- How many wrong-known target drugs have a significant prediction from our pipeline -->
 ```{r}
 Figure3B <- ggplot(CancerInhibitors_removeNotExp, aes(y=BestTargetCorr, x=PredictedRank,
                              color= category ))+
   geom_point()+
   geom_vline(xintercept = 523, linetype='dashed', color='blue')+
-  theme_bw(base_size = 18)+
+  theme_bw(base_size = 12)+
   theme(legend.position = 'top')+
   guides(color=guide_legend(nrow=3,byrow=TRUE))+
   labs(x='Rank of Known Target', y='Correlation with Best\n Predicted Target')
-```
-
-```{r}
-ggsave(Figure3B, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3B.pdf',
-       width = 6, height = 6)
-ggsave(Figure3B, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3B.png',
-       width = 6, height = 6)
 ```
 
 ```{r}
@@ -125,34 +111,17 @@ To_annotate=CancerInhibitors_removeNotExp$improvement_over_known>cor_Threshold &
 CancerInhibitors_removeNotExp$drug_known_predicted_annotation=paste(CancerInhibitors_removeNotExp$drugName, CancerInhibitors_removeNotExp$MaxTargetName, CancerInhibitors_removeNotExp$BestTargetName, sep=';' )
 CancerInhibitors_removeNotExp$drug_ann[To_annotate]=CancerInhibitors_removeNotExp$drug_known_predicted_annotation[To_annotate]
 ```
-<!-- These are drugs whose predicted target is incorrect & we can predict a high confidence Target-->
-```{r}
-CancerInhibitors_WT_HC=CancerInhibitors_WT_HC[order(CancerInhibitors_WT_HC$improvement_over_known, decreasing = T),]
-CancerInhibitors_WT_HC[which(CancerInhibitors_WT_HC$phase=='Launched'),]
-table(CancerInhibitors_WT_HC$phase)
-```
-
 
 ```{r}
 Figure3C <- ggplot(CancerInhibitors_removeNotExp, aes(y=improvement_over_known, x=PredictedRank,
                              color= category,label=drug_ann))+
   geom_point()+
   geom_label_repel(size=2)+
-  theme_bw(base_size = 18)+
+  theme_bw(base_size = 12)+
   # theme(legend.position = 'none')+
   geom_vline(xintercept = 523, linetype='dashed', color='blue')+
+  geom_hline(yintercept = 0.2, linetype='dashed', color='blue')+
   labs(x='Predicted Rank of Known Target', y='Improvement score of\nPredicted Target over Known')
-```
-
-```{r}
-Figure3ABC=ggarrange(Figure3A, Figure3B, Figure3C, 
-                     labels = 'AUTO', nrow = 2,ncol = 2,
-                     common.legend = TRUE,
-                     legend="top")
-ggsave(Figure3ABC, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3ABC_v0.png',
-       width = 12, height = 12)
-ggsave(Figure3ABC, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3ABC_v0.pdf',
-       width = 12, height = 12)
 ```
 
 ```{r}
@@ -167,20 +136,56 @@ figure3D_data=data.frame(table(CancerInhibitors_removeNotExp_cat_ofInterest$phas
 Figure3D <- ggplot(figure3D_data, aes(y=Freq, x=Var1))+
   geom_segment( aes(x=Var1, xend=Var1, y=0, yend=Freq), color="skyblue") +
   geom_point( color="blue", size=4, alpha=0.6)+
-   theme_bw(base_size = 18) +
+   theme_bw(base_size = 12) +
   coord_flip()+
   labs(y='Drugs with alternative\npredicted target',x='Drugs Category')
+```
 
-Figure3ABCD <- grid.arrange(Figure3ABC, Figure3D, nrow = 2,
-             layout_matrix = rbind(c(1, 1, 1),c(1, 1, 1),c(1, 1, 1), c(1, 1, 1), c(NA, 2, NA)) )
+<!-- Strophanthidin target is known as ATP1A1 but our pipeline predicts it as PSMD5 -->
+```{r}
+CurrWrong_Target='ATP1A1'; DOI='strophanthidin'; BestPredicted_Target='PSMD5'
+# sum(expression_matched[CurrWrong_Target,]<3)
+DOI_id=KnownTarget_predictions$drugBroadID[grep('strophanthidin', KnownTarget_predictions$drugName)]
+Figure3E_data=rbind(data.frame(Target='Currently Known Target',
+                               TargetName=CurrWrong_Target,
+                               CRISPR_KO=avana_matched[CurrWrong_Target,],
+                               drug_response=drug_matched[DOI_id,]),
+                    data.frame(Target='Predicted Target',
+                               TargetName=BestPredicted_Target,
+                               CRISPR_KO=avana_matched[BestPredicted_Target,],
+                               drug_response=drug_matched[DOI_id,]
+                               )
+                    )
 
+
+Figure3E <- ggplot(Figure3E_data, aes(x=CRISPR_KO, y=drug_response))+
+  geom_point()+
+  stat_smooth(method = 'lm', se = T)+
+  facet_wrap(.~Target+TargetName, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO',
+       y=paste('Response to', DOI))+
+  stat_cor(size=4)+
+  theme(legend.position = 'top')
+Figure3E
+# ggsave(Figure3E, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS9v0.png',
+#        width = 6, height = 4)
+# ggsave(Figure3E, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS9v0.pdf',
+#        width = 6, height = 4)
 ```
 
 ```{r}
-ggsave(Figure3ABCD, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3ABCD_v0.png',
-       width = 12, height = 15)
-ggsave(Figure3ABCD, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3ABCD_v0.pdf',
-       width = 12, height = 15)
+Figure3ABC=ggarrange(Figure3A, Figure3B, Figure3C, 
+                     labels = 'AUTO', nrow = 1,ncol = 3,
+                     common.legend = TRUE,
+                     legend="top")
+Figure3 <- grid.arrange(Figure3ABC, Figure3D, Figure3E, nrow = 2,
+                        layout_matrix = rbind(c(1, 1, 1),c(1, 1, 1),c(1, 1, 1),c(2, 3, 3), c(2, 3, 3)) )
+
+ggsave(Figure3, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3v0.png',
+       width = 10, height = 6)
+ggsave(Figure3, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3v0.pdf',
+       width = 10, height = 6)
 ```
 
 ```{r}

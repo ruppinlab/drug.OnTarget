@@ -7,6 +7,7 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 <!-- Functions needed for TrueTarget Project -->
+<!-- Compute drug vs crispr correlation - primary target -->
 ```{r}
 correlation_bet_crispr_drug <- function(infunc_drugName){
   infunc_drugResp=onTarget$secondary_prism[infunc_drugName, common_cellLines]
@@ -18,6 +19,20 @@ correlation_bet_crispr_drug <- function(infunc_drugName){
   correlation_df
 }
 ```
+<!-- Compute drug vs crispr correlation in cell lines where primary target is not expressed - secondary target -->
+```{r}
+correlation_bet_crispr_drug_secondary <- function(infunc_drugName, CellLines_withoutPrimary){
+  infunc_drugResp=onTarget$secondary_prism[infunc_drugName, CellLines_withoutPrimary]
+  infunc_CRISPRResp=onTarget$avana_22Q2[, CellLines_withoutPrimary]
+  correlation_df=sapply(1:nrow(infunc_CRISPRResp),function(x)
+    unlist(cor.test_trimmed_v0.default(infunc_drugResp, infunc_CRISPRResp[x,])))
+  correlation_df=t(correlation_df)
+  row.names(correlation_df) <- all_genenames
+  correlation_df
+}
+```
+
+
 <!-- Trimmed cor test -->
 ```{r}
 cor.test_trimmed_v0 <- function(x, ...) UseMethod("cor.test_trimmed_v0")

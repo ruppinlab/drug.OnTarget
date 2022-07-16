@@ -1,0 +1,287 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- Test the power of our secondary target prediction -->
+<!-- Validate secondary targets -->
+<!-- Step 1: identify secondary known targets of each drug -->
+```{r}
+require(tidyr)
+KnownTarget_predictions$allKnownTargets=
+  onTarget$drugCategory$target[match(KnownTarget_predictions$drugBroadID, onTarget$drugCategory$broad_id_trimmed)]
+allKnownTargets_list=strsplit(as.character(KnownTarget_predictions$allKnownTargets), split = ', ')
+
+Sec_KnownTargets_list=sapply(1:nrow(KnownTarget_predictions), function(x){
+  primary_target_id=grep(KnownTarget_predictions$MaxTargetName[x], allKnownTargets_list[[x]])
+  allKnownTargets_list[[x]][-primary_target_id]
+}  )
+names(Sec_KnownTargets_list)=KnownTarget_predictions$drugBroadID
+```
+<!-- identify the drugs where the primary target is correct -->
+```{r}
+correctly_predict_drugID=KnownTarget_predictions$drugBroadID[which(KnownTarget_predictions$PredictedRank<523)]
+
+#Get the best ranking of secondary target for each of these drugs
+Sec_KnonwTarget_score_step1vs3=sapply(correctly_predict_drugID, function(x)
+
+  err_handle(data.frame(drugName=x,
+           secKnownTarget_Step1=Sec_KnownTargets_list[[x]][which.max(corrMat_rank[Sec_KnownTargets_list[[x]], x])],
+           secKnownTarget_Step3=Sec_KnownTargets_list[[x]][which.max(sec_corrMat_rank[Sec_KnownTargets_list[[x]], x])],
+           SecKnown_Pred_rank_Step1=min(corrMat_rank[Sec_KnownTargets_list[[x]], x], na.rm = T) ,
+           SecKnown_Pred_rank_Step3=min(sec_corrMat_rank[Sec_KnownTargets_list[[x]], x], na.rm = T) 
+           ))
+)
+Sec_KnonwTarget_score_step1vs3_df=do.call(rbind, Sec_KnonwTarget_score_step1vs3)
+Sec_KnonwTarget_score_step1vs3_df
+Sec_KnonwTarget_score_step1vs3_df_long <- 
+  gather(Sec_KnonwTarget_score_step1vs3_df, Step, Corr_strength_rank, SecKnown_Pred_rank_Step1:SecKnown_Pred_rank_Step3, factor_key=TRUE)
+Sec_KnonwTarget_score_step1vs3_df_long=Sec_KnonwTarget_score_step1vs3_df_long[-grep('TP53',Sec_KnonwTarget_score_step1vs3_df_long$secKnownTarget_Step1),]
+```
+<!-- Comapre the prediction rank from step 1 vs step 3, Confounding by mean random  rank. -->
+```{r}
+Sec_KnonwTarget_score_step1vs3_df_long$Step=factor(Sec_KnonwTarget_score_step1vs3_df_long$Step)
+levels(Sec_KnonwTarget_score_step1vs3_df_long$Step)=c('Correlation based on\n all cell lines',
+                                                      'Correlation based on\ncell lines with\nno-expression of primary\ntarget')
+```
+
+```{r}
+ggpaired(Sec_KnonwTarget_score_step1vs3_df_long, y='Corr_strength_rank', x='Step',
+ color = 'Step', line.color = "gray", line.size = 0.4,
+ palette = "npg", )
+```
+```{r}
+FigureS8 <-  ggplot(Sec_KnonwTarget_score_step1vs3_df, aes(y=SecKnown_Pred_rank_Step1, x=SecKnown_Pred_rank_Step3))+
+  geom_point()+
+  geom_abline(intercept = 0, slope = 1, linetype='dashed', color='blue')+
+  theme_bw(base_size = 13)+
+  labs(y='Correlation based on\n all cell lines',x='Correlation based on cell lines with\nno-expression of primary target')
+ggsave(FigureS8, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS8v0.png',
+       width = 4, height = 4)
+ggsave(FigureS8, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS8v0.pdf',
+       width = 4, height = 4)
+```
+
+```{r}
+Sec_KnonwTarget_score_step1vs3_df[which(Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step3<523),]
+Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step3<523
+dim(na.omit(Sec_KnonwTarget_score_step1vs3_df))
+sum(Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step3<523, na.rm = T)
+sum(Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step1<523, na.rm = T)
+```
+<!-- Identify drugs who secondary target can only be identified using second step -->
+```{r}
+secTarget_correctly_predicted=Sec_KnonwTarget_score_step1vs3_df$drugName[which(Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step3<523 &
+                                                                         Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step1>523)
+                                                                         ]
+Sec_KnonwTarget_score_step1vs3_df[match(secTarget_correctly_predicted, Sec_KnonwTarget_score_step1vs3_df$drugName),]
+KnownTarget_predictions[match(secTarget_correctly_predicted, KnownTarget_predictions$drugBroadID),]
+```
+<!-- Create random negative labels & their score. Next, get score of positive labels from Step 1 vs 3. -->
+<!-- We create random labels for each drug & get their score -->
+```{r}
+#Get the best ranking of secondary target for each of these drugs
+step1_vs_step3<- function(seed_id=1, rank_threshold=2){
+  correctly_predict_drugID=KnownTarget_predictions$drugBroadID[which(KnownTarget_predictions$PredictedRank<rank_threshold)]
+  set.seed(seed_id)
+  negative_labels=sample(1:nrow(corrMat_rank), size = length(correctly_predict_drugID))
+  #respective drugs for which this negative label is provided
+  names(negative_labels)=correctly_predict_drugID
+  
+  Sec_KnonwTarget_score_step1vs3=sapply(correctly_predict_drugID, function(x)
+    
+    err_handle(data.frame(drugName=x,
+                          secKnownTarget_Step1=Sec_KnownTargets_list[[x]][which.max(corrMat_rank[Sec_KnownTargets_list[[x]], x])],
+                          secKnownTarget_Step3=Sec_KnownTargets_list[[x]][which.max(sec_corrMat_rank[Sec_KnownTargets_list[[x]], x])],
+                          SecKnown_Pred_rank_Step1=min(corrMat_rank[Sec_KnownTargets_list[[x]], x], na.rm = T) ,
+                          Control_Step1=corrMat_rank[negative_labels[x], x],
+                          SecKnown_Pred_rank_Step3=min(sec_corrMat_rank[Sec_KnownTargets_list[[x]], x], na.rm = T),
+                          Control_Step3=sec_corrMat_rank[negative_labels[x], x],
+                          Control=rownames(corrMat_rank)[negative_labels[x]]
+    ))
+  )
+  Sec_KnonwTarget_score_step1vs3_df=do.call(rbind, Sec_KnonwTarget_score_step1vs3)
+  Sec_KnonwTarget_score_step1vs3_df=na.omit(Sec_KnonwTarget_score_step1vs3_df)
+  Sec_KnonwTarget_score_step1vs3_df=Sec_KnonwTarget_score_step1vs3_df[-grep('TP53',Sec_KnonwTarget_score_step1vs3_df$secKnownTarget_Step1),]
+  Score_from_Step1=rbind(data.frame(label='Positive', Score=Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step1),
+                         data.frame(label='Negative', Score=Sec_KnonwTarget_score_step1vs3_df$Control_Step1))
+  Score_from_Step3=rbind(data.frame(label='Positive', Score=Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step3),
+                         data.frame(label='Negative', Score=Sec_KnonwTarget_score_step1vs3_df$Control_Step3))
+  Score_from_Step13_combination=rbind(data.frame(label='Positive',
+                                                 Score=pmin(Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step1,
+                                                           Sec_KnonwTarget_score_step1vs3_df$SecKnown_Pred_rank_Step3)),
+                                      data.frame(label='Negative', 
+                                                 Score=Sec_KnonwTarget_score_step1vs3_df$Control_Step3))
+  power_step1=roc(Score_from_Step1$label, Score_from_Step1$Score)
+  power_step3=roc(Score_from_Step3$label, Score_from_Step3$Score)
+  power_step13_comb=roc(Score_from_Step13_combination$label, Score_from_Step13_combination$Score)
+  
+  list(Score_from_Step1=Score_from_Step1, 
+       Score_from_Step3=Score_from_Step3,
+       Score_from_Step13_combination=Score_from_Step13_combination,
+       step1_roc= power_step1,
+       step3_roc=power_step3, 
+       step12_comb_roc=power_step13_comb)
+}
+
+```
+
+```{r}
+power_s1vsS3=lapply(1:10, function(x) step1_vs_step3(seed_id = x, rank_threshold = 2))
+sapply(power_s1vsS3[[1]], function(x))
+sapply(power_s1vsS3, function(y) sapply(y[4:6], function(x) x$auc))
+```
+<!-- Draw Figure 4D -->
+```{r}
+Score_from_Step3=S1vsS3_seed1$Score_from_Step3
+Figure6D <- ggplot(Score_from_Step3, aes(y=Score, x=label))+
+  geom_boxplot()+
+  stat_compare_means(label = 'p')+
+  theme_bw(base_size = 15)+
+  labs(y='Predicted Rank from Step3', x='Ground Truth Labels')
+```
+<!-- Figure 6E -->
+```{r}
+Score_from_Step1=S1vsS3_seed1$Score_from_Step1
+Figure6E <- ggplot(Score_from_Step1, aes(y=Score, x=label))+
+  geom_boxplot()+
+  stat_compare_means(label = 'p')+
+  theme_bw(base_size = 15)+
+  labs(y='Predicted Rank Step1', x='Ground Truth Labels')
+```
+<!-- Figure 6F -->
+```{r}
+Score_from_Step13_combination=S1vsS3_seed1$Score_from_Step13_combination
+Figure6F <- ggplot(Score_from_Step13_combination, aes(y=Score, x=label))+
+  geom_boxplot()+
+  stat_compare_means(label = 'p')+
+  theme_bw(base_size = 15)+
+  labs(y='Predicted Rank Step1+3', x='Ground Truth Labels')
+```
+Plot all AUC together
+```{r}
+secTargetROC_list=lapply(S1vsS3_seed1[4:6], smooth)
+# Add mean AUC
+names(secTargetROC_list)=c('Step1=0.82', 'Step3=0.86', 'Step1+3=0.9')
+
+Figure6G <- ggroc(secTargetROC_list)+ 
+  theme_bw(base_size = 11) + 
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.7, 0.25),
+        legend.text = element_text(size=12),
+        text = element_text(size=11)) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
+  labs(title="", x="Specificity", y="Sensitivity")
+```
+```{r}
+Primary_Target='BTK'; DOI='Ibrutinib'; sec_Target='EGFR'
+DOI_id=KnownTarget_predictions$drugBroadID[match_stripall(DOI, KnownTarget_predictions$drugName)]
+Figure6B_data=rbind(data.frame(Target='Primary Target',
+                               TargetName='BTK',
+                               CRISPR_KO=avana_matched[Primary_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               expression=factor(expression_matched[Primary_Target,]<2, labels = c('High', 'Low'))),
+                    data.frame(Target='Secondary Target',
+                               TargetName='EGFR',
+                               CRISPR_KO=avana_matched[sec_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               expression=factor(expression_matched[Primary_Target,]<0.05, labels = c('High', 'Low'))))
+
+Figure6B <- ggplot(Figure6B_data, aes(x=CRISPR_KO, y=drug_response, color=expression))+
+  # geom_point()+
+  stat_smooth(method = 'lm', se = T)+
+  facet_wrap(.~Target+TargetName, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO',
+       y='Response to Ibrutinib',
+       color='BTK\nexpression\nstatus')+
+  stat_cor(label.y = c(1.2,1.4), size=4)+
+  theme(legend.position = 'top')
+Figure6B
+```
+<!-- CDK6 vs CDK4 -->
+```{r}
+Primary_Target='CDK6'; DOI='palbociclib'; sec_Target='CDK4'
+sum(expression_matched[Primary_Target,]<3)
+DOI_id=KnownTarget_predictions$drugBroadID[match_stripall(DOI, KnownTarget_predictions$drugName)]
+Figure6B_data=rbind(data.frame(Target='Primary Target',
+                               TargetName=Primary_Target,
+                               CRISPR_KO=avana_matched[Primary_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               expression=factor(expression_matched[Primary_Target,]<3, labels = c('High', 'Low'))),
+                    data.frame(Target='Secondary Target',
+                               TargetName=sec_Target,
+                               CRISPR_KO=avana_matched[sec_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               expression=factor(expression_matched[Primary_Target,]<3, labels = c('High', 'Low'))))
+
+Figure6H <- ggplot(Figure6B_data, aes(x=CRISPR_KO, y=drug_response, color=expression))+
+  # geom_point()+
+  stat_smooth(method = 'lm', se = T)+
+  facet_wrap(.~Target+TargetName, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO',
+       y='Response to palbociclib',
+       color='CDK6 expression\nstatus')+
+  stat_cor(label.y = c(0.93,0.96), size=4)+
+  theme(legend.position = 'top')
+Figure6H
+KnownTarget_predictions$allKnownTargets
+```
+<!-- RARA vs RARB -->
+```{r}
+Primary_Target='RARA'; DOI='tamibarotene'; sec_Target='RARB'
+# sum(expression_matched[Primary_Target,]<3)
+DOI_id=KnownTarget_predictions$drugBroadID[match_stripall(DOI, KnownTarget_predictions$drugName)]
+FigureS9_data=rbind(data.frame(Target='Primary Target',
+                               TargetName=Primary_Target,
+                               CRISPR_KO=avana_matched[Primary_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               expression=factor(expression_matched[Primary_Target,]<3, labels = c('High', 'Low'))),
+                    data.frame(Target='Secondary Target',
+                               TargetName=sec_Target,
+                               CRISPR_KO=avana_matched[sec_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               expression=factor(expression_matched[Primary_Target,]<3, labels = c('High', 'Low'))))
+
+FigureS9 <- ggplot(FigureS9_data, aes(x=CRISPR_KO, y=drug_response, color=expression))+
+  # geom_point()+
+  stat_smooth(method = 'lm', se = T)+
+  facet_wrap(.~Target+TargetName, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO',
+       y='Response to tamibarotene',
+       color='RARA expression\nstatus')+
+  stat_cor(label.y = c(0.93,0.96), size=4)+
+  theme(legend.position = 'top')
+
+ggsave(FigureS9, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS9v0.png',
+       width = 6, height = 4)
+ggsave(FigureS9, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS9v0.pdf',
+       width = 6, height = 4)
+```
+
+
+
+```{r, fig.width=5, fig.height=4}
+Figure6 <-grid.arrange(Figure6B, Figure6C, Figrue6A,
+                       Figure6D, Figure6E, Figure6F,Figure6G,
+                       Figure6H,
+                       layout_matrix = rbind(c(1, 1, 2, 3), c(4, 5, 6, 7), c(8,8,NA, NA)) 
+                       )
+ggsave(Figure6, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure6v1.png',
+       width = 10, height = 12)
+ggsave(Figure6, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure6v1.pdf',
+       width = 10, height = 12)
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

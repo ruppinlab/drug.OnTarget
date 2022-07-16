@@ -20,7 +20,11 @@ KnownTarget_predictions$MaxTargetName[grep('ibru',KnownTarget_predictions$drugNa
 <!-- MATCHED MATRIX -->
 ```{r}
 matched_cellLines=Reduce(intersect,
-                         list(colnames(onTarget$expression), colnames(onTarget$avana_22Q2), colnames(onTarget$secondary_prism)))
+                         list(colnames(onTarget$expression),
+                              colnames(onTarget$avana_22Q2),
+                              colnames(onTarget$secondary_prism),
+                              colnames(onTarget$mutations_matrix)
+                              ))
 expression_matched=onTarget$expression[,matched_cellLines]
 avana_matched=onTarget$avana_22Q2[,matched_cellLines]
 drug_matched=onTarget$secondary_prism[,matched_cellLines]

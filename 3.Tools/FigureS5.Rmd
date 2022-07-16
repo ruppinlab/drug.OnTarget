@@ -1,0 +1,87 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+<!-- ribociclib: Incorrect and correct Target; Figure S5C -->
+```{r}
+CurrWrong_Target='CDK4'; DOI='ribociclib'; BestPredicted_Target='CDIPT'
+DOI_id=KnownTarget_predictions$drugBroadID[grep(DOI, KnownTarget_predictions$drugName)[1]]
+FigureS5C_data=rbind(data.frame(Target='Currently Known Target',
+                               TargetName=CurrWrong_Target,
+                               CRISPR_KO=avana_matched[CurrWrong_Target,],
+                               drug_response=drug_matched[DOI_id,]),
+                    data.frame(Target='Predicted Target',
+                               TargetName=BestPredicted_Target,
+                               CRISPR_KO=avana_matched[BestPredicted_Target,],
+                               drug_response=drug_matched[DOI_id,]
+                               )
+                    )
+
+
+FigureS5C <- ggplot(FigureS5C_data, aes(x=CRISPR_KO, y=drug_response))+
+  geom_point()+
+  stat_smooth(method = 'lm', se = T)+
+  facet_wrap(.~Target+TargetName, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO',
+       y=paste('Response to', DOI))+
+  stat_cor(size=4)+
+  theme(legend.position = 'top')
+FigureS5C
+ggsave(FigureS5C, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5C.png',
+       width = 6, height = 4)
+ggsave(FigureS5C, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5C.pdf',
+       width = 6, height = 4)
+```
+
+```{r}
+CurrWrong_Target='DNMT1'; DOI='decitabine'; BestPredicted_Target='CFAP20'
+DOI_id=KnownTarget_predictions$drugBroadID[grep(DOI, KnownTarget_predictions$drugName)[1]]
+FigureS5D_data=rbind(data.frame(Target='Currently Known Target',
+                               TargetName=CurrWrong_Target,
+                               CRISPR_KO=avana_matched[CurrWrong_Target,],
+                               drug_response=drug_matched[DOI_id,]),
+                    data.frame(Target='Predicted Target',
+                               TargetName=BestPredicted_Target,
+                               CRISPR_KO=avana_matched[BestPredicted_Target,],
+                               drug_response=drug_matched[DOI_id,]
+                               )
+                    )
+
+
+FigureS5D<- ggplot(FigureS5D_data, aes(x=CRISPR_KO, y=drug_response))+
+  geom_point()+
+  stat_smooth(method = 'lm', se = T)+
+  facet_wrap(.~Target+TargetName, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO',
+       y=paste('Response to', DOI))+
+  stat_cor(size=4)+
+  theme(legend.position = 'top')
+FigureS5D
+ggsave(FigureS5D, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5D.png',
+       width = 6, height = 4)
+ggsave(FigureS5D, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5D.pdf',
+       width = 6, height = 4)
+```
+
+```{r}
+FigureS5 <-grid.arrange(FigureS5C, FigureS5D, nrow=1)
+ggsave(FigureS5, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5CD.png',
+       width = 12, height = 4)
+ggsave(FigureS5, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5CD.pdf',
+       width = 10, height = 4)
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

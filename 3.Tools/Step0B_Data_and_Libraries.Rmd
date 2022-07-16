@@ -18,12 +18,13 @@ require(grid)
 require(cowplot)
 require(gridExtra)
 require('stringb')
+require(DEGreport)
 ```
 <!-- Data -->
 ```{r}
 setwd('/Users/sinhas8/Project_TrueTarget/Tools_github/')
 onTarget=readRDS('../Data/onTarget_v2.0.RDS')
-KnownTarget_predictions=readRDS('/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions_v2.RDS')
+KnownTarget_predictions=readRDS('/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions_v3.RDS')
 drugCandidates_for_secTargets=readRDS('../Data/drugCandidates_for_secTargets.RDS')
 drugVScrispr_corr_features_list=readRDS('../Data/drugVScrispr_corr_features_list.RDS')
 drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_features_list, function(x) x[,2])
@@ -83,6 +84,14 @@ onTarget$drugCategory$is.activator=F
 onTarget$drugCategory$is.activator[category_activator_drugs_ID]=T
 ```
 
+<!-- MATCHED MATRIX -->
+```{r}
+matched_cellLines=Reduce(intersect,
+                         list(colnames(onTarget$expression_20Q4), colnames(onTarget$avana_22Q2), colnames(onTarget$secondary_prism)))
+expression_matched=onTarget$expression_20Q4[,matched_cellLines]
+avana_matched=onTarget$avana_22Q2[,matched_cellLines]
+drug_matched=onTarget$secondary_prism[,matched_cellLines]
+```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
