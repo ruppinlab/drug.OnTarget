@@ -8,20 +8,144 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 <!-- Atomic inputs needed to run a code -->
 <!-- Libraries -->
-```{r}
+
+```r
 require(parallel); require('tictoc'); library(fgsea); library(ggplot2)
+```
+
+```
+## Loading required package: parallel
+```
+
+```
+## Loading required package: tictoc
+```
+
+```
+## Registered S3 method overwritten by 'data.table':
+##   method           from
+##   print.data.table
+```
+
+```
+## Want to understand how all the pieces fit together? Read R for Data Science: https://r4ds.had.co.nz/
+```
+
+```r
 require(ggpubr); require(statar); require('interactions')
+```
+
+```
+## Loading required package: ggpubr
+```
+
+```
+## Loading required package: statar
+```
+
+```
+## Loading required package: interactions
+```
+
+```r
 require(stats); require(reshape2); require(pROC)
+```
+
+```
+## Loading required package: reshape2
+```
+
+```r
 require(data.table); 
+```
+
+```
+## Loading required package: data.table
+```
+
+```
+## data.table 1.14.2 using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+```
+## **********
+## This installation of data.table has not detected OpenMP support. It should still work but in single-threaded mode.
+## This is a Mac. Please read https://mac.r-project.org/openmp/. Please engage with Apple and ask them for support. Check r-datatable.com for updates, and our Mac instructions here: https://github.com/Rdatatable/data.table/wiki/Installation. After several years of many reports of installation problems on Mac, it's time to gingerly point out that there have been no similar problems on Windows or Linux.
+## **********
+```
+
+```
+## 
+## Attaching package: 'data.table'
+```
+
+```
+## The following objects are masked from 'package:reshape2':
+## 
+##     dcast, melt
+```
+
+```r
 require(ggrepel)
+```
+
+```
+## Loading required package: ggrepel
+```
+
+```r
 require(grid)
+```
+
+```
+## Loading required package: grid
+```
+
+```r
 require(cowplot)
+```
+
+```
+## Loading required package: cowplot
+```
+
+```
+## 
+## Attaching package: 'cowplot'
+```
+
+```
+## The following object is masked from 'package:ggpubr':
+## 
+##     get_legend
+```
+
+```r
 require(gridExtra)
+```
+
+```
+## Loading required package: gridExtra
+```
+
+```r
 require('stringb')
+```
+
+```
+## Loading required package: stringb
+```
+
+```r
 require(DEGreport)
 ```
+
+```
+## Loading required package: DEGreport
+```
 <!-- Data -->
-```{r}
+
+```r
 setwd('/Users/sinhas8/Project_TrueTarget/Tools_github/')
 onTarget=readRDS('../Data/onTarget_v2.0.RDS')
 KnownTarget_predictions=readRDS('/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions_v3.RDS')
@@ -36,7 +160,8 @@ corrMat_rank=apply(-corrMat, 2, rank)
 source('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/myCustom_functions.R')
 ```
 <!-- Functions for producing negative controld during primary target identification -->
-```{r}
+
+```r
 # Create a random df unique to the input df
 randomize_DF_with_unique_Pairs<-function(df2randomize=Positive_Set_DrugGene_Pairs){
   df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
@@ -68,10 +193,10 @@ randomize_DF_with_unique_Pairs_V2<-function(df2randomize=Positive_Set_DrugGene_P
   colnames(df2return)=colnames(df2randomize)
   df2return
 }
-
 ```
 <!-- Compute if a drug is inhibitor or not -->
-```{r}
+
+```r
 category_inhibitor=c('inhibitor', 'antagonist', 'blocker')
 category_activator=c('agonist', 'activator', 'stimulant')
 category_inhibitor_drugs_ID=sapply(category_inhibitor, function(x) grep(x, onTarget$drugCategory$moa))
@@ -85,7 +210,8 @@ onTarget$drugCategory$is.activator[category_activator_drugs_ID]=T
 ```
 
 <!-- MATCHED MATRIX -->
-```{r}
+
+```r
 matched_cellLines=Reduce(intersect,
                          list(colnames(onTarget$expression_20Q4),
                               colnames(onTarget$avana_22Q2),

@@ -8,15 +8,16 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 <!-- Perfomring validation of primary target identification -->
 <!-- Preloading -->
-```{r}
+```{r echo = T, results = 'hide'}
 library(pROC)
+library(stringr)
 knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
 knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
 ```
 <!-- V1: Validation based on Targets that are more indepedently cited >3 -->
 <!-- By Curating BioGrid Chemical Interaction database we would like to test  -->
 <!-- V1_ROC -->
-```{r}
+```{r echo = F, results = 'hide', message=FALSE, warning=FALSE}
 biogrid=read.csv('/Users/sinhas8/Project_TrueTarget/Data/BIOGRID-CHEMICALS-3.5.182.chemtab.txt',sep='\t')
 KnownTarget_predictions$drugName_stripall=stripall2match(KnownTarget_predictions$drugName)
 biogrid$Chemical.Name_stripall = stripall2match(biogrid$Chemical.Name)
@@ -405,156 +406,11 @@ V8_ROC=test_AUC_A8(seedNumber=1, numberOfTargets_Thr=10, which_level = c(1:4))
 # # Both with V2 or V1 method of shuffling, our results stay same: This is also the case for most of the above cases. In above case, it is still comparable.
 # test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R1', 'R2'))
 ```
-<!-- Putting all the ROC together and work together -->
-```{r}
-ROC_list=list(COSMIC_resistance=V6_ROC, 
-     oncoKB_resistance=V7_ROC, 
-     FDA_mutation_approval=V8_ROC,
-     SAB=V5_ROC,
-     Biogrid_Highly_Cited=V1_ROC,
-     DrugBank_Active_Inhibitors=V2B_ROC,
-     DrugBank_Active_Antagonists=V2A_ROC
-     )
-```
-
-```{r}
-df2plot_Figure1A=data.frame(Dataset_names=names(ROC_list),
-           AUC=sapply(ROC_list, function(x) x$auc))
-
-df2plot_Figure1A$Dataset_names=factor(df2plot_Figure1A$Dataset_names, levels = as.character(df2plot_Figure1A$Dataset_names))
-
-Figure1A=ggplot(df2plot_Figure1A, aes(y=AUC,x=Dataset_names))+
-  geom_bar(stat = 'identity')+
-  theme_bw(base_size = 18) + 
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
-  labs(x='Gold Standard Datasets')
-Figure1A
-```
-
-```{r}
-names(ROC_list)=c('COSMIC resistance=0.94',
-                  'oncoKB resistance=0.95',
-                  'FDA mutation approval=0.91',
-                  'SAB=0.88',
-                  'Biogrid Highly Cited=0.76',
-                  'DrugBank Active Inhibitors=0.69',
-                  'DrugBank Active Antagonists=0.72')
-saveRDS(ROC_list, '/Users/sinhas8/Project_TrueTarget/Data/ROC_list.RDS')
-Figure1B <- ggroc(ROC_list)+ 
-  theme_bw(base_size = 18) + 
-  theme(legend.title = element_blank(), 
-        legend.position = c(0.7, 0.25),
-        legend.text = element_text(size=12),
-        text = element_text(size=12)) +
-  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
-  labs(title="", x="Specificity", y="Sensitivity")
-```
-
-<!-- Finding a threshold that best divides the positve vs negative labels -->
-```{r}
-ROC_list$`COSMIC resistance=0.94`$thresholds[which.max(ROC_list$`COSMIC resistance=0.94`$sensitivities+ROC_list$`COSMIC resistance=0.94`$specificities)]
-sapply(ROC_list, function(x)
-  x$thresholds[which.max(x$sensitivities+x$specificities)] )
-(sapply(ROC_list, function(x)
-  x$thresholds[which.max(x$specificities)] ))
-sapply(ROC_list, function(x)
-  x$thresholds[which.max(x$sensitivities)] )
-```
-
-
-```{r}
-Comp_Gold_Standard=list(COSMIC_resistance=V6_ROC[[2]], 
-     oncoKB_resistance=V7_ROC[[2]], 
-     FDA_mutation_approval=V8_ROC[[2]],
-     SAB=V5_ROC[[2]],
-     Biogrid_Highly_Cited=V1_ROC[[2]],
-     DrugBank_Active_Inhibitors=V2B_ROC[[2]],
-     DrugBank_Active_Antagonists=V2A_ROC[[2]]
-     )
-```
-
-```{r}
-Comp_Gold_Standard_df=do.call(rbind, Comp_Gold_Standard)
-ROC_all_datapoints=smooth(roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr))
-```
-
-
-```{r}
-Drugs_in_morethan1Datasets=names(which(table(unlist(sapply(Comp_Gold_Standard, function(x) paste(x$Chemical.Name, x$Drugbank_Gene)[x$Label=='Positive'] )))>1))
-Drugs_in_morethan1Datasets=strsplit_customv0(Drugs_in_morethan1Datasets, infunc_split_by = ' ',retreving_onject_id = 1)
-platinum_dataset_ID=Comp_Gold_Standard_df$Chemical.Name %in% Drugs_in_morethan1Datasets
-platinum_dataset=Comp_Gold_Standard_df[platinum_dataset_ID,]
-platinum_dataset=unique(platinum_dataset)
-roc_platinum=smooth(roc(platinum_dataset$Label, platinum_dataset$crispr_corr))
-roc_platinum$thresholds[which.max(roc_platinum$specificities)]
-```
-```{r}
-roc_overall_list=list(All_data_points=ROC_all_datapoints,
-                      platinum=roc_platinum)
-names(roc_overall_list)=c('All data points=0.80', 'Platinum Standard=0.89')
-Figure1D <- ggroc(roc_overall_list)+ 
-  theme_bw(base_size = 18) + 
-  theme(legend.title = element_blank(), 
-        legend.position = c(0.6, 0.2),
-        legend.text = element_text(size=18),
-        text = element_text(size=12)) +
-  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
-  labs(title="", x="Specificity", y="Sensitivity")
-```
-
-```{r}
-roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr)
-roc_platinum$specificities
-Figure1E_df2plot=data.frame(rank_Threshold=roc_platinum$thresholds, Specificity=roc_platinum$specificities)
-Figure1E_df2plot$BestSpecificity=F
-Figure1E_df2plot$BestSpecificity[which.max(Figure1E_df2plot$Specificity)]=T
-
-Figure1E<- ggplot(Figure1E_df2plot, aes(x=rank_Threshold, y=Specificity) )+
-  geom_point(aes(size=ifelse(BestSpecificity, 3, 2), 
-                 color=ifelse(BestSpecificity, 'black', 'red')) )+
-  geom_line()+
-  scale_x_reverse()+
-  theme_bw(base_size = 18)+
-  geom_vline(xintercept = Figure1E_df2plot$rank_Threshold[Figure1E_df2plot$BestSpecificity], linetype='dashed', color='blue')+
-  annotate(geom="text", x=5000, y=0.2, label="Rank Threshold\nat max specificity=523", size=6,
-              color="black")+
-  theme(legend.position='none')
-Figure1E
-```
-
-
-```{r}
-Figure1BE=ggarrange(Figure1A, Figure1B, Figure1D, Figure1E, nrow = 2, ncol=2, labels = 'AUTO', 
-                    font.label = list(size = 26))
-
-ggsave(Figure1BE, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1BE_v0.png',
-       width = 15, height = 12)
-ggsave(Figure1BE, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1BE_v0.pdf',
-       width = 15, height = 12)
-```
-#Diamond dataset
-```{r}
-Drugs_in_morethan1Datasets=names(which(table(unlist(sapply(Comp_Gold_Standard, function(x) paste(x$Chemical.Name, x$Drugbank_Gene)[x$Label=='Positive'] )))>2))
-Drugs_in_morethan1Datasets=strsplit_customv0(Drugs_in_morethan1Datasets, infunc_split_by = ' ',retreving_onject_id = 1)
-Comp_Gold_Standard_df=do.call(rbind, Comp_Gold_Standard)
-roc_overall=roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr)
-platinum_dataset_ID=Comp_Gold_Standard_df$Chemical.Name %in% Drugs_in_morethan1Datasets
-platinum_dataset=Comp_Gold_Standard_df[platinum_dataset_ID,]
-platinum_dataset=unique(platinum_dataset)
-dim(platinum_dataset)
-roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr)
-roc_platinum$thresholds[which.max(roc_platinum$sensitivities+roc_platinum$specificities)]
-roc_platinum$thresholds[which.max(roc_platinum$specificities)]
-```
-```{r}
-Comp_Gold_Standard_df[grep('cobimetinib',Comp_Gold_Standard_df$Chemical.Name, ignore.case = T),]
-Comp_Gold_Standard_df[grep('cobimetinib',Comp_Gold_Standard_df$Chemical.Name, ignore.case = T),]
-```
-<!-- V8: Hihgly Selective inhibitors based on their binding profile -->
+<!-- V9: Hihgly Selective inhibitors based on their binding profile -->
 
 ```{r}
 # Preprocessing
-highly_selective_inhibitor=readxl::read_xlsx('/Users/sinhas8/Project_TrueTarget/Data/20220419-L3500-Highly-Selective-Inhibitor-Library-96-well.xlsx', sheet = 2)
+highly_selective_inhibitor=readxl::read_xlsx('/Users/sinhas8/Project_TrueTarget/Data/Updated_20220419-L3500-Highly-Selective-Inhibitor-Library-96-well.xlsx', sheet = 2)
 
 
 highly_selective_inhibitor$known_target=onTarget$drugCategory$target[
@@ -562,8 +418,9 @@ highly_selective_inhibitor$known_target=onTarget$drugCategory$target[
 highly_selective_inhibitor$count_target=sapply(strsplit(as.character(highly_selective_inhibitor$known_target), ', '), length)
 highly_selective_inhibitor$known_target_single=KnownTarget_predictions$MaxTargetName[
   match_stripall(highly_selective_inhibitor$Name, KnownTarget_predictions$drugName)]
+highly_selective_inhibitor
 
-test_AUC_A8<-function(seedNumber=1, numberOfTargets_Thr=5){
+test_AUC_A9<-function(seedNumber=2, numberOfTargets_Thr=5){
   cond1=highly_selective_inhibitor$count_target<numberOfTargets_Thr
   Positive_Set_DrugGene_Pairs=na.omit(data.frame(
     Drugbank_Gene=as.character(highly_selective_inhibitor$known_target_single)[which(cond1)],
@@ -585,11 +442,227 @@ test_AUC_A8<-function(seedNumber=1, numberOfTargets_Thr=5){
   roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)
   list(roc_curve_crispr, Complete_Set)
 }
+V9_ROC=test_AUC_A9(seedNumber=1, numberOfTargets_Thr=30)
+```
+```{r}
+Comp_Gold_Standard=list(COSMIC_resistance=V6_ROC[[2]], 
+     oncoKB_resistance=V7_ROC[[2]], 
+     FDA_mutation_approval=V8_ROC[[2]],
+     SAB=V5_ROC[[2]],
+     Biogrid_Highly_Cited=V1_ROC[[2]],
+     DrugBank_Active_Inhibitors=V2B_ROC[[2]],
+     DrugBank_Active_Antagonists=V2A_ROC[[2]],
+     Selective_Inhibitors=V9_ROC[[2]]
+     )
+```
+<!-- A box plot showing all the data distribution -->
+```{r}
+Comp_Gold_Standard_df=do.call(rbind, Comp_Gold_Standard)
+Comp_Gold_Standard_df$Dataset=strsplit_customv0(rownames(Comp_Gold_Standard_df), infunc_split_by = '\\.')
+Comp_Gold_Standard_df$Dataset=gsub('Active','',Comp_Gold_Standard_df$Dataset)
+Comp_Gold_Standard_df$Dataset=gsub('_',' ',Comp_Gold_Standard_df$Dataset)
+Comp_Gold_Standard_df$Dataset_wrapped=str_wrap(Comp_Gold_Standard_df$Dataset, width = 15)
 
-V8_ROC=test_AUC_A8(seedNumber=1, numberOfTargets_Thr=30)
-dim(V8_ROC[[2]])
-V8_ROC[[1]]
-# Area under the curve: 0.9527
+Figure1B <- ggplot(Comp_Gold_Standard_df, aes(x=Label, y=crispr_corr, color=Label))+
+  geom_boxplot()+
+  stat_compare_means(label = '..p.format..', label.y.npc = 0.9, size=2.5)+
+  facet_wrap(.~Dataset_wrapped, nrow = 2)+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_blank(), legend.position = 'top', strip.text.x = element_text(size = 8))+
+  labs(y='Predicted Rank')
+Figure1B
+```
+
+
+
+<!-- Putting all the ROC together and work together -->
+```{r}
+ROC_list=list(COSMIC_resistance=V6_ROC[[1]], 
+     oncoKB_resistance=V7_ROC[[1]], 
+     FDA_mutation_approval=V8_ROC[[1]],
+     SAB=V5_ROC[[1]],
+     Biogrid_Highly_Cited=V1_ROC[[1]],
+     DrugBank_Active_Inhibitors=V2B_ROC[[1]],
+     DrugBank_Active_Antagonists=V2A_ROC[[1]],
+     Selective_Inhibitors=V9_ROC[[1]]
+     )
+```
+
+```{r}
+df2plot_Figure1A=data.frame(Dataset_names=names(ROC_list),
+           AUC=sapply(ROC_list, function(x) x$auc))
+df2plot_Figure1A$Dataset_names=factor(df2plot_Figure1A$Dataset_names, levels = as.character(df2plot_Figure1A$Dataset_names))
+df2plot_Figure1A$Dataset_names=gsub('_',' ',df2plot_Figure1A$Dataset_names)
+df2plot_Figure1A$Dataset_names=paste(df2plot_Figure1A$Dataset_names, '(N=',c(16, 28, 86, 24, 28, 90, 52, 142), ')', sep='')
+
+
+Figure1C=ggplot(df2plot_Figure1A, aes(y=AUC,x=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC)))+
+  geom_bar(stat = 'identity')+
+  theme_bw(base_size = 10) + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
+  labs(x='Gold Standard Datasets')+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 15))
+Figure1C
+```
+
+```{r}
+names(ROC_list)=c('COSMIC resistance=0.94',
+                  'oncoKB resistance=0.95',
+                  'FDA mutation approval=0.91',
+                  'SAB=0.88',
+                  'Biogrid Highly Cited=0.76',
+                  'DrugBank Active Inhibitors=0.69',
+                  'DrugBank Active Antagonists=0.72',
+                  'Selective Inhibitors=0.75')
+saveRDS(ROC_list, '/Users/sinhas8/Project_TrueTarget/Data/ROC_list.RDS')
+Figure1D <- ggroc(ROC_list)+ 
+  theme_bw(base_size = 3) + 
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.6, 0.2),
+        legend.text = element_text(size=10),
+        text = element_text(size=12),
+        legend.spacing.y = unit(-0.25, 'cm')) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
+  labs(title="", x="Specificity", y="Sensitivity")+
+  guides(color = guide_legend(byrow = TRUE))
+Figure1D
+```
+
+<!-- Finding a threshold that best divides the positve vs negative labels -->
+```{r}
+ROC_list$`COSMIC resistance=0.94`$thresholds[which.max(ROC_list$`COSMIC resistance=0.94`$sensitivities+ROC_list$`COSMIC resistance=0.94`$specificities)]
+sapply(ROC_list, function(x)
+  x$thresholds[which.max(x$sensitivities+x$specificities)] )
+mean(sapply(ROC_list, function(x)
+  x$auc ))
+(sapply(ROC_list, function(x)
+  x$thresholds[which.max(x$specificities)] ))
+sapply(ROC_list, function(x)
+  x$thresholds[which.max(x$sensitivities)] )
+```
+
+<!-- An ROC comprising all data points -->
+```{r}
+ROC_all_datapoints=smooth(roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr))
+```
+
+
+```{r}
+Drugs_in_morethan1Datasets=names(which(table(unlist(sapply(Comp_Gold_Standard, function(x) paste(x$Chemical.Name, x$Drugbank_Gene)[x$Label=='Positive'] )))>1))
+Drugs_in_morethan1Datasets=strsplit_customv0(Drugs_in_morethan1Datasets, infunc_split_by = ' ',retreving_onject_id = 1)
+platinum_dataset_ID=Comp_Gold_Standard_df$Chemical.Name %in% Drugs_in_morethan1Datasets
+platinum_dataset=Comp_Gold_Standard_df[platinum_dataset_ID,]
+platinum_dataset=unique(platinum_dataset)
+dim(platinum_dataset)
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr)
+roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+roc_platinum=smooth(roc_platinum)
+```
+
+```{r}
+platinum_dataset$Dataset='Platinum-Standard'
+Comp_Gold_Standard_df$Dataset='All Data'
+FigureE_data=rbind(Comp_Gold_Standard_df, platinum_dataset)
+Figure1E <- ggplot(FigureE_data, aes(x=Label, y=crispr_corr, color=Label))+
+  geom_boxplot()+
+  stat_compare_means(label = 'p', label.y.npc = 0.9)+
+  facet_wrap(.~Dataset, nrow = 2)+
+  theme_bw(base_size = 12)+
+  theme(axis.text.x = element_blank())+
+  theme(legend.position = 'top')+
+  labs(y='Predicted Rank')
+```
+
+
+```{r}
+roc_overall_list=list(All_data_points=ROC_all_datapoints,
+                      platinum=roc_platinum)
+names(roc_overall_list)=c('All data points=0.79', 'Platinum Standard=0.90')
+Figure1F <- ggroc(roc_overall_list)+ 
+  theme_bw(base_size = 12) + 
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.6, 0.2),
+        legend.text = element_text(size=15),
+        text = element_text(size=12)) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
+  labs(title="", x="Specificity", y="Sensitivity")
+Figure1F
+```
+
+```{r}
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr)
+roc_platinum$specificities
+Figure1E_df2plot=data.frame(rank_Threshold=roc_platinum$thresholds, Specificity=roc_platinum$specificities)
+Figure1E_df2plot$BestSpecificity=F
+Figure1E_df2plot$BestSpecificity[which.max(Figure1E_df2plot$Specificity)]=T
+Figure1G<- ggplot(Figure1E_df2plot, aes(x=rank_Threshold, y=Specificity) )+
+  geom_point(aes(size=ifelse(BestSpecificity, 3, 2), 
+                 color=ifelse(BestSpecificity, 'black', 'red')) )+
+  geom_line()+
+  scale_x_reverse()+
+  theme_bw(base_size = 12)+
+  geom_vline(xintercept = Figure1E_df2plot$rank_Threshold[Figure1E_df2plot$BestSpecificity], linetype='dashed', color='blue')+
+  annotate(geom="text", x=5000, y=0.2, label="Rank Threshold\nat max specificity=523", size=4,
+              color="black")+
+  theme(legend.position='none')+
+  labs(x='Rank Threshold')
+Figure1G
+```
+
+
+```{r}
+Figure1_withoutOverview= grid.arrange(Figure1B, Figure1C, Figure1D,
+                        Figure1E,Figure1F,Figure1G,
+                        layout_matrix=rbind(c(1, 1, 2, 2, 3, 3), c(4, NA, 5, 5, 6, 6)))
+ggsave(Figure1_withoutOverview, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1_withoutOverview_v0.png',
+       width = 12, height = 8)
+ggsave(Figure1_withoutOverview, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1_withoutOverview_v0.pdf',
+       width = 12, height = 8)
+```
+#Diamond dataset
+```{r}
+Drugs_in_morethan1Datasets=names(which(table(unlist(sapply(Comp_Gold_Standard, function(x) paste(x$Chemical.Name, x$Drugbank_Gene)[x$Label=='Positive'] )))>2))
+Drugs_in_morethan1Datasets=strsplit_customv0(Drugs_in_morethan1Datasets, infunc_split_by = ' ',retreving_onject_id = 1)
+Comp_Gold_Standard_df=do.call(rbind, Comp_Gold_Standard)
+roc_overall=roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr)
+platinum_dataset_ID=Comp_Gold_Standard_df$Chemical.Name %in% Drugs_in_morethan1Datasets
+platinum_dataset=Comp_Gold_Standard_df[platinum_dataset_ID,]
+platinum_dataset=unique(platinum_dataset)
+dim(platinum_dataset)
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr)
+roc_platinum$thresholds[which.max(roc_platinum$sensitivities+roc_platinum$specificities)]
+roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+roc_platinum$thresholds[which.max(roc_platinum$sensitivities)]
+```
+```{r}
+Comp_Gold_Standard_df[grep('cobimetinib',Comp_Gold_Standard_df$Chemical.Name, ignore.case = T),]
+Comp_Gold_Standard_df[grep('cobimetinib',Comp_Gold_Standard_df$Chemical.Name, ignore.case = T),]
+```
+```{r}
+df2plotFigure1H=data.frame(sensitivity=roc_platinum$sensitivities, specificities=roc_platinum$specificities)
+
+df2plotFigure1H <- rbind(data.frame(rank_Threshold=roc_platinum$thresholds, Score=roc_platinum$specificities,Model_score='specificity'),
+      data.frame(rank_Threshold=roc_platinum$thresholds, Score=roc_platinum$sensitivities,Model_score='sensitivity'))
+Figure1E_df2plot$BestSpecificity=F
+Figure1E_df2plot$BestSpecificity[which.max(Figure1E_df2plot$Specificity)]=T
+df2plotFigure1H
+roc_platinum$thresholds[which.min(abs(roc_platinum$sensitivities-roc_platinum$specificities))]
+roc_platinum$thresholds[which.max(roc_platinum$sensitivities+roc_platinum$specificities)]
+FigureS1C <- ggplot(df2plotFigure1H, aes(x=rank_Threshold, y=Score, color=Model_score))+
+  geom_point()+
+  geom_line()+
+  scale_x_reverse()+
+  theme_bw(base_size = 18)+
+  geom_vline(xintercept = 5765, linetype='dashed', color='blue')+
+  annotate(geom="text", x=5000, y=0.2, label="Rank Threshold\nat equal sensitivity\n & specivity=5765", size=4,
+               color="black")+
+  # theme(legend.position='none')+
+  labs(x='Rank Threshold')
+  
+ggsave(FigureS1C, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS1C.png',
+       width = 6, height = 4)
+ggsave(FigureS1C, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS1C.pdf',
+       width = 6, height = 4)
 
 ```
 
