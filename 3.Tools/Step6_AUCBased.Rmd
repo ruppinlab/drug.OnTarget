@@ -504,6 +504,22 @@ Figure1C=ggplot(df2plot_Figure1A, aes(y=AUC,x=reorder(text_wrap(df2plot_Figure1A
   scale_x_discrete(labels = function(x) str_wrap(x, width = 15))
 Figure1C
 ```
+<!-- Alternative Figure1C -->
+```{r}
+Figure1C <- ggplot(df2plot_Figure1A, aes(y=AUC,
+                             x=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC) )) +
+  geom_segment( aes(x=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC),
+                    xend=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC), y=0, yend=AUC), color="grey") +
+  geom_point(color="orange", size=4) +
+  theme_bw(base_size = 10) + 
+  theme(
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)
+  ) +
+  labs(x='Gold Standard Datasets')+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 15))
+  
+```
+
 
 ```{r}
 names(ROC_list)=c('COSMIC resistance=0.94',

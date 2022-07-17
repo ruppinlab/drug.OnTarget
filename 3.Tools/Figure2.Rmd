@@ -12,6 +12,7 @@ require(ggrepel)
 require(grid)
 require(cowplot)
 require(gridExtra)
+require(tidyverse)
 require('stringb')
 knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
 knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
@@ -34,7 +35,7 @@ cond5=df2plot_single$KnownTarget_meanCorr>3
 df2plot_single=df2plot_single[cond5,]
 df2plot_single=unique(df2plot_single[,c('drugName', 'Maxcorr', 'MaxTargetName', 'PredictedRank')])
 df2plot_single$TrueTarget_Predicted='Known Target is wrong'
-df2plot_single$TrueTarget_Predicted[df2plot_single$PredictedRank>523]='Known Target is correct'
+df2plot_single$TrueTarget_Predicted[df2plot_single$PredictedRank<523]='Known Target is correct'
 ```
 <!-- Plot Figure 2B -->
 ```{r}
@@ -67,8 +68,9 @@ cond5=df2plot$KnownTarget_meanCorr>3
 df2plot=df2plot[cond5,]
 df2plot=unique(df2plot[,c('drugName', 'Maxcorr', 'MaxTargetName', 'PredictedRank')])
 df2plot$TrueTarget_Predicted='Known Target is wrong'
-df2plot$TrueTarget_Predicted[df2plot$PredictedRank>523]='Known Target is correct'
-
+df2plot$TrueTarget_Predicted[df2plot$PredictedRank<523]='Known Target is correct'
+df2plot$TrueTarget_Predicted=factor(df2plot$TrueTarget_Predicted)
+# df2plot$TrueTarget_Predicted=fct_rev(df2plot$TrueTarget_Predicted)
 Figure2A <- ggplot(df2plot, aes(x=Maxcorr,
                                        y=PredictedRank,
                                        color=TrueTarget_Predicted))+
@@ -82,6 +84,7 @@ Figure2A <- ggplot(df2plot, aes(x=Maxcorr,
                   nudge_y = seq(-5000, -18000,-2000),
                   nudge_x = seq(-0.5, 0.8, 0.1), max.overlaps = 1)+
   geom_hline(yintercept = 523, linetype='dashed', color='blue')
+Figure2A
 ```
 
 ```{r}
@@ -89,7 +92,7 @@ clinicalPhase=read.csv('/Users/sinhas8/Project_TrueTarget/Data/biomarkers.csv')
 df2plot$stage=clinicalPhase$phase[match_stripall(df2plot$drugName, clinicalPhase$name)]
 # df2plot=na.omit(df2plot)
 df2plot_launched=df2plot[df2plot$stage=='Launched',]
-Figure2C <- ggplot(df2plot_launched,
+Figure2C <- ggplot(na.omit(df2plot_launched),
                    aes(x=Maxcorr,y=PredictedRank,color=TrueTarget_Predicted))+
   geom_point()+
   theme_bw(base_size = 18)+
