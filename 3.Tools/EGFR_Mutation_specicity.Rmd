@@ -16,7 +16,7 @@ KnownTarget_predictions_v2= readRDS('../Data/KnownTarget_predictions_v2.RDS')
 
 clinical_data= read.csv('../Data/biomarkers.csv')
 head(clinical_data)
-head(sort(table(KnownTarget_predictions_v2$Known_MaxTargetName), decreasing = T),20)
+top_20_target= names(head(sort(table(KnownTarget_predictions_v2$Known_MaxTargetName), decreasing = T),20))
 ```
 
 
@@ -25,7 +25,7 @@ head(KnownTarget_predictions_v2)
 names(KnownTarget_predictions_v2)[c(2,3)]= c('Known_MaxTargetName','knownTarget_bestCorr')
 
 head(sort(table(KnownTarget_predictions_v2$Known_MaxTargetName), decreasing = T),20)
-EGFR_drug= filter(KnownTarget_predictions_v2, grepl('EGFR',Known_MaxTargetName)) %>% distinct(drugName, .keep_all= T)
+EGFR_drug= filter(KnownTarget_predictions_v2, grepl('\\PGR\\b',Known_MaxTargetName,)) %>% distinct(drugName, .keep_all= T)
 hist(EGFR_drug$knownTarget_bestCorr)
 ```
 
@@ -136,6 +136,42 @@ ggsave(Figure2_EFG, filename = '../result/Figure2_EFG_v4.png',
 ggsave(Figure2_EFG, filename = '../result/Figure2_EFG_v4.pdf',
        width = 14, height = 4)
 
+```
+
+```{r fig.width=5, fig.height=4}
+top_target= top_20_target[!top_20_target %in% c('EGFR','MET','MAP2K1', 'MAPK14','TYMS','PGR','NR3C1')]
+
+top_target_df_for_clinical_advancement= KnownTarget_predictions_v2[KnownTarget_predictions_v2$Known_MaxTargetName %in% top_target,] %>% distinct(drugName, .keep_all= T)
+
+df2plot_join_with_launch_data= top_target_df_for_clinical_advancement
+df2plot_join_with_launch_data= df2plot_join_with_launch_data[!is.na(df2plot_join_with_launch_data$phase),]
+table(df2plot_join_with_launch_data$phase)
+df2plot_join_with_launch_data = df2plot_join_with_launch_data %>% mutate(phase = replace(phase, phase == 'Phase 1/Phase 2', 'Phase 2'))
+df2plot_join_with_launch_data = df2plot_join_with_launch_data %>% mutate(phase = replace(phase, phase == 'Phase 2/Phase 3', 'Phase 3'))
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Withdrawn'] = -1
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Preclinical'] = 0
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 1'] = 1
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 2'] = 2
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 3'] = 3
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Launched'] = 4
+
+
+Supp_figure_4A= ggplot(df2plot_join_with_launch_data, aes(x= reorder(factor(phase),clinical_stage), 
+                                          y= knownTarget_bestCorr,
+                                          color= clinical_stage))+
+  geom_boxplot()+
+  facet_wrap(vars(Known_MaxTargetName),
+            scales = 'free')+
+  theme_bw(base_size = 15)+
+  stat_smooth(method = 'lm', se= T, level = 0.8,
+              span= 1, aes(group= 1), linetype= 'dotted', size= 0.8)+
+  theme(axis.text.x = element_text(angle = 35, vjust = 0.9, hjust=0.9),
+        legend.position = 'top')+
+  
+  labs(x= 'Clinical Stages' , y = 'DKS Score')
+Supp_figure_4A
+ggsave('../result/Supp_figure_4_v0.png',Supp_figure_4A,
+       width =8, height = 10, units = 'in', dpi = 300)
 ```
 
 <!--EGFR generation-->
