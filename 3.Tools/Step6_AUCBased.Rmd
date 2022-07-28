@@ -498,7 +498,7 @@ df2plot_Figure1A$Dataset_names=paste(df2plot_Figure1A$Dataset_names, '(N=',c(16,
 
 Figure1C=ggplot(df2plot_Figure1A, aes(y=AUC,x=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC)))+
   geom_bar(stat = 'identity')+
-  theme_bw(base_size = 10) + 
+  theme_bw(base_size = 8) + 
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
   labs(x='Gold Standard Datasets')+
   scale_x_discrete(labels = function(x) str_wrap(x, width = 15))
@@ -509,15 +509,14 @@ Figure1C
 Figure1C <- ggplot(df2plot_Figure1A, aes(y=AUC,
                              x=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC) )) +
   geom_segment( aes(x=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC),
-                    xend=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC), y=0, yend=AUC), color="grey") +
+                    xend=reorder(text_wrap(df2plot_Figure1A$Dataset_names), -AUC), y=0, yend=AUC), color="skyblue") +
   geom_point(color="orange", size=4) +
-  theme_bw(base_size = 10) + 
-  theme(
-    axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)
-  ) +
+  theme_bw(base_size = 12) + 
+  theme(axis.text.x = element_text(size=8)) +
   labs(x='Gold Standard Datasets')+
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 15))
-  
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20))+
+  coord_flip()
+Figure1C  
 ```
 
 

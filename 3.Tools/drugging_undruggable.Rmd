@@ -47,14 +47,18 @@ PredictedBestDrug=data.frame(gene=best_drugID_df$geneID,
            drugName=onTarget$drugCategory$name[match(best_drugID_df$drugID, onTarget$drugCategory$broad_id_trimmed)],
            Rank=apply(best_drugID_df, 1, function(x) corrMatrank_oncogenes_noDrugs[x[1],x[2]]),
            cor=apply(best_drugID_df, 1, function(x) corrMat_oncogenes_noDrugs[x[1],x[2]]),
-           P=apply(best_drugID_df, 1, function(x) corrMatP_oncogenes_noDrugs[x[1],x[2]])
+           P=apply(best_drugID_df, 1, function(x) corrMatP_oncogenes_noDrugs[x[1],x[2]]),
+           drugID=best_drugID_df$drugID
            # , KnownTarget_predictions[match(best_drugID_df$drugID, KnownTarget_predictions$drugBroadID),],
            )
+PredictedBestDrug
 ```
 
 ```{r}
 PredictedBestDrug$Actionability='Druggable'
 PredictedBestDrug$Actionability[PredictedBestDrug$gene %!in% KnownTarget_predictions$MaxTargetName]='Undruggable'
+
+PredictedBestDrug$drugID[grep('PPM1',PredictedBestDrug$gene)]
 
 PredictedBestDrug$drugName[grep('PPM1',PredictedBestDrug$gene)]='GSK2830371'
 PredictedBestDrug$ann=''
@@ -67,24 +71,24 @@ PredictedBestDrug$ann[famous_oncogenes_id]=
 PredictedBestDrug$undruggable_with_newTarget=PredictedBestDrug$Rank<5 & PredictedBestDrug$P<0.05 &
   PredictedBestDrug$Actionability=='Undruggable'
 
-Figure4E <-  ggplot(PredictedBestDrug, aes(x=cor, y=Rank, label=ann,
+Figure5A <-  ggplot(PredictedBestDrug, aes(x=cor, y=Rank, label=ann,
                                      color=Actionability))+
   geom_point()+
   theme_bw(base_size = 18)+
   scale_y_reverse()+
-  geom_label_repel(nudge_y = c(-50,-100, -200))+
-  labs(x='Correlation between drug Response\n and oncogene CRISPR-KO', 
+  geom_label_repel(nudge_y = c(-20,-50,-100,-200), size=3)+
+  labs(x='DKS Score', 
        y='Oncogene target rank\n vs the rest of the gennes')+
   guides(color=guide_legend(nrow=2,byrow=TRUE))+
   theme(legend.position = 'top')
-Figure4E
+Figure5A
 ```
 
 ```{r}
-ggsave(Figure4E, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4E_v0.png',
-       width = 6, height = 6)
-ggsave(Figure4E, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4E_v0.pdf',
-       width = 6, height = 6)
+# ggsave(Figure4E, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4E_v0.png',
+#        width = 6, height = 6)
+# ggsave(Figure4E, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4E_v0.pdf',
+#        width = 6, height = 6)
 ```
 
 ```{r}
@@ -95,9 +99,189 @@ PredictedBestDrug[PredictedBestDrug$gene %in% famous_oncogenes,]
 ```
 <!-- Finding drugs that specifically binds to the mutated form of the protein -->
 ```{r}
+# AMG-232 targeting MDM4
+DOI='AMG-232';
+DOI_id=KnownTarget_predictions$drugBroadID[grep(DOI, KnownTarget_predictions$drugName, ignore.case = T)]
+BestPredicted_Target='MDM4'
+Figure5B_data=rbind(data.frame(Target='Predicted Target',
+                               TargetName=BestPredicted_Target,
+                               CRISPR_KO=avana_matched[BestPredicted_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               drugName=DOI
+                               )
+                    )
 
+# Pitavastatin targeting KAT7
+DOI='Pitavastatin';
+DOI_id=KnownTarget_predictions$drugBroadID[grep(DOI, KnownTarget_predictions$drugName, ignore.case = T)]
+BestPredicted_Target='KAT7'
+Figure5C_data=rbind(data.frame(Target='Predicted Target',
+                               TargetName=BestPredicted_Target,
+                               CRISPR_KO=avana_matched[BestPredicted_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               drugName=DOI
+                               )
+                    )
+
+# Pitavastatin targeting KAT7
+DOI='Atiprimod';
+DOI_id=KnownTarget_predictions$drugBroadID[grep(DOI, KnownTarget_predictions$drugName, ignore.case = T)]
+BestPredicted_Target='MITF'
+Figure5D_data=rbind(data.frame(Target='Predicted Target',
+                               TargetName=BestPredicted_Target,
+                               CRISPR_KO=avana_matched[BestPredicted_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               drugName=DOI
+                               )
+                    )
+
+# Pitavastatin targeting KAT7
+DOI='GSK2830371';
+DOI_id=PredictedBestDrug$drugID[grep('PPM1',PredictedBestDrug$gene)]
+BestPredicted_Target='PPM1D'
+Figure5E_data=rbind(data.frame(Target='Predicted Target',
+                               TargetName=BestPredicted_Target,
+                               CRISPR_KO=avana_matched[BestPredicted_Target,],
+                               drug_response=drug_matched[DOI_id,],
+                               drugName=DOI
+                               )
+                    )
 ```
 
+```{r}
+Figure5B2D_data=rbind(Figure5B_data, Figure5C_data, Figure5D_data, Figure5E_data)
+Figure5B2D <- ggplot(Figure5B2D_data, aes(x=CRISPR_KO, y=drug_response))+
+  geom_point()+
+  stat_smooth(method = 'lm', se = T)+
+  facet_wrap(drugName~Target+TargetName, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO',
+       y=paste('Drug response'))+
+  stat_cor(size=4)+
+  theme(legend.position = 'top')
+```
+
+```{r}
+Figure5 <- grid.arrange(Figure5A,Figure5B2D, layout_matrix=rbind(c(1, 2)))
+ggsave(Figure5, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure5_undruggablev0.png',
+       width = 9, height = 6)
+ggsave(Figure5, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure5_undruggablev0.pdf',
+       width = 9, height = 6)
+```
+<!-- Find if these drugs bind more specifically to the mutant form -->
+```{r}
+PredictedBestDrug
+interaction_Features=lapply(1:nrow(PredictedBestDrug), function(x)
+  {
+  infunc_drug_matched=err_handle(drug_matched[PredictedBestDrug$drugID[x],])
+  infunc_avana_matched=err_handle(avana_matched[PredictedBestDrug$gene[x],])
+  infunc_mutation_matched=err_handle(mutation_matched[PredictedBestDrug$gene[x],])
+  err_handle(summary(lm(infunc_drug_matched ~ 
+                infunc_avana_matched*infunc_mutation_matched))$coefficients[4,c(1,4)])
+  }
+  )
+names(interaction_Features)=PredictedBestDrug$drugID
+# This is an interaction where the where cell lines with low expression (<2, Trues in above vector) will have "lower" correlation strength than cell lines with high expression (>2, Falses in above vector)
+PredictedBestDrug$mutation_interaction_strength=sapply(interaction_Features, function(x) x[1])
+PredictedBestDrug$mutation_interaction_P=sapply(interaction_Features, function(x) x[2])
+```
+
+```{r}
+PredictedBestDrug
+```
+```{r}
+PredictedBestDrug$ann=''
+PredictedBestDrug$is_sig_higher=PredictedBestDrug$mutation_interaction_P<0.05
+PredictedBestDrug$ann= paste(PredictedBestDrug$drugName,
+                                           PredictedBestDrug$gene,sep=';')
+Figure5F <- ggplot(PredictedBestDrug, aes(y= mutation_interaction_strength,
+                                     x= -log10(mutation_interaction_P),
+                                     color= is_sig_higher,
+                                     label= ann))+
+  geom_point()+
+  theme_bw(base_size = 15)+
+  theme(legend.position = 'top')+
+  geom_label_repel(data = subset(PredictedBestDrug,
+                                 PredictedBestDrug$mutation_interaction_P<0.05 | PredictedBestDrug$mutation_interaction_strength >5),
+                   nudge_x = c(1, 3, 5), nudge_y = c(6, 4, 2))+
+  geom_vline(xintercept = 1.3, linetype='dashed',color='blue')+
+  labs(x='-log10(Significance)', y='Differential targeting to\nmutant vs WT', color='Is Significant')+
+  geom_hline(yintercept = 0, linetype='dashed', color='blue')
+Figure5F
+```
+<!-- Top four fits with differential binding -->
+```{r}
+GOI='KRAS';DOI='RO-4987655'
+DOI_id=PredictedBestDrug$drugID[match_stripall( DOI, PredictedBestDrug$drugName)]
+Figure5G_data=data.frame(crispr=avana_matched[GOI,],
+                         drug_response=drug_matched[DOI_id,],
+                         mutation=mutation_matched[GOI,],
+                         GOI=GOI,
+                         DOI=DOI)
+Figure5G_data$mutation=factor(Figure5G_data$mutation)
+levels(Figure5G_data$mutation)=c('WT', 'mutant')
+
+
+#Hit 2
+dim(KnownTarget_predictions)
+GOI='PPM1D';DOI='GSK2830371'
+DOI_id=PredictedBestDrug$drugID[match_stripall( DOI, PredictedBestDrug$drugName)]
+Figure5H_data=data.frame(crispr=avana_matched[GOI,],
+                         drug_response=drug_matched[DOI_id,],
+                         mutation=mutation_matched[GOI,],
+                         GOI=GOI,
+                         DOI=DOI)
+Figure5H_data$mutation=factor(Figure5H_data$mutation)
+levels(Figure5H_data$mutation)=c('WT', 'mutant')
+
+
+#Hit 3
+GOI='GATA2';
+DOI=as.character(PredictedBestDrug$drugName[match_stripall( GOI, PredictedBestDrug$gene)])
+DOI_id=PredictedBestDrug$drugID[match_stripall( DOI, PredictedBestDrug$drugName)]
+Figure5I_data=data.frame(crispr=avana_matched[GOI,],
+                         drug_response=drug_matched[DOI_id,],
+                         mutation=mutation_matched[GOI,],
+                         GOI=GOI,
+                         DOI=DOI)
+Figure5I_data$mutation=factor(Figure5I_data$mutation)
+levels(Figure5I_data$mutation)=c('WT', 'mutant')
+
+#Hit 4
+GOI='DDR2';
+DOI=as.character(PredictedBestDrug$drugName[match_stripall( GOI, PredictedBestDrug$gene)])
+DOI_id=PredictedBestDrug$drugID[match_stripall( DOI, PredictedBestDrug$drugName)]
+Figure5J_data=data.frame(crispr=avana_matched[GOI,],
+                         drug_response=drug_matched[DOI_id,],
+                         mutation=mutation_matched[GOI,],
+                         GOI=GOI,
+                         DOI=DOI)
+Figure5J_data$mutation=factor(Figure5J_data$mutation)
+levels(Figure5J_data$mutation)=c('WT', 'mutant')
+```
+
+```{r}
+Figure5G2J_data=rbind(Figure5G_data, Figure5H_data, Figure5I_data, Figure5J_data)
+Figure5G2J <- ggplot(Figure5G2J_data, aes(x=crispr, y=drug_response, color=factor(mutation)))+
+  # geom_point()+
+  stat_smooth(method = 'lm', se = F)+
+  facet_wrap(.~GOI+DOI, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO', y='Drug Response', color='mutation\nstatus')+
+  stat_cor(label.y = c(0.8,0.9), size=3)+
+  theme(legend.position = 'top')
+Figure5G2J
+```
+
+```{r}
+Figure5 <- grid.arrange(grid.arrange(Figure5A,Figure5B2D, layout_matrix=rbind(c(1, 2))),
+             grid.arrange(Figure5F,Figure5G2J, layout_matrix=rbind(c(1, 2))), nrow=2)
+
+ggsave(Figure5, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure5_undruggablev0.png',
+       width = 9, height = 10)
+ggsave(Figure5, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure5_undruggablev0.pdf',
+       width = 9, height = 10)
+```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 

@@ -43,14 +43,15 @@ Figure2B <- ggplot(df2plot_single, aes(x=Maxcorr,
                                        y=PredictedRank,
                                        color=TrueTarget_Predicted))+
   geom_point()+
-  theme_bw(base_size = 18)+
+  theme_bw(base_size = 12)+
   labs(x='Correlation of drug response\n& known target CRISPR-KO',
        y='', color='True Target Prediction')+
   scale_y_reverse()+
-  geom_text_repel(data = df2plot_single[df2plot_single$PredictedRank<10,], 
+  geom_text_repel(data = df2plot_single[df2plot_single$PredictedRank<2 & df2plot_single$Maxcorr>0.33,], 
                   aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
-                  nudge_y = seq(-5000, -16000,-1000),
-                  nudge_x = seq(-0.5, 0.8, 0.1), max.overlaps = 1)+
+                  nudge_y = seq(-5000, -16000,-4000),
+                  nudge_x = seq(-0.5, 0.8, 0.4),
+                  max.overlaps = 1, size=3)+
   geom_hline(yintercept = 523, linetype='dashed', color='blue')
 Figure2B
 ```
@@ -71,18 +72,19 @@ df2plot$TrueTarget_Predicted='Known Target is wrong'
 df2plot$TrueTarget_Predicted[df2plot$PredictedRank<523]='Known Target is correct'
 df2plot$TrueTarget_Predicted=factor(df2plot$TrueTarget_Predicted)
 # df2plot$TrueTarget_Predicted=fct_rev(df2plot$TrueTarget_Predicted)
+df2plot
 Figure2A <- ggplot(df2plot, aes(x=Maxcorr,
                                        y=PredictedRank,
                                        color=TrueTarget_Predicted))+
   geom_point()+
-  theme_bw(base_size = 18)+
+  theme_bw(base_size = 12)+
   labs(x=text_wrap(''),
        y='Genome-Wide Rank', color='True Target Prediction')+
   scale_y_reverse()+
-  geom_text_repel(data = df2plot[df2plot$PredictedRank==1 & df2plot$Maxcorr>0.35,], 
+  geom_text_repel(data = df2plot[df2plot$PredictedRank==1 & df2plot$Maxcorr>0.38,], 
                   aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
-                  nudge_y = seq(-5000, -18000,-2000),
-                  nudge_x = seq(-0.5, 0.8, 0.1), max.overlaps = 1)+
+                  nudge_y = seq(-5000, -18000,-3000),
+                  nudge_x = seq(-0.5, 0.8, 0.2), max.overlaps = 1, size=3)+
   geom_hline(yintercept = 523, linetype='dashed', color='blue')
 Figure2A
 ```
@@ -95,47 +97,74 @@ df2plot_launched=df2plot[df2plot$stage=='Launched',]
 Figure2C <- ggplot(na.omit(df2plot_launched),
                    aes(x=Maxcorr,y=PredictedRank,color=TrueTarget_Predicted))+
   geom_point()+
-  theme_bw(base_size = 18)+
+  theme_bw(base_size = 12)+
   labs(x=text_wrap(''),
        y='', color='True Target Prediction')+
   scale_y_reverse()+
   geom_text_repel(data = df2plot_launched[df2plot_launched$PredictedRank<10,], 
                   aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
                     nudge_y = seq(-5000, -10000,-1000),
-                  nudge_x = seq(-0.5, 0.2, 0.1), max.overlaps = 1)+
+                  nudge_x = seq(-0.5, 0.2, 0.1), max.overlaps = 1, size=3)+
   geom_hline(yintercept = 523, linetype='dashed', color='blue')
 Figure2C
-```
-
-```{r}
-Figure2ABC=ggarrange(Figure2A, Figure2B, Figure2C, 
-                     labels = 'AUTO', nrow = 1,common.legend = TRUE, legend="top")
-ggsave(Figure2ABC, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2AB_v0.png',
-       width = 14, height = 5)
-ggsave(Figure2ABC, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2AB_v0.pdf',
-       width = 21, height = 8)
 ```
 
 ```{r}
 figure2D_data=data.frame(Category=c('Targeted Inhibitor', 'Single Targeted Inhibitor', 'Approved Targeted Inhibitor'),
 Prop_corr_ann=c(sum(df2plot$PredictedRank<523, na.rm = T)/length(na.omit(df2plot$PredictedRank)),
                 sum(df2plot_single$PredictedRank<523)/length(df2plot_single$PredictedRank),
-                sum(df2plot_launched$PredictedRank<523)/length(df2plot_launched$PredictedRank)))
-Figure2D <- ggplot(figure2D_data, aes(y=Prop_corr_ann, x=Category))+
-  geom_segment( aes(x=Category, xend=Category, y=0, yend=Prop_corr_ann), color="skyblue") +
-  geom_point( color="blue", size=4, alpha=0.6)+
-   theme_bw(base_size = 18) +
+                sum(df2plot_launched$PredictedRank<523, na.rm = T)/length(na.omit(df2plot_launched$PredictedRank))))
+Figure2D <- ggplot(figure2D_data, aes(y=Prop_corr_ann, x=str_wrap(Category, 5)))+
+  geom_segment( aes(x=str_wrap(Category, 5), xend=str_wrap(Category, 5),
+                    y=0, yend=Prop_corr_ann), color="skyblue") +
+  geom_point(color="blue", size=4, alpha=0.6)+
+   theme_bw(base_size = 10) +
   coord_flip()+
   labs(y='Proportion of Drugs\n with correct known Target',x='Drugs Category')
-Figure2ABCD <- grid.arrange(Figure2ABC, Figure2D, nrow = 2,
-             layout_matrix = rbind(c(1, 1, 1),c(1, 1, 1), c(NA, 4, NA)) )
+```
+
+<!-- Figure 4E -->
+```{r, fig.width=10}
+KnownTarget_predictions$clinical_stage=factor(KnownTarget_predictions$phase)
+levels(KnownTarget_predictions$clinical_stage)=c(4, 1, 2, 2, 3, 3, 0, -1)
+KnownTarget_predictions$phase_trimmed=factor(KnownTarget_predictions$phase)
+levels(KnownTarget_predictions$phase_trimmed)=c("Launched","Phase 1","Phase 2", "Phase 2","Phase 3", "Phase 3", "Preclinical", "Withdrawn")
+
+top_drugs_of_interest=which(KnownTarget_predictions$MaxTargetName %in% c('EGFR','MAP2K1', 'MET'))
+clinical_advancement=unique(KnownTarget_predictions[top_drugs_of_interest,])
+dim(clinical_advancement)
+
+diff_CLin_stages_comb= combn(as.character(na.omit(unique(clinical_advancement$phase_trimmed))),2, simplify = F)
+
+clinical_advancement$phase_trimmed=factor(clinical_advancement$phase_trimmed)
+clinical_advancement$clinical_stage=factor2numeric(clinical_advancement$clinical_stage)
+clinical_advancement=clinical_advancement[!is.na(clinical_advancement$clinical_stage),]
+Figure2E= ggplot(clinical_advancement, 
+                  aes(x= reorder(factor(phase_trimmed),clinical_stage), 
+                      y= Maxcorr,
+                      color= clinical_stage))+
+  geom_boxplot()+
+  stat_compare_means(comparisons = diff_CLin_stages_comb, size=2)+
+  theme_bw(base_size = 12)+
+  stat_smooth(method = 'lm', se= T, level = 0.8,
+              span= 1, aes(group= 1), linetype= 'dotted', size= 0.8)+
+  labs(y='DKS Score', x='Clinical Stages')+
+  facet_wrap(.~MaxTargetName, scales = 'free')+
+  theme(legend.position = 'right')+
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+Figure2E
+sort(table(KnownTarget_predictions$MaxTargetName), decreasing = T)
 ```
 
 ```{r}
-ggsave(Figure2ABCD, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2AB_v0.png',
-       width = 14, height = 7.5)
-ggsave(Figure2ABCD, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2AB_v0.pdf',
-       width = 14, height = 7.5)
+Figure2ABC=ggarrange(Figure2A, Figure2B, Figure2C, 
+                     labels = 'AUTO', nrow = 1,common.legend = TRUE, legend="top")
+Figure2 <- grid.arrange(Figure2ABC, Figure2D, Figure2E,
+                        layout_matrix = rbind(c(1, 1, 1, 1),c(1, 1, 1, 1),c(2, 3, 3, 3),c(NA, 3, 3, 3)) )
+ggsave(Figure2, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2v0.png',
+       width = 10, height = 8)
+ggsave(Figure2, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2v0.pdf',
+       width = 10, height = 8)
 ```
 
 

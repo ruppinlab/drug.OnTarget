@@ -34,7 +34,7 @@ CancerInhibitors_mapping=match_stripall(CancerInhibitors,
                                         KnownTarget_predictions$drugBroadID)
 CancerInhibitors=KnownTarget_predictions[na.omit(CancerInhibitors_mapping),]
 CancerInhibitors=unique(CancerInhibitors)
-dim(CancerInhibitors)
+colnames(CancerInhibitors)[16]='KnownTarget_meanExp'
 ```
 <!-- How many drugs are wrongly annotated after removing the low-expressed ones-->
 ```{r}
@@ -173,6 +173,54 @@ Figure3E
 # ggsave(Figure3E, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS9v0.pdf',
 #        width = 6, height = 4)
 ```
+<!-- Ones that are wrongly annotated -->
+```{r}
+KnownTarget_predictions=unique(KnownTarget_predictions)
+cond1=!is.na(KnownTarget_predictions$PredictedRank)
+cond2=KnownTarget_predictions$PredictedRank>523
+cond3=grepl('targeted cancer', KnownTarget_predictions$drugCategory)
+cond4=KnownTarget_predictions$BestTargetCorrFDR<0.05
+cond5=KnownTarget_predictions$BestTargetCorr-KnownTarget_predictions$Maxcorr>0.2
+cond6=KnownTarget_predictions$KnownTarget_meanCorr>3
+WronglyAnnotated=KnownTarget_predictions[which(cond1 & cond2 & cond4 & cond5 & cond6),]
+dim(WronglyAnnotated)
+
+#predicted pathway
+predicted_pathway_annotation=sapply(1:nrow(WronglyAnnotated),function(y)
+  names(na.omit(sapply(names(hallmark_pathway), function(x) match(WronglyAnnotated$BestTargetName[y], hallmark_pathway[[x]])))[1]) )
+WronglyAnnotated$predictedPathway=predicted_pathway_annotation
+
+Known_pathway_annotation=sapply(1:nrow(WronglyAnnotated),function(y)
+  names(na.omit(sapply(names(hallmark_pathway), function(x) match(WronglyAnnotated$MaxTargetName[y], hallmark_pathway[[x]])))[1]) )
+WronglyAnnotated$Known_pathway_annotation=Known_pathway_annotation
+WronglyAnnotated
+wrong2correctPathway=data.frame(table(WronglyAnnotated$Known_pathway_annotation, WronglyAnnotated$predictedPathway))
+wrong2correctPathway=wrong2correctPathway[wrong2correctPathway$Freq!=0,]
+mean_corr_df=aggregate(WronglyAnnotated$BestTargetCorr - WronglyAnnotated$Maxcorr,
+                    by =list(WronglyAnnotated$Known_pathway_annotation, WronglyAnnotated$predictedPathway), mean)
+wrong2correctPathway$mean_corr=mean_corr_df$x
+```
+
+
+```{r}
+wrong2correctPathway$Var2=gsub('_',' ',gsub('HALLMARK_','',wrong2correctPathway$Var2))
+wrong2correctPathway$Var1=gsub('_',' ',gsub('HALLMARK_','',wrong2correctPathway$Var1))
+Figure3F <- ggplot(data = wrong2correctPathway,
+       aes(axis1 = Var1, axis2 = str_wrap(Var2, 30), y = Freq)) +
+  geom_alluvium(aes(fill=mean_corr)) +
+  geom_stratum() +
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum)), size=2) +
+  scale_x_discrete(limits = c("Var1", "Var2"),
+                   expand = c(0.15, 0.05)) +
+  theme_void(base_size = 12) +
+  guides(fill = guide_legend(title = "DKS score"))
+Figure3F
+ggsave(Figure3F, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3F.png',
+       width = 11, height = 5)
+ggsave(Figure3F, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3F.pdf',
+       width = 11, height = 5)
+```
 
 ```{r}
 Figure3ABC=ggarrange(Figure3A, Figure3B, Figure3C, 
@@ -186,6 +234,17 @@ ggsave(Figure3, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3v0.
        width = 10, height = 6)
 ggsave(Figure3, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3v0.pdf',
        width = 10, height = 6)
+```
+
+
+```{r}
+Figure3v2=grid.arrange(Figure3, Figure3F, layout_matrix=rbind(c(1,1,1,1,1,1),c(1,1,1,1,1,1),c(NA,2,2,2,2,NA)))
+ggsave(Figure3v2, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3v0.png',
+       width = 10, height = 9)
+ggsave(Figure3v2, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3v0.pdf',
+       width = 10, height = 9)
+```
+
 ```
 
 ```{r}

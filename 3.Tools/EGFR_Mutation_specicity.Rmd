@@ -2,7 +2,7 @@
 title: "EGFR"
 output: html_document
 ---
-
+<!-- DKS score vs Clinical advancement -->
 ```{r}
 knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
 knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
@@ -15,8 +15,6 @@ theme_set(theme_bw(18))
 KnownTarget_predictions_v2= readRDS('../Data/KnownTarget_predictions_v2.RDS')
 
 clinical_data= read.csv('../Data/biomarkers.csv')
-head(clinical_data)
-head(sort(table(KnownTarget_predictions_v2$Known_MaxTargetName), decreasing = T),20)
 ```
 
 
