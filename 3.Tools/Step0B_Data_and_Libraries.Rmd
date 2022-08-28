@@ -1,90 +1,107 @@
 ---
-title: "R Notebook"
+title: "Data, libraries and preprocessing"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 <!-- Atomic inputs needed to run a code -->
 <!-- Libraries -->
 ```{r}
-require(parallel); require('tictoc'); library(fgsea); library(ggplot2)
-require(ggpubr); require(statar); require('interactions')
-require(stats); require(reshape2); require(pROC)
-require(data.table); 
+# if (!require("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# 
+# BiocManager::install("fgsea")
+
+### network problem : talked to narisu and talked about the authentication
+# library(fgsea)
+require(data.table)
+require('stringb')
+require(parallel)
+require('tictoc')
+require(statar)
+require('interactions')
+require(stats)
+require(reshape2)
+require(ggplot2)
+require(ggpubr)
 require(ggrepel)
+require(ggforce)
 require(grid)
 require(cowplot)
 require(gridExtra)
-require('stringb')
+require(pROC)
 require(DEGreport)
+
+#Functions needed
+source('../3.Tools/myCustom_functions.R')
 ```
-<!-- Data -->
+<!-- OnTarget Data and the preprocessing-->
 ```{r}
-setwd('/Users/sinhas8/Project_TrueTarget/Tools_github/')
+# setwd('/Users/sinhanee/Documents/projects/drug.OnTarget/')
 onTarget=readRDS('../Data/onTarget_v2.0.RDS')
-KnownTarget_predictions=readRDS('/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions_v3.RDS')
+KnownTarget_predictions=readRDS('../Data/KnownTarget_predictions_v3.RDS') ## required dataset latest version
 drugCandidates_for_secTargets=readRDS('../Data/drugCandidates_for_secTargets.RDS')
 drugVScrispr_corr_features_list=readRDS('../Data/drugVScrispr_corr_features_list.RDS')
+```
+
+<!-- Get the correlation strength, P value and the rank of the correlation matrix-->
+```{r}
 drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_features_list, function(x) x[,2])
 corrMat_P=sapply(drugVScrispr_corr_features_list, function(x) x[,1])
 corrMat=drugVScrispr_corr_Strength
 corrMat_rank=apply(-corrMat, 2, rank)
-
-#Functions needed
-source('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/myCustom_functions.R')
 ```
-<!-- Functions for producing negative controld during primary target identification -->
+<!-- known target prediction-->
 ```{r}
-# Create a random df unique to the input df
-randomize_DF_with_unique_Pairs<-function(df2randomize=Positive_Set_DrugGene_Pairs){
-  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
-  fixedCol=df2randomize[,2]
-  shuffledCol=sample(df2randomize[,1])
-  new_df=paste(shuffledCol, fixedCol, sep = '_')
-  while(sum(df2randomize_collapsed==new_df)>0){
-    new_df[df2randomize_collapsed==new_df]=
-      paste(sample(df2randomize[,1], sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
-  }
-  df2return=do.call(rbind, strsplit(new_df, '_'))
-  df2return=data.frame(df2return[,1], df2return[,2])
-  colnames(df2return)=colnames(df2randomize)
-  df2return
-}
+drugSubset_map2_annotation <- match(rownames(onTarget$secondary_prism), onTarget$drugCategory$broad_id_trimmed)
 
-randomize_DF_with_unique_Pairs_V2<-function(df2randomize=Positive_Set_DrugGene_Pairs){
-  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
-  fixedCol=df2randomize[,2]
-  shuffledCol=sample(rownames(corrMat), nrow(df2randomize))
-  new_df=paste(shuffledCol, fixedCol, sep = '_')
-  while(sum(df2randomize_collapsed==new_df)>0){
-    new_df[df2randomize_collapsed==new_df]=
-      paste(sample(rownames(onTarget$corrMat), sum(df2randomize_collapsed==new_df)),
-            fixedCol[df2randomize_collapsed==new_df], sep = '_')
-  }
-  df2return=do.call(rbind, strsplit(new_df, '_'))
-  df2return=data.frame(df2return[,1], df2return[,2])
-  colnames(df2return)=colnames(df2randomize)
-  df2return
-}
-
+all_drugNames_common = onTarget$drugCategory$name[drugSubset_map2_annotation]
+all_drugTargets = onTarget$drugCategory[drugSubset_map2_annotation,c('name','target')]
+all_drugMOA = onTarget$drugCategory$moa[drugSubset_map2_annotation]
 ```
+
+
+<!-- Identify the known target Correlation -->
+```{r}
+all_drugTargets_seperated = str_split(as.character(all_drugTargets), ", ")
+
+all_drugTargets_correlation=sapply(1:length(all_drugTargets_seperated),
+      function(x) {
+        ret_cor=drugVScrispr_corr_Strength[
+          match(all_drugTargets_seperated[[x]],
+                rownames(drugVScrispr_corr_Strength)), x]
+        names(ret_cor)=err_handle(all_drugTargets_seperated[[x]])
+        ret_cor
+        } )
+
+names(all_drugTargets_correlation) <- as.character(all_drugNames_common)
+all_drugTargets_correlation['dabrafenib']
+
+### Dataframe of the knowntarget_prediction
+all_drugTargets_MAXcorrelation=sapply(all_drugTargets_correlation, function(x) max(x, na.rm=T))
+all_drugTargets_MAXcorrGene=sapply(all_drugTargets_correlation,
+                                      function(x) names(which.max(x)))
+all_drugTargets_MAXcorrGene[sapply(all_drugTargets_MAXcorrGene, length)==0]=NA
+KnownTarget_predictions=data.frame(
+  drugName=names(all_drugTargets_MAXcorrelation),
+  MaxTargetName=unlist(all_drugTargets_MAXcorrGene),
+  Maxcorr=all_drugTargets_MAXcorrelation)
+KnownTarget_predictions=KnownTarget_predictions[order(KnownTarget_predictions$Maxcorr, decreasing = T),]
+```
+
+
+<!-- Preprocessing of Drug Category Data set to identify drug is inhibitor or not -->
 <!-- Compute if a drug is inhibitor or not -->
+<!--  Note: tell the activator part to sanju is.activator ~1640 due to grep(agonist), is.activator.check ~800. -->
 ```{r}
-category_inhibitor=c('inhibitor', 'antagonist', 'blocker')
-category_activator=c('agonist', 'activator', 'stimulant')
-category_inhibitor_drugs_ID=sapply(category_inhibitor, function(x) grep(x, onTarget$drugCategory$moa))
-category_activator_drugs_ID=sapply(category_activator, function(x) grep(x, onTarget$drugCategory$moa))
-category_inhibitor_drugs_ID=unique(unlist(category_inhibitor_drugs_ID))
-category_activator_drugs_ID=unique(unlist(category_activator_drugs_ID))
-onTarget$drugCategory$is.inhibitor=F
-onTarget$drugCategory$is.inhibitor[category_inhibitor_drugs_ID]=T
-onTarget$drugCategory$is.activator=F
-onTarget$drugCategory$is.activator[category_activator_drugs_ID]=T
+onTarget$drugCategory = onTarget$drugCategory %>% dplyr::mutate(is.inhibitor = ifelse(grepl('inhibitor', onTarget$drugCategory$moa) |
+                                                                   grepl('antagonist', onTarget$drugCategory$moa) |
+                                                                   grepl('blocker', onTarget$drugCategory$moa) ,TRUE, FALSE),
+                                     is.activator = ifelse(grepl('activator', onTarget$drugCategory$moa) |
+                                                                   grepl('\\bagonist\\b', onTarget$drugCategory$moa) |
+                                                                   grepl('stimulant', onTarget$drugCategory$moa) ,TRUE, FALSE))
 ```
 
-<!-- MATCHED MATRIX -->
+<!-- MATCHED MATRIX for expression data for Step_2 interaction of expression and mutation data-->
 ```{r}
 matched_cellLines=Reduce(intersect,
                          list(colnames(onTarget$expression_20Q4),
@@ -94,10 +111,3 @@ expression_matched=onTarget$expression_20Q4[,matched_cellLines]
 avana_matched=onTarget$avana_22Q2[,matched_cellLines]
 drug_matched=onTarget$secondary_prism[,matched_cellLines]
 ```
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-
