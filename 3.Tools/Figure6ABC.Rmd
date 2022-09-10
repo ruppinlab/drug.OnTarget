@@ -3,9 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 <!-- SECONDARY TARGETS SECTION-->
 <!-- Chart the landscape of secondary Targets -->
 ```{r}
@@ -17,6 +14,7 @@ knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
 ```{r}
 correctly_predicted=which(KnownTarget_predictions$PredictedRank<523)
 ```
+
 ```{r}
 count_correct_direction_prop=sum(KnownTarget_predictions$interaction_strength[correctly_predicted]<0, na.rm = T)/
   length(na.omit(KnownTarget_predictions$interaction_strength[correctly_predicted]))
@@ -105,9 +103,3 @@ ggsave(Figure6, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure6v0.
 ggsave(Figure6, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure6v0.pdf',
        width = 14, height = 4)
 ```
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

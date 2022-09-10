@@ -1,0 +1,383 @@
+---
+title: "Applications of TRUE Target: Figure 4"
+output: html_notebook
+---
+
+<!-- Complete Figure 4: The correlation plots between drug response and known target CRISPR-KO for (A) all targeted therapy- inhibitor drugs, (B) for drugs with single targets, and (C) for FDA-approved single-target cancer inhibitors. And rest figure 4 for predicting clinical advancement of a drug using predicted DKS score. -->
+
+<!-- Supplementary Figure 7A-F:Predicting new targets for drugs with targets that are predicted to be wrongly annotated or with no known targets. -->
+
+<!--Supplementary Figure 3A: Predicting the clinical advancement of addition 13 top targets where atleast three clinical phase information is available -->
+
+```{r}
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+```
+
+<!-- conditions for filtering out the drugs -->
+```{r}
+cond1=onTarget$drugCategory$drug_category=='targeted cancer'
+cond2=!is.na(as.character(onTarget$drugCategory$target))
+cond3=sapply(strsplit(as.character(onTarget$drugCategory$target), ', '), length)==1
+cond4=onTarget$drugCategory$is.inhibitor
+```
+
+<!-- Figure 4: panel 1 -->
+```{r}
+## figure for the drugs with targeted therapy and are inhibitors
+CancerInhibitors = onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond4]
+
+CancerInhibitors_mapping = match(CancerInhibitors,
+                                 KnownTarget_predictions$drugBroadID)
+
+df2plot = KnownTarget_predictions[na.omit(CancerInhibitors_mapping),]
+
+## conditioned for the remove low expressed drug
+cond5=df2plot$KnownTarget_meanCorr>3
+df2plot=df2plot[which(cond5),]
+
+df2plot = unique(df2plot) %>% select(c('drugName', 'Maxcorr', 'MaxTargetName', 'PredictedRank', 'phase')) %>% 
+  mutate(TrueTarget_Predicted = ifelse(PredictedRank < 523, 'Known Target is correct', 
+         'Known Target is wrong'))
+
+df2plot$TrueTarget_Predicted = factor(df2plot$TrueTarget_Predicted)  
+
+Figure4A <- ggplot(df2plot, aes(x=Maxcorr,
+                                       y=PredictedRank,
+                                       color=TrueTarget_Predicted))+
+  geom_point()+
+  theme_bw(base_size = 12)+
+  labs(x=text_wrap(''),
+       y='Genome-Wide Rank', color='True Target Prediction')+
+  scale_y_reverse()+
+  geom_text_repel(data = df2plot[df2plot$PredictedRank==1 & df2plot$Maxcorr>0.38,], 
+                  aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
+                  nudge_y = seq(-5000, -18000,-3000),
+                  nudge_x = seq(-0.5, 0.8, 0.2), max.overlaps = 1, size=3)+
+  geom_hline(yintercept = 523, linetype='dashed', color='blue')
+Figure4A
+```
+
+<!-- Figure supplemetary figure 7: panel 1 : How many drugs are wrongly annotated after removing the low-expressed ones -->
+<!-- Plot Figure supplementary 7A -->
+```{r}
+df2plot_supp7 = KnownTarget_predictions[na.omit(CancerInhibitors_mapping),]
+
+## computing the improvement score and adding the category column
+df2plot_supp7 = unique(df2plot_supp7) %>% mutate(improvement_over_known = BestTargetCorr - Maxcorr) %>% 
+  mutate(category = ifelse(PredictedRank<523, 'Correct Known target', 
+                           ifelse((PredictedRank>523 & BestTargetCorrFDR<0.1 & improvement_over_known>0.2), 
+                                                                                'Wrong Known target;\n Significant Target from TrueTarget', 
+                                                                                'Wrong Known target;\n No Significant Target from TrueTarget'))) 
+
+### defining the id of low expressed drugs
+remove_not_expressed = df2plot_supp7$KnownTarget_meanCorr>3
+launched = df2plot_supp7$phase=='Launched'
+
+remove_not_expressedID = which(remove_not_expressed)
+df2plot_supp7_removeNotExp = df2plot_supp7[remove_not_expressedID,]
+
+## used for figure 4D
+## computing the propotion of single targeted drug which are rank less than 523
+prop_Targeted_inhibitor= sum(df2plot_supp7_removeNotExp$PredictedRank < 523, na.rm = T)/ length(df2plot_supp7_removeNotExp$PredictedRank)
+prop_Approved_Targeted_Inhibitor = sum(df2plot_figure4A$PredictedRank[remove_not_expressed & launched]<523, 
+                                       na.rm = T) / length(df2plot_figure4A$PredictedRank[which(remove_not_expressed & launched)])
+
+Figure_supp_7A <- ggplot(df2plot_supp7_removeNotExp,
+                   aes(y=BestTargetCorr, x=Maxcorr,
+                       color=category
+                       ))+
+  geom_point()+
+  theme_bw(base_size = 12)+
+  # coord_fixed()+
+  theme(legend.position = 'top')+
+  guides(color=guide_legend(nrow=3,byrow=TRUE))+
+  labs(x='Correlation with Known Target', y='Correlation with Best\n Predicted Target')+
+  geom_mark_ellipse(expand = 0)
+
+Figure_supp_7A
+```
+
+<!-- How many wrong-known target drugs have a significant prediction from our pipeline -->
+<!-- Plot Figure supplementary 7B -->
+```{r}
+Figure_supp_7B <- ggplot(df2plot_supp7_removeNotExp, aes(y=BestTargetCorr, x=PredictedRank,
+                             color= category ))+
+  geom_point()+
+  geom_vline(xintercept = 523, linetype='dashed', color='blue')+
+  theme_bw(base_size = 12)+
+  theme(legend.position = 'top')+
+  guides(color=guide_legend(nrow=3,byrow=TRUE))+
+  labs(x='Rank of Known Target', y='Correlation with Best\n Predicted Target')
+Figure_supp_7B
+```
+
+
+<!-- Plot Figure supplementary 7C -->
+```{r}
+cor_Threshold=0.3
+To_annotate=df2plot_supp7_removeNotExp$improvement_over_known>cor_Threshold & 
+  df2plot_supp7_removeNotExp$category==unique(df2plot_supp7_removeNotExp$category)[3]
+
+#Add drug; known; predicted
+df2plot_supp7_removeNotExp= df2plot_supp7_removeNotExp %>% mutate(drug_ann = '') %>% 
+  mutate(drug_known_predicted_annotation = paste(drugName, MaxTargetName, BestTargetName, sep=';' ))
+
+df2plot_supp7_removeNotExp$drug_ann[To_annotate] = df2plot_supp7_removeNotExp$drug_known_predicted_annotation[To_annotate]
+Figure_supp_7C <- ggplot(CancerInhibitors_removeNotExp, aes(y=improvement_over_known, x=PredictedRank,
+                             color= category,label=drug_ann))+
+  geom_point()+
+  geom_label_repel(size=3)+
+  theme_bw(base_size = 12)+
+  # theme(legend.position = 'none')+
+  geom_vline(xintercept = 523, linetype='dashed', color='blue')+
+  geom_hline(yintercept = 0.2, linetype='dashed', color='blue')+
+  labs(x='Predicted Rank of Known Target', y='Improvement score of\nPredicted Target over Known')
+Figure_supp_7C 
+```
+
+<!-- Plot Figure supplementary 7D -->
+```{r}
+cat_ofInterest=CancerInhibitors_removeNotExp$category==unique(CancerInhibitors_removeNotExp$category)[3]
+CancerInhibitors_removeNotExp_cat_ofInterest=CancerInhibitors_removeNotExp[cat_ofInterest,]
+
+figure_supp_7D_data=data.frame(table(CancerInhibitors_removeNotExp_cat_ofInterest$phase))
+Figure_supp_7D <- ggplot(figure3D_data, aes(y=Freq, x=Var1))+
+  geom_segment( aes(x=Var1, xend=Var1, y=0, yend=Freq), color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6)+
+   theme_bw(base_size = 12) +
+  coord_flip()+
+  labs(y='Drugs with alternative\npredicted target',x='Drugs Category')
+
+Figure_supp_7D 
+```
+
+<!-- Plot Figure supplementary 7E and 7F -->
+<!-- Strophanthidin target is known as ATP1A1 but our pipeline predicts it as PSMD5 -->
+```{r}
+CurrWrong_Target='ATP1A1'; DOI='strophanthidin'; BestPredicted_Target='PSMD5'
+# sum(expression_matched[CurrWrong_Target,]<3)
+DOI_id=KnownTarget_predictions$drugBroadID[grep('strophanthidin', KnownTarget_predictions$drugName)]
+Figure3E_data=rbind(data.frame(Target='Currently Known Target',
+                               TargetName=CurrWrong_Target,
+                               CRISPR_KO=avana_matched[CurrWrong_Target,],
+                               drug_response=drug_matched[DOI_id,]),
+                    data.frame(Target='Predicted Target',
+                               TargetName=BestPredicted_Target,
+                               CRISPR_KO=avana_matched[BestPredicted_Target,],
+                               drug_response=drug_matched[DOI_id,]
+                               )
+                    )
+
+
+Figure_supp_7EF <- ggplot(Figure3E_data, aes(x=CRISPR_KO, y=drug_response))+
+  geom_point()+
+  stat_smooth(method = 'lm', se = T)+
+  facet_wrap(.~Target+TargetName, scales = 'free')+
+  theme_bw(base_size = 12)+
+  labs(x='Viability after CRISPR-KO',
+       y=paste('Response to', DOI))+
+  stat_cor(size=4)+
+  theme(legend.position = 'top')
+Figure_supp_7EF 
+
+# ggsave(Figure3E, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS9v0.pdf',
+#        width = 6, height = 4)
+```
+
+<!-- Attaching supp figure together -->
+```{r} 
+Figure_supp_7ABC=ggarrange(Figure_supp_7A, Figure_supp_7B, Figure_supp_7C, 
+                     labels = 'AUTO', nrow = 1,ncol = 3,
+                     common.legend = TRUE,
+                     legend="top")
+Figure_supp_7ABCDEF <- grid.arrange(Figure_supp_7ABC, Figure_supp_7D, Figure_supp_7EF, nrow = 2,
+                        layout_matrix = rbind(c(1, 1, 1),c(1, 1, 1),c(1, 1, 1),c(2, 3, 3), c(2, 3, 3)) )
+
+# ggsave(Figure3, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure3v0.pdf',
+#        width = 10, height = 6)
+```
+
+<!-- Figure 4(B-D): Main figure -->
+<!-- Figure 4: Data preprocessing: true target of the drugs which have single target and used for targeted therapy and are inhibitor -->
+```{r}
+singleCancerInhibitors = onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond3 & cond4]
+
+singleCancerInhibitors_mapping = match_stripall(singleCancerInhibitors, KnownTarget_predictions$drugBroadID)
+df2plot_single = KnownTarget_predictions[na.omit(singleCancerInhibitors_mapping),]
+### condition defining the id of low expressed drugs
+cond5=df2plot_single$KnownTarget_meanCorr>3
+df2plot_single=df2plot_single[which(cond5),]
+
+df2plot_single = unique(df2plot_single) %>% select(c('drugName', 'Maxcorr', 'MaxTargetName', 'PredictedRank')) %>%
+  mutate(TrueTarget_Predicted = ifelse(PredictedRank<523, 'Known Target is correct', 
+         'Known Target is wrong'))
+```
+
+<!-- Plot Figure 4: panel 2 -->
+```{r}
+Figure_4B <- ggplot(df2plot_single, aes(x=Maxcorr,
+                                       y=PredictedRank,
+                                       color=TrueTarget_Predicted))+
+  geom_point()+
+  theme_bw(base_size = 12)+
+  labs(x='Correlation of drug response\n& known target CRISPR-KO',
+       y='', color='True Target Prediction')+
+  scale_y_reverse()+
+  geom_text_repel(data = df2plot_single[df2plot_single$PredictedRank<2 & df2plot_single$Maxcorr>0.33,], 
+                  aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
+                  nudge_y = seq(-5000, -16000,-4000),
+                  nudge_x = seq(-0.5, 0.8, 0.4),
+                  max.overlaps = 1, size=3)+
+  geom_hline(yintercept = 523, linetype='dashed', color='blue')
+Figure_4B 
+```
+
+<!-- Figure 4: panel 3 -->
+```{r}
+df2plot_launched=na.omit(df2plot[df2plot$phase =='Launched',])
+
+Figure_4C <- ggplot(na.omit(df2plot_launched),
+                   aes(x=Maxcorr,y=PredictedRank,color=TrueTarget_Predicted))+
+  geom_point()+
+  theme_bw(base_size = 12)+
+  labs(x=text_wrap(''),
+       y='', color='True Target Prediction')+
+  scale_y_reverse()+
+  geom_text_repel(data = df2plot_launched[df2plot_launched$PredictedRank<10,], 
+                  aes(x=Maxcorr, y=PredictedRank,label=paste(drugName, MaxTargetName, sep = ':')),
+                    nudge_y = seq(-5000, -10000,-1000),
+                  nudge_x = seq(-0.5, 0.2, 0.1), max.overlaps = 1, size=3)+
+  geom_hline(yintercept = 523, linetype='dashed', color='blue')
+Figure_4C 
+
+
+```
+
+<!-- Figure 4: panel 4 -->
+```{r}
+### figure 4: computed after removing the drugs with low expression
+## computing the propotion drug which are rank less than 523 with condition
+prop_Targeted_inhibitor= sum(df2plot$PredictedRank<523, na.rm = T)/length(na.omit(df2plot$PredictedRank))
+prop_Single_Targeted_Inhibitor= sum(df2plot_single$PredictedRank<523)/length(df2plot_single$PredictedRank)
+prop_Approved_Targeted_Inhibitor = sum(df2plot_launched$PredictedRank<523, na.rm = T)/length(na.omit(df2plot_launched$PredictedRank))
+
+figure4D_data=data.frame(Category=c('Targeted Inhibitor', 
+                                    'Single Targeted Inhibitor', 
+                                    'Approved Targeted Inhibitor'),
+Prop_corr_ann=c(prop_Targeted_inhibitor, 
+                prop_Single_Targeted_Inhibitor, 
+                prop_Approved_Targeted_Inhibitor
+                ))
+
+figure_4D <- ggplot(figure2D_data, aes(y=Prop_corr_ann, x=str_wrap(Category, 5)))+
+  geom_segment( aes(x=str_wrap(Category, 5), xend=str_wrap(Category, 5),
+                    y=0, yend=Prop_corr_ann), color="skyblue") +
+  geom_point(color="blue", size=4, alpha=0.6)+
+   theme_bw(base_size = 10) +
+  coord_flip()+
+  labs(y='Proportion of Drugs\n with correct known Target',x='Drugs Category')
+figure_4D
+```
+
+<!-- Figure 4: panel 5 --> 
+<!-- The clinical advancement of a drug is increasing as the DKS score of the drug increases -->
+```{r}
+## top most frequent 20 know genes 
+top_20_target= names(head(sort(table(KnownTarget_predictions$MaxTargetName), decreasing = T),20))
+
+#### top target of interest
+top_3_target= top_20_target[top_20_target %in% c('EGFR','MET','MAP2K1')]
+top_3_target_df= KnownTarget_predictions[KnownTarget_predictions$MaxTargetName %in% top_3_target,] %>% distinct(drugName, .keep_all= T)
+
+df2plot_join_with_launch_data= top_3_target_df[!(is.na(top_3_target_df$phase)),]
+table(df2plot_join_with_launch_data$phase)
+df2plot_join_with_launch_data = df2plot_join_with_launch_data %>% mutate(phase = replace(phase, phase == 'Phase 1/Phase 2', 'Phase 2')) %>% 
+  mutate(clinical_stage = ifelse(phase== 'Preclinical', 0,
+                                 ifelse(phase == 'Phase 1', 1, 
+                                        ifelse(phase == 'Phase 2', 2, 
+                                               ifelse(phase== 'Phase 3', 3, 
+                                                      ifelse(phase == "Launched", 4, -1))))), .after = phase)
+
+combnations= combn(unique(df2plot_join_with_launch_data$phase),2, simplify = F)
+
+Figure_4EFG = ggplot(df2plot_join_with_launch_data, aes(x= reorder(factor(phase),clinical_stage), 
+                                          y= Maxcorr,
+                                          color= clinical_stage))+
+  geom_boxplot()+
+  facet_wrap(vars(MaxTargetName), scales = 'free')+
+  stat_compare_means(comparisons = combnations)+
+  theme_bw(base_size = 12)+
+  stat_smooth(method = 'lm', se= T, level = 0.8,
+              span= 1, aes(group= 1), linetype= 'dotted', size= 0.8)+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust=0.9),
+        legend.position = 'right')+
+  labs(x= 'Clinical Stages' , y = 'DKS Score')
+Figure_4EFG
+```
+
+<!-- Attaching figure 4A-G  -->
+
+```{r}
+Figure4ABC=ggarrange(Figure4A, Figure_4B, Figure_4C, 
+                     labels = 'AUTO', nrow = 1,common.legend = TRUE, legend="top")
+Figure4 <- grid.arrange(Figure4ABC, figure_4D, Figure_4EFG,
+                        layout_matrix = rbind(c(1, 1, 1, 1),c(1, 1, 1, 1),c(2, 3, 3, 3),c(NA, 3, 3, 3)) )
+ggsave(Figure4, filename = '../result/Figure4_v1.pdf',
+       width = 10, height = 8)
+```
+
+
+<!-- Supplementary figure S3A predicting clinical advancement using prediced DKS score in 11 addition top drugs -->
+```{r fig.width=5, fig.height=7}
+top_13_target= top_20_target[!top_20_target %in% c('EGFR','MET','MAP2K1', 'MAPK14','TYMS','PGR','NR3C1')]
+additional_13_top_target_df= KnownTarget_predictions[KnownTarget_predictions$MaxTargetName %in% top_13_target,] %>% distinct(drugName, .keep_all= T)
+
+df2plot_data_supp_3A= additional_13_top_target_df[!(is.na(additional_13_top_target_df$phase)),]
+
+df2plot_data_supp_3A = df2plot_data_supp_3A %>% mutate(phase = replace(phase, phase == 'Phase 1/Phase 2', 'Phase 2')) %>% 
+  mutate(phase = replace(phase, phase == 'Phase 2/Phase 3', 'Phase 3')) %>%
+  mutate(clinical_stage = ifelse(phase== 'Preclinical', 0,
+                                 ifelse(phase == 'Phase 1', 1, 
+                                        ifelse(phase == 'Phase 2', 2, 
+                                               ifelse(phase== 'Phase 3', 3, 
+                                                      ifelse(phase == "Launched", 4, -1))))), .after = phase)
+
+Figure_Supp_3A = ggplot(df2plot_data_supp_3A, aes(x= reorder(factor(phase),clinical_stage), 
+                                          y= Maxcorr,
+                                          color= clinical_stage))+
+  geom_boxplot()+
+  facet_wrap(vars(MaxTargetName),
+            scales = 'free')+
+  theme_bw(base_size = 12)+
+  stat_smooth(method = 'lm', se= T, level = 0.8,
+              span= 1, aes(group= 1), linetype= 'dotted', size= 0.8)+
+  theme(axis.text.x = element_text(angle = 35, vjust = 0.9, hjust=0.9),
+        legend.position = 'top')+
+  labs(x= 'Clinical Stages' , y = 'DKS Score')
+Figure_Supp_3A
+
+ggsave(Figure_Supp_3A, filename = '../result/Figure_supp_3A.pdf',
+       width = 10, height = 10)
+```
+
+
+
+
+<!-- Extra -->
+```{r}
+onTarget$drugCategory[grep('decitabine',onTarget$drugCategory$name),]
+
+CancerInhibitors_removeNotExp[cat_ofInterest,]$phase
+CancerInhibitors[grep('DNMT1', CancerInhibitors$MaxTargetName ),]
+```
+
+```{r}
+CancerInhibitors_removeNotExp_cat_ofInterest[order(CancerInhibitors_removeNotExp_cat_ofInterest$improvement_over_known, decreasing = T),-c(4:11,14:16)]
+CancerInhibitors_removeNotExp_cat_ofInterest[order(CancerInhibitors_removeNotExp_cat_ofInterest$BestTargetCorr, decreasing = T),-c(4:11,14:16)]
+CancerInhibitors_removeNotExp_cat_ofInterest[grep('Launched',CancerInhibitors_removeNotExp_cat_ofInterest$phase),]
+
+## to extract names of the target
+cat(CancerInhibitors_removeNotExp_cat_ofInterest$MaxTargetName, sep = '\n')
+```
+

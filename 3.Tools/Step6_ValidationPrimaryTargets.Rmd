@@ -10,8 +10,8 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 <!-- Preloading -->
 ```{r}
 library(pROC)
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
 ```
 <!-- V1: Validation based on Targets that are more indepedently cited >3 -->
 <!-- By Curating BioGrid Chemical Interaction database we would like to test  -->

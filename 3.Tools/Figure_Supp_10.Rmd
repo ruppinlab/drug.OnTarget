@@ -1,17 +1,14 @@
 ---
-title: "R Notebook"
+title: "Supplementary Figure 10"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
-
+<!-- Supplementary_10B - Pathways enriched in the mechanism of actions of drugs with incorrect targets  -->
 <!-- ribociclib: Incorrect and correct Target; Figure S5C -->
 ```{r}
 CurrWrong_Target='CDK4'; DOI='ribociclib'; BestPredicted_Target='CDIPT'
 DOI_id=KnownTarget_predictions$drugBroadID[grep(DOI, KnownTarget_predictions$drugName)[1]]
-FigureS5C_data=rbind(data.frame(Target='Currently Known Target',
+Figure_supp_10BC_data=rbind(data.frame(Target='Currently Known Target',
                                TargetName=CurrWrong_Target,
                                CRISPR_KO=avana_matched[CurrWrong_Target,],
                                drug_response=drug_matched[DOI_id,]),
@@ -23,7 +20,7 @@ FigureS5C_data=rbind(data.frame(Target='Currently Known Target',
                     )
 
 
-FigureS5C <- ggplot(FigureS5C_data, aes(x=CRISPR_KO, y=drug_response))+
+Figure_supp_10BC <- ggplot(FigureS5C_data, aes(x=CRISPR_KO, y=drug_response))+
   geom_point()+
   stat_smooth(method = 'lm', se = T)+
   facet_wrap(.~Target+TargetName, scales = 'free')+
@@ -32,17 +29,13 @@ FigureS5C <- ggplot(FigureS5C_data, aes(x=CRISPR_KO, y=drug_response))+
        y=paste('Response to', DOI))+
   stat_cor(size=4)+
   theme(legend.position = 'top')
-FigureS5C
-ggsave(FigureS5C, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5C.png',
-       width = 6, height = 4)
-ggsave(FigureS5C, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5C.pdf',
-       width = 6, height = 4)
+Figure_supp_10BC
 ```
 
 ```{r}
 CurrWrong_Target='DNMT1'; DOI='decitabine'; BestPredicted_Target='CFAP20'
 DOI_id=KnownTarget_predictions$drugBroadID[grep(DOI, KnownTarget_predictions$drugName)[1]]
-FigureS5D_data=rbind(data.frame(Target='Currently Known Target',
+Figure_supp_10DE_data=rbind(data.frame(Target='Currently Known Target',
                                TargetName=CurrWrong_Target,
                                CRISPR_KO=avana_matched[CurrWrong_Target,],
                                drug_response=drug_matched[DOI_id,]),
@@ -54,7 +47,7 @@ FigureS5D_data=rbind(data.frame(Target='Currently Known Target',
                     )
 
 
-FigureS5D<- ggplot(FigureS5D_data, aes(x=CRISPR_KO, y=drug_response))+
+Figure_supp_10DE<- ggplot(FigureS5D_data, aes(x=CRISPR_KO, y=drug_response))+
   geom_point()+
   stat_smooth(method = 'lm', se = T)+
   facet_wrap(.~Target+TargetName, scales = 'free')+
@@ -63,18 +56,12 @@ FigureS5D<- ggplot(FigureS5D_data, aes(x=CRISPR_KO, y=drug_response))+
        y=paste('Response to', DOI))+
   stat_cor(size=4)+
   theme(legend.position = 'top')
-FigureS5D
-ggsave(FigureS5D, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5D.png',
-       width = 6, height = 4)
-ggsave(FigureS5D, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5D.pdf',
-       width = 6, height = 4)
+Figure_supp_10DE
 ```
 
 ```{r}
-FigureS5 <-grid.arrange(FigureS5C, FigureS5D, nrow=1)
-ggsave(FigureS5, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5CD.png',
-       width = 12, height = 4)
-ggsave(FigureS5, filename = '/Users/sinhas8/Project_TrueTarget/Results/FigureS5CD.pdf',
+Figure_supp_10B <-grid.arrange(FigureS5C, FigureS5D, nrow=1)
+ggsave(Figure_supp_10B, filename = '../result/Figure_Supp_10CD.pdf',
        width = 10, height = 4)
 
 ```

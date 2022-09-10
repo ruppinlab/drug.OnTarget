@@ -1,16 +1,14 @@
 ---
-title: "R Notebook"
+title: "supplementary figure 7G or 8"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- Wrongly allocated target and pathway -->
 <!-- Create Alluvial Plot -->
 ```{r}
 library(qusage)
 require('ggalluvial')
-hallmark_pathway=read.gmt('/Users/sinhas8/Downloads/h.all.v7.5.1.symbols (1).gmt')
+hallmark_pathway=read.gmt('../Data/h.all.v7.5.1.symbols (1).gmt')
 pathway_annotation=sapply(1:nrow(KnownTarget_predictions),function(y)
   na.omit(sapply(names(hallmark_pathway), function(x) match(KnownTarget_predictions$MaxTargetName[y], hallmark_pathway[[x]])))[1] )
 pathway_annotation[1:10]
@@ -156,11 +154,4 @@ ggsave(Figure4, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4v0.
 ```{r}
 
 ```
-
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 

@@ -1772,11 +1772,12 @@ pre code {
 <!-- Libraries -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBpZiAoIXJlcXVpcmUoXCJCaW9jTWFuYWdlclwiLCBxdWlldGx5ID0gVFJVRSkpXG4jICAgICBpbnN0YWxsLnBhY2thZ2VzKFwiQmlvY01hbmFnZXJcIilcbiMgXG4jIEJpb2NNYW5hZ2VyOjppbnN0YWxsKFwiZmdzZWFcIilcblxuIyMjIG5ldHdvcmsgcHJvYmxlbSA6IHRhbGtlZCB0byBuYXJpc3UgYW5kIHRhbGtlZCBhYm91dCB0aGUgYXV0aGVudGljYXRpb25cbiMgbGlicmFyeShmZ3NlYSlcbnJlcXVpcmUoZGF0YS50YWJsZSlcbnJlcXVpcmUoJ3N0cmluZ2InKVxucmVxdWlyZShwYXJhbGxlbClcbnJlcXVpcmUoJ3RpY3RvYycpXG5yZXF1aXJlKHN0YXRhcilcbnJlcXVpcmUoJ2ludGVyYWN0aW9ucycpXG5yZXF1aXJlKHN0YXRzKVxucmVxdWlyZShyZXNoYXBlMilcbnJlcXVpcmUoZ2dwbG90MilcbnJlcXVpcmUoZ2dwdWJyKVxucmVxdWlyZShnZ3JlcGVsKVxucmVxdWlyZShnZ2ZvcmNlKVxucmVxdWlyZShncmlkKVxucmVxdWlyZShjb3dwbG90KVxucmVxdWlyZShncmlkRXh0cmEpXG5yZXF1aXJlKHBST0MpXG5yZXF1aXJlKERFR3JlcG9ydClcblxuI0Z1bmN0aW9ucyBuZWVkZWRcbnNvdXJjZSgnLi4vMy5Ub29scy9teUN1c3RvbV9mdW5jdGlvbnMuUicpXG5gYGAifQ== -->
-<pre class="r"><code># if (!require(&quot;BiocManager&quot;, quietly = TRUE))
-#     install.packages(&quot;BiocManager&quot;)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuIyBpZiAoIXJlcXVpcmUoXFxCaW9jTWFuYWdlclxcLCBxdWlldGx5ID0gVFJVRSkpXG4jICAgICBpbnN0YWxsLnBhY2thZ2VzKFxcQmlvY01hbmFnZXJcXClcbiMgXG4jIEJpb2NNYW5hZ2VyOjppbnN0YWxsKFxcZmdzZWFcXClcblxuIyMjIG5ldHdvcmsgcHJvYmxlbSA6IHRhbGtlZCB0byBuYXJpc3UgYW5kIHRhbGtlZCBhYm91dCB0aGUgYXV0aGVudGljYXRpb25cbiMgbGlicmFyeShmZ3NlYSlcbnJlcXVpcmUoZGF0YS50YWJsZSlcbnJlcXVpcmUoJ3N0cmluZ2InKVxucmVxdWlyZShwYXJhbGxlbClcbnJlcXVpcmUoJ3RpY3RvYycpXG5yZXF1aXJlKHN0YXRhcilcbnJlcXVpcmUoJ2ludGVyYWN0aW9ucycpXG5yZXF1aXJlKHN0YXRzKVxucmVxdWlyZShyZXNoYXBlMilcbnJlcXVpcmUoZ2dwbG90MilcbnJlcXVpcmUoZ2dwdWJyKVxucmVxdWlyZShnZ3JlcGVsKVxucmVxdWlyZShnZ2ZvcmNlKVxucmVxdWlyZShncmlkKVxucmVxdWlyZShjb3dwbG90KVxucmVxdWlyZShncmlkRXh0cmEpXG5yZXF1aXJlKHBST0MpXG5yZXF1aXJlKERFR3JlcG9ydClcblxuI0Z1bmN0aW9ucyBuZWVkZWRcbnNvdXJjZSgnLi4vMy5Ub29scy9teUN1c3RvbV9mdW5jdGlvbnMuUicpXG5gYGBcbmBgYCJ9 -->
+<pre class="r"><code>```r
+# if (!require(\BiocManager\, quietly = TRUE))
+#     install.packages(\BiocManager\)
 # 
-# BiocManager::install(&quot;fgsea&quot;)
+# BiocManager::install(\fgsea\)
 
 ### network problem : talked to narisu and talked about the authentication
 # library(fgsea)
@@ -1800,73 +1801,110 @@ require(DEGreport)
 
 #Functions needed
 source(&#39;../3.Tools/myCustom_functions.R&#39;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- OnTarget Data and the preprocessing-->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBzZXR3ZCgnL1VzZXJzL3NpbmhhbmVlL0RvY3VtZW50cy9wcm9qZWN0cy9kcnVnLk9uVGFyZ2V0LycpXG5vblRhcmdldD1yZWFkUkRTKCcuLi9EYXRhL29uVGFyZ2V0X3YyLjAuUkRTJylcbktub3duVGFyZ2V0X3ByZWRpY3Rpb25zPXJlYWRSRFMoJy4uL0RhdGEvS25vd25UYXJnZXRfcHJlZGljdGlvbnNfdjMuUkRTJykgIyMgcmVxdWlyZWQgZGF0YXNldCBsYXRlc3QgdmVyc2lvblxuZHJ1Z0NhbmRpZGF0ZXNfZm9yX3NlY1RhcmdldHM9cmVhZFJEUygnLi4vRGF0YS9kcnVnQ2FuZGlkYXRlc19mb3Jfc2VjVGFyZ2V0cy5SRFMnKVxuZHJ1Z1ZTY3Jpc3ByX2NvcnJfZmVhdHVyZXNfbGlzdD1yZWFkUkRTKCcuLi9EYXRhL2RydWdWU2NyaXNwcl9jb3JyX2ZlYXR1cmVzX2xpc3QuUkRTJylcbmBgYCJ9 -->
-<pre class="r"><code># setwd(&#39;/Users/sinhanee/Documents/projects/drug.OnTarget/&#39;)
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+&lt;!-- OnTarget Data and the preprocessing--&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuIyBzZXR3ZCgnL1VzZXJzL3NpbmhhbmVlL0RvY3VtZW50cy9wcm9qZWN0cy9kcnVnLk9uVGFyZ2V0LycpXG5vblRhcmdldD1yZWFkUkRTKCcuLi9EYXRhL29uVGFyZ2V0X3YyLjAuUkRTJylcbktub3duVGFyZ2V0X3ByZWRpY3Rpb25zPXJlYWRSRFMoJy4uL0RhdGEvS25vd25UYXJnZXRfcHJlZGljdGlvbnNfdjMuUkRTJykgIyMgcmVxdWlyZWQgZGF0YXNldCBsYXRlc3QgdmVyc2lvblxuZHJ1Z0NhbmRpZGF0ZXNfZm9yX3NlY1RhcmdldHM9cmVhZFJEUygnLi4vRGF0YS9kcnVnQ2FuZGlkYXRlc19mb3Jfc2VjVGFyZ2V0cy5SRFMnKVxuZHJ1Z1ZTY3Jpc3ByX2NvcnJfZmVhdHVyZXNfbGlzdD1yZWFkUkRTKCcuLi9EYXRhL2RydWdWU2NyaXNwcl9jb3JyX2ZlYXR1cmVzX2xpc3QuUkRTJylcbmBgYFxuYGBgIn0= --&gt;
+
+```r
+```r
+# setwd(&#39;/Users/sinhanee/Documents/projects/drug.OnTarget/&#39;)
 onTarget=readRDS(&#39;../Data/onTarget_v2.0.RDS&#39;)
 KnownTarget_predictions=readRDS(&#39;../Data/KnownTarget_predictions_v3.RDS&#39;) ## required dataset latest version
 drugCandidates_for_secTargets=readRDS(&#39;../Data/drugCandidates_for_secTargets.RDS&#39;)
 drugVScrispr_corr_features_list=readRDS(&#39;../Data/drugVScrispr_corr_features_list.RDS&#39;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- Get the correlation strength, P value and the rank of the correlation matrix-->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGltKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKVxuXG5gYGAifQ== -->
-<pre class="r"><code>dim(drugVScrispr_corr_Strength)
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+
+&lt;!-- Get the correlation strength, P value and the rank of the correlation matrix--&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuZGltKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKVxuXG5gYGBcbmBgYCJ9 --&gt;
+
+```r
+```r
+dim(drugVScrispr_corr_Strength)
 </code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDE3Mzg2ICAxNjE4XG4ifQ== -->
-<pre><code>[1] 17386  1618</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- known target prediction-->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZHJ1Z1N1YnNldF9tYXAyX2Fubm90YXRpb24gPC0gbWF0Y2gocm93bmFtZXMob25UYXJnZXQkc2Vjb25kYXJ5X3ByaXNtKSwgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JGJyb2FkX2lkX3RyaW1tZWQpXG5cbmFsbF9kcnVnTmFtZXNfY29tbW9uID0gb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG5hbWVbZHJ1Z1N1YnNldF9tYXAyX2Fubm90YXRpb25dXG5hbGxfZHJ1Z1RhcmdldHMgPSBvblRhcmdldCRkcnVnQ2F0ZWdvcnlbZHJ1Z1N1YnNldF9tYXAyX2Fubm90YXRpb24sYygnbmFtZScsJ3RhcmdldCcpXVxuYWxsX2RydWdNT0EgPSBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hW2RydWdTdWJzZXRfbWFwMl9hbm5vdGF0aW9uXVxuYGBgIn0= -->
-<pre class="r"><code>drugSubset_map2_annotation &lt;- match(rownames(onTarget$secondary_prism), onTarget$drugCategory$broad_id_trimmed)
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-output-begin eyJkYXRhIjoiWzFdIDE3Mzg2ICAxNjE4XG4ifQ== --&gt;
+</code></pre>
+<p>[1] 17386 1618</p>
+<pre><code>
+
+
+&lt;!-- rnb-output-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+&lt;!-- known target prediction--&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuZHJ1Z1N1YnNldF9tYXAyX2Fubm90YXRpb24gPC0gbWF0Y2gocm93bmFtZXMob25UYXJnZXQkc2Vjb25kYXJ5X3ByaXNtKSwgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JGJyb2FkX2lkX3RyaW1tZWQpXG5cbmFsbF9kcnVnTmFtZXNfY29tbW9uID0gb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG5hbWVbZHJ1Z1N1YnNldF9tYXAyX2Fubm90YXRpb25dXG5hbGxfZHJ1Z1RhcmdldHMgPSBvblRhcmdldCRkcnVnQ2F0ZWdvcnlbZHJ1Z1N1YnNldF9tYXAyX2Fubm90YXRpb24sYygnbmFtZScsJ3RhcmdldCcpXVxuYWxsX2RydWdNT0EgPSBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hW2RydWdTdWJzZXRfbWFwMl9hbm5vdGF0aW9uXVxuYGBgXG5gYGAifQ== --&gt;
+
+```r
+```r
+drugSubset_map2_annotation &lt;- match(rownames(onTarget$secondary_prism), onTarget$drugCategory$broad_id_trimmed)
 
 all_drugNames_common = onTarget$drugCategory$name[drugSubset_map2_annotation]
 all_drugTargets = onTarget$drugCategory[drugSubset_map2_annotation,c(&#39;name&#39;,&#39;target&#39;)]
 all_drugMOA = onTarget$drugCategory$moa[drugSubset_map2_annotation]</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- Identify the known target Correlation -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWxsX2RydWdUYXJnZXRzX3NlcGVyYXRlZCA9IHN0cl9zcGxpdChhcy5jaGFyYWN0ZXIoYWxsX2RydWdUYXJnZXRzKSwgXCIsIFwiKVxuXG5hbGxfZHJ1Z1RhcmdldHNfY29ycmVsYXRpb249c2FwcGx5KDE6bGVuZ3RoKGFsbF9kcnVnVGFyZ2V0c19zZXBlcmF0ZWQpLFxuICAgICAgZnVuY3Rpb24oeCkge1xuICAgICAgICByZXRfY29yPWRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoW1xuICAgICAgICAgIG1hdGNoKGFsbF9kcnVnVGFyZ2V0c19zZXBlcmF0ZWRbW3hdXSxcbiAgICAgICAgICAgICAgICByb3duYW1lcyhkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aCkpLCB4XVxuICAgICAgICBuYW1lcyhyZXRfY29yKT1lcnJfaGFuZGxlKGFsbF9kcnVnVGFyZ2V0c19zZXBlcmF0ZWRbW3hdXSlcbiAgICAgICAgcmV0X2NvclxuICAgICAgICB9IClcblxubmFtZXMoYWxsX2RydWdUYXJnZXRzX2NvcnJlbGF0aW9uKSA8LSBhcy5jaGFyYWN0ZXIoYWxsX2RydWdOYW1lc19jb21tb24pXG5hbGxfZHJ1Z1RhcmdldHNfY29ycmVsYXRpb25bJ2RhYnJhZmVuaWInXVxuXG4jIyMgRGF0YWZyYW1lIG9mIHRoZSBrbm93bnRhcmdldF9wcmVkaWN0aW9uXG5hbGxfZHJ1Z1RhcmdldHNfTUFYY29ycmVsYXRpb249c2FwcGx5KGFsbF9kcnVnVGFyZ2V0c19jb3JyZWxhdGlvbiwgZnVuY3Rpb24oeCkgbWF4KHgsIG5hLnJtPVQpKVxuYWxsX2RydWdUYXJnZXRzX01BWGNvcnJHZW5lPXNhcHBseShhbGxfZHJ1Z1RhcmdldHNfY29ycmVsYXRpb24sXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGZ1bmN0aW9uKHgpIG5hbWVzKHdoaWNoLm1heCh4KSkpXG5hbGxfZHJ1Z1RhcmdldHNfTUFYY29yckdlbmVbc2FwcGx5KGFsbF9kcnVnVGFyZ2V0c19NQVhjb3JyR2VuZSwgbGVuZ3RoKT09MF09TkFcbktub3duVGFyZ2V0X3ByZWRpY3Rpb25zPWRhdGEuZnJhbWUoXG4gIGRydWdOYW1lPW5hbWVzKGFsbF9kcnVnVGFyZ2V0c19NQVhjb3JyZWxhdGlvbiksXG4gIE1heFRhcmdldE5hbWU9dW5saXN0KGFsbF9kcnVnVGFyZ2V0c19NQVhjb3JyR2VuZSksXG4gIE1heGNvcnI9YWxsX2RydWdUYXJnZXRzX01BWGNvcnJlbGF0aW9uKVxuS25vd25UYXJnZXRfcHJlZGljdGlvbnM9S25vd25UYXJnZXRfcHJlZGljdGlvbnNbb3JkZXIoS25vd25UYXJnZXRfcHJlZGljdGlvbnMkTWF4Y29yciwgZGVjcmVhc2luZyA9IFQpLF1cbmBgYCJ9 -->
-<pre class="r"><code>all_drugTargets_seperated = str_split(as.character(all_drugTargets), &quot;, &quot;)
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
 
-all_drugTargets_correlation=sapply(1:length(all_drugTargets_seperated),
-      function(x) {
-        ret_cor=drugVScrispr_corr_Strength[
-          match(all_drugTargets_seperated[[x]],
-                rownames(drugVScrispr_corr_Strength)), x]
-        names(ret_cor)=err_handle(all_drugTargets_seperated[[x]])
-        ret_cor
-        } )
+&lt;!-- rnb-chunk-end --&gt;
 
-names(all_drugTargets_correlation) &lt;- as.character(all_drugNames_common)
-all_drugTargets_correlation[&#39;dabrafenib&#39;]
 
-### Dataframe of the knowntarget_prediction
-all_drugTargets_MAXcorrelation=sapply(all_drugTargets_correlation, function(x) max(x, na.rm=T))
-all_drugTargets_MAXcorrGene=sapply(all_drugTargets_correlation,
-                                      function(x) names(which.max(x)))
-all_drugTargets_MAXcorrGene[sapply(all_drugTargets_MAXcorrGene, length)==0]=NA
-KnownTarget_predictions=data.frame(
-  drugName=names(all_drugTargets_MAXcorrelation),
-  MaxTargetName=unlist(all_drugTargets_MAXcorrGene),
-  Maxcorr=all_drugTargets_MAXcorrelation)
-KnownTarget_predictions=KnownTarget_predictions[order(KnownTarget_predictions$Maxcorr, decreasing = T),]</code></pre>
+&lt;!-- rnb-text-begin --&gt;
+
+
+
+&lt;!-- Identify the known target Correlation --&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuYWxsX2RydWdUYXJnZXRzX3NlcGVyYXRlZCA9IHN0cl9zcGxpdChhcy5jaGFyYWN0ZXIoYWxsX2RydWdUYXJnZXRzKSwgXFxcbmBgYCJ9 --&gt;
+
+```r
+```r
+all_drugTargets_seperated = str_split(as.character(all_drugTargets), \</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1875,31 +1913,47 @@ KnownTarget_predictions=KnownTarget_predictions[order(KnownTarget_predictions$Ma
 <!--  Note: tell the activator part to sanju is.activator ~1640 due to grep(agonist), is.activator.check ~800. -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxub25UYXJnZXQkZHJ1Z0NhdGVnb3J5ID0gb25UYXJnZXQkZHJ1Z0NhdGVnb3J5ICU+JSBkcGx5cjo6bXV0YXRlKGlzLmluaGliaXRvciA9IGlmZWxzZShncmVwbCgnaW5oaWJpdG9yJywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgfFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdyZXBsKCdhbnRhZ29uaXN0Jywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgfFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdyZXBsKCdibG9ja2VyJywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgLFRSVUUsIEZBTFNFKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpcy5hY3RpdmF0b3IgPSBpZmVsc2UoZ3JlcGwoJ2FjdGl2YXRvcicsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpIHxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBncmVwbCgnXFxcXGJhZ29uaXN0XFxcXGInLCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKSB8XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ3JlcGwoJ3N0aW11bGFudCcsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpICxUUlVFLCBGQUxTRSkpXG5gYGAifQ== -->
-<pre class="r"><code>onTarget$drugCategory = onTarget$drugCategory %&gt;% dplyr::mutate(is.inhibitor = ifelse(grepl(&#39;inhibitor&#39;, onTarget$drugCategory$moa) |
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxub25UYXJnZXQkZHJ1Z0NhdGVnb3J5ID0gb25UYXJnZXQkZHJ1Z0NhdGVnb3J5ICU+JSBkcGx5cjo6bXV0YXRlKGlzLmluaGliaXRvciA9IGlmZWxzZShncmVwbCgnaW5oaWJpdG9yJywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgfFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdyZXBsKCdhbnRhZ29uaXN0Jywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgfFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdyZXBsKCdibG9ja2VyJywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgLFRSVUUsIEZBTFNFKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpcy5hY3RpdmF0b3IgPSBpZmVsc2UoZ3JlcGwoJ2FjdGl2YXRvcicsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpIHxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBncmVwbCgnXFxcXGJhZ29uaXN0XFxcXGInLCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKSB8XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ3JlcGwoJ3N0aW11bGFudCcsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpICxUUlVFLCBGQUxTRSkpXG5gYGBcbmBgYCJ9 -->
+<pre class="r"><code>```r
+onTarget$drugCategory = onTarget$drugCategory %&gt;% dplyr::mutate(is.inhibitor = ifelse(grepl(&#39;inhibitor&#39;, onTarget$drugCategory$moa) |
                                                                    grepl(&#39;antagonist&#39;, onTarget$drugCategory$moa) |
                                                                    grepl(&#39;blocker&#39;, onTarget$drugCategory$moa) ,TRUE, FALSE),
                                      is.activator = ifelse(grepl(&#39;activator&#39;, onTarget$drugCategory$moa) |
                                                                    grepl(&#39;\\bagonist\\b&#39;, onTarget$drugCategory$moa) |
                                                                    grepl(&#39;stimulant&#39;, onTarget$drugCategory$moa) ,TRUE, FALSE))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- MATCHED MATRIX for expression data for Step_2 interaction of expression and mutation data-->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWF0Y2hlZF9jZWxsTGluZXM9UmVkdWNlKGludGVyc2VjdCxcbiAgICAgICAgICAgICAgICAgICAgICAgICBsaXN0KGNvbG5hbWVzKG9uVGFyZ2V0JGV4cHJlc3Npb25fMjBRNCksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2xuYW1lcyhvblRhcmdldCRhdmFuYV8yMlEyKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbG5hbWVzKG9uVGFyZ2V0JHNlY29uZGFyeV9wcmlzbSkpKVxuZXhwcmVzc2lvbl9tYXRjaGVkPW9uVGFyZ2V0JGV4cHJlc3Npb25fMjBRNFssbWF0Y2hlZF9jZWxsTGluZXNdXG5hdmFuYV9tYXRjaGVkPW9uVGFyZ2V0JGF2YW5hXzIyUTJbLG1hdGNoZWRfY2VsbExpbmVzXVxuZHJ1Z19tYXRjaGVkPW9uVGFyZ2V0JHNlY29uZGFyeV9wcmlzbVssbWF0Y2hlZF9jZWxsTGluZXNdXG5gYGAifQ== -->
-<pre class="r"><code>matched_cellLines=Reduce(intersect,
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+
+&lt;!-- MATCHED MATRIX for expression data for Step_2 interaction of expression and mutation data--&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxubWF0Y2hlZF9jZWxsTGluZXM9UmVkdWNlKGludGVyc2VjdCxcbiAgICAgICAgICAgICAgICAgICAgICAgICBsaXN0KGNvbG5hbWVzKG9uVGFyZ2V0JGV4cHJlc3Npb25fMjBRNCksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2xuYW1lcyhvblRhcmdldCRhdmFuYV8yMlEyKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbG5hbWVzKG9uVGFyZ2V0JHNlY29uZGFyeV9wcmlzbSkpKVxuZXhwcmVzc2lvbl9tYXRjaGVkPW9uVGFyZ2V0JGV4cHJlc3Npb25fMjBRNFssbWF0Y2hlZF9jZWxsTGluZXNdXG5hdmFuYV9tYXRjaGVkPW9uVGFyZ2V0JGF2YW5hXzIyUTJbLG1hdGNoZWRfY2VsbExpbmVzXVxuZHJ1Z19tYXRjaGVkPW9uVGFyZ2V0JHNlY29uZGFyeV9wcmlzbVssbWF0Y2hlZF9jZWxsTGluZXNdXG5gYGBcbmBgYCJ9 --&gt;
+
+```r
+```r
+matched_cellLines=Reduce(intersect,
                          list(colnames(onTarget$expression_20Q4),
                               colnames(onTarget$avana_22Q2),
                               colnames(onTarget$secondary_prism)))
 expression_matched=onTarget$expression_20Q4[,matched_cellLines]
 avana_matched=onTarget$avana_22Q2[,matched_cellLines]
 drug_matched=onTarget$secondary_prism[,matched_cellLines]</code></pre>
+<p>```</p>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSwgbGlicmFyaWVzIGFuZCBwcmVwcm9jZXNzaW5nIgpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sKLS0tCgo8IS0tIEF0b21pYyBpbnB1dHMgbmVlZGVkIHRvIHJ1biBhIGNvZGUgLS0+CjwhLS0gTGlicmFyaWVzIC0tPgpgYGB7cn0KIyBpZiAoIXJlcXVpcmUoIkJpb2NNYW5hZ2VyIiwgcXVpZXRseSA9IFRSVUUpKQojICAgICBpbnN0YWxsLnBhY2thZ2VzKCJCaW9jTWFuYWdlciIpCiMgCiMgQmlvY01hbmFnZXI6Omluc3RhbGwoImZnc2VhIikKCiMjIyBuZXR3b3JrIHByb2JsZW0gOiB0YWxrZWQgdG8gbmFyaXN1IGFuZCB0YWxrZWQgYWJvdXQgdGhlIGF1dGhlbnRpY2F0aW9uCiMgbGlicmFyeShmZ3NlYSkKcmVxdWlyZShkYXRhLnRhYmxlKQpyZXF1aXJlKCdzdHJpbmdiJykKcmVxdWlyZShwYXJhbGxlbCkKcmVxdWlyZSgndGljdG9jJykKcmVxdWlyZShzdGF0YXIpCnJlcXVpcmUoJ2ludGVyYWN0aW9ucycpCnJlcXVpcmUoc3RhdHMpCnJlcXVpcmUocmVzaGFwZTIpCnJlcXVpcmUoZ2dwbG90MikKcmVxdWlyZShnZ3B1YnIpCnJlcXVpcmUoZ2dyZXBlbCkKcmVxdWlyZShnZ2ZvcmNlKQpyZXF1aXJlKGdyaWQpCnJlcXVpcmUoY293cGxvdCkKcmVxdWlyZShncmlkRXh0cmEpCnJlcXVpcmUocFJPQykKcmVxdWlyZShERUdyZXBvcnQpCgojRnVuY3Rpb25zIG5lZWRlZApzb3VyY2UoJy4uLzMuVG9vbHMvbXlDdXN0b21fZnVuY3Rpb25zLlInKQpgYGAKPCEtLSBPblRhcmdldCBEYXRhIGFuZCB0aGUgcHJlcHJvY2Vzc2luZy0tPgpgYGB7cn0KIyBzZXR3ZCgnL1VzZXJzL3NpbmhhbmVlL0RvY3VtZW50cy9wcm9qZWN0cy9kcnVnLk9uVGFyZ2V0LycpCm9uVGFyZ2V0PXJlYWRSRFMoJy4uL0RhdGEvb25UYXJnZXRfdjIuMC5SRFMnKQpLbm93blRhcmdldF9wcmVkaWN0aW9ucz1yZWFkUkRTKCcuLi9EYXRhL0tub3duVGFyZ2V0X3ByZWRpY3Rpb25zX3YzLlJEUycpICMjIHJlcXVpcmVkIGRhdGFzZXQgbGF0ZXN0IHZlcnNpb24KZHJ1Z0NhbmRpZGF0ZXNfZm9yX3NlY1RhcmdldHM9cmVhZFJEUygnLi4vRGF0YS9kcnVnQ2FuZGlkYXRlc19mb3Jfc2VjVGFyZ2V0cy5SRFMnKQpkcnVnVlNjcmlzcHJfY29ycl9mZWF0dXJlc19saXN0PXJlYWRSRFMoJy4uL0RhdGEvZHJ1Z1ZTY3Jpc3ByX2NvcnJfZmVhdHVyZXNfbGlzdC5SRFMnKQpgYGAKCjwhLS0gR2V0IHRoZSBjb3JyZWxhdGlvbiBzdHJlbmd0aCwgUCB2YWx1ZSBhbmQgdGhlIHJhbmsgb2YgdGhlIGNvcnJlbGF0aW9uIG1hdHJpeC0tPgpgYGB7cn0KZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGg9c2FwcGx5KGRydWdWU2NyaXNwcl9jb3JyX2ZlYXR1cmVzX2xpc3QsIGZ1bmN0aW9uKHgpIHhbLDJdKQpjb3JyTWF0X1A9c2FwcGx5KGRydWdWU2NyaXNwcl9jb3JyX2ZlYXR1cmVzX2xpc3QsIGZ1bmN0aW9uKHgpIHhbLDFdKQpjb3JyTWF0PWRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoCmNvcnJNYXRfcmFuaz1hcHBseSgtY29yck1hdCwgMiwgcmFuaykKYGBgCjwhLS0ga25vd24gdGFyZ2V0IHByZWRpY3Rpb24tLT4KYGBge3J9CmRydWdTdWJzZXRfbWFwMl9hbm5vdGF0aW9uIDwtIG1hdGNoKHJvd25hbWVzKG9uVGFyZ2V0JHNlY29uZGFyeV9wcmlzbSksIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRicm9hZF9pZF90cmltbWVkKQoKYWxsX2RydWdOYW1lc19jb21tb24gPSBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbmFtZVtkcnVnU3Vic2V0X21hcDJfYW5ub3RhdGlvbl0KYWxsX2RydWdUYXJnZXRzID0gb25UYXJnZXQkZHJ1Z0NhdGVnb3J5W2RydWdTdWJzZXRfbWFwMl9hbm5vdGF0aW9uLGMoJ25hbWUnLCd0YXJnZXQnKV0KYWxsX2RydWdNT0EgPSBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hW2RydWdTdWJzZXRfbWFwMl9hbm5vdGF0aW9uXQpgYGAKCgo8IS0tIElkZW50aWZ5IHRoZSBrbm93biB0YXJnZXQgQ29ycmVsYXRpb24gLS0+CmBgYHtyfQphbGxfZHJ1Z1RhcmdldHNfc2VwZXJhdGVkID0gc3RyX3NwbGl0KGFzLmNoYXJhY3RlcihhbGxfZHJ1Z1RhcmdldHMpLCAiLCAiKQoKYWxsX2RydWdUYXJnZXRzX2NvcnJlbGF0aW9uPXNhcHBseSgxOmxlbmd0aChhbGxfZHJ1Z1RhcmdldHNfc2VwZXJhdGVkKSwKICAgICAgZnVuY3Rpb24oeCkgewogICAgICAgIHJldF9jb3I9ZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGhbCiAgICAgICAgICBtYXRjaChhbGxfZHJ1Z1RhcmdldHNfc2VwZXJhdGVkW1t4XV0sCiAgICAgICAgICAgICAgICByb3duYW1lcyhkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aCkpLCB4XQogICAgICAgIG5hbWVzKHJldF9jb3IpPWVycl9oYW5kbGUoYWxsX2RydWdUYXJnZXRzX3NlcGVyYXRlZFtbeF1dKQogICAgICAgIHJldF9jb3IKICAgICAgICB9ICkKCm5hbWVzKGFsbF9kcnVnVGFyZ2V0c19jb3JyZWxhdGlvbikgPC0gYXMuY2hhcmFjdGVyKGFsbF9kcnVnTmFtZXNfY29tbW9uKQphbGxfZHJ1Z1RhcmdldHNfY29ycmVsYXRpb25bJ2RhYnJhZmVuaWInXQoKIyMjIERhdGFmcmFtZSBvZiB0aGUga25vd250YXJnZXRfcHJlZGljdGlvbgphbGxfZHJ1Z1RhcmdldHNfTUFYY29ycmVsYXRpb249c2FwcGx5KGFsbF9kcnVnVGFyZ2V0c19jb3JyZWxhdGlvbiwgZnVuY3Rpb24oeCkgbWF4KHgsIG5hLnJtPVQpKQphbGxfZHJ1Z1RhcmdldHNfTUFYY29yckdlbmU9c2FwcGx5KGFsbF9kcnVnVGFyZ2V0c19jb3JyZWxhdGlvbiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBmdW5jdGlvbih4KSBuYW1lcyh3aGljaC5tYXgoeCkpKQphbGxfZHJ1Z1RhcmdldHNfTUFYY29yckdlbmVbc2FwcGx5KGFsbF9kcnVnVGFyZ2V0c19NQVhjb3JyR2VuZSwgbGVuZ3RoKT09MF09TkEKS25vd25UYXJnZXRfcHJlZGljdGlvbnM9ZGF0YS5mcmFtZSgKICBkcnVnTmFtZT1uYW1lcyhhbGxfZHJ1Z1RhcmdldHNfTUFYY29ycmVsYXRpb24pLAogIE1heFRhcmdldE5hbWU9dW5saXN0KGFsbF9kcnVnVGFyZ2V0c19NQVhjb3JyR2VuZSksCiAgTWF4Y29ycj1hbGxfZHJ1Z1RhcmdldHNfTUFYY29ycmVsYXRpb24pCktub3duVGFyZ2V0X3ByZWRpY3Rpb25zPUtub3duVGFyZ2V0X3ByZWRpY3Rpb25zW29yZGVyKEtub3duVGFyZ2V0X3ByZWRpY3Rpb25zJE1heGNvcnIsIGRlY3JlYXNpbmcgPSBUKSxdCmBgYAoKCjwhLS0gUHJlcHJvY2Vzc2luZyBvZiBEcnVnIENhdGVnb3J5IERhdGEgc2V0IHRvIGlkZW50aWZ5IGRydWcgaXMgaW5oaWJpdG9yIG9yIG5vdCAtLT4KPCEtLSBDb21wdXRlIGlmIGEgZHJ1ZyBpcyBpbmhpYml0b3Igb3Igbm90IC0tPgo8IS0tICBOb3RlOiB0ZWxsIHRoZSBhY3RpdmF0b3IgcGFydCB0byBzYW5qdSBpcy5hY3RpdmF0b3IgfjE2NDAgZHVlIHRvIGdyZXAoYWdvbmlzdCksIGlzLmFjdGl2YXRvci5jaGVjayB+ODAwLiAtLT4KYGBge3J9Cm9uVGFyZ2V0JGRydWdDYXRlZ29yeSA9IG9uVGFyZ2V0JGRydWdDYXRlZ29yeSAlPiUgZHBseXI6Om11dGF0ZShpcy5pbmhpYml0b3IgPSBpZmVsc2UoZ3JlcGwoJ2luaGliaXRvcicsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpIHwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdyZXBsKCdhbnRhZ29uaXN0Jywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgfAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ3JlcGwoJ2Jsb2NrZXInLCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKSAsVFJVRSwgRkFMU0UpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaXMuYWN0aXZhdG9yID0gaWZlbHNlKGdyZXBsKCdhY3RpdmF0b3InLCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKSB8CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBncmVwbCgnXFxiYWdvbmlzdFxcYicsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpIHwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdyZXBsKCdzdGltdWxhbnQnLCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKSAsVFJVRSwgRkFMU0UpKQpgYGAKCjwhLS0gTUFUQ0hFRCBNQVRSSVggZm9yIGV4cHJlc3Npb24gZGF0YSBmb3IgU3RlcF8yIGludGVyYWN0aW9uIG9mIGV4cHJlc3Npb24gYW5kIG11dGF0aW9uIGRhdGEtLT4KYGBge3J9Cm1hdGNoZWRfY2VsbExpbmVzPVJlZHVjZShpbnRlcnNlY3QsCiAgICAgICAgICAgICAgICAgICAgICAgICBsaXN0KGNvbG5hbWVzKG9uVGFyZ2V0JGV4cHJlc3Npb25fMjBRNCksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbG5hbWVzKG9uVGFyZ2V0JGF2YW5hXzIyUTIpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2xuYW1lcyhvblRhcmdldCRzZWNvbmRhcnlfcHJpc20pKSkKZXhwcmVzc2lvbl9tYXRjaGVkPW9uVGFyZ2V0JGV4cHJlc3Npb25fMjBRNFssbWF0Y2hlZF9jZWxsTGluZXNdCmF2YW5hX21hdGNoZWQ9b25UYXJnZXQkYXZhbmFfMjJRMlssbWF0Y2hlZF9jZWxsTGluZXNdCmRydWdfbWF0Y2hlZD1vblRhcmdldCRzZWNvbmRhcnlfcHJpc21bLG1hdGNoZWRfY2VsbExpbmVzXQpgYGAK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSwgbGlicmFyaWVzIGFuZCBwcmVwcm9jZXNzaW5nIgpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sKLS0tCgo8IS0tIEF0b21pYyBpbnB1dHMgbmVlZGVkIHRvIHJ1biBhIGNvZGUgLS0+CjwhLS0gTGlicmFyaWVzIC0tPgpgYGB7cn0KIyBpZiAoIXJlcXVpcmUoIkJpb2NNYW5hZ2VyIiwgcXVpZXRseSA9IFRSVUUpKQojICAgICBpbnN0YWxsLnBhY2thZ2VzKCJCaW9jTWFuYWdlciIpCiMgCiMgQmlvY01hbmFnZXI6Omluc3RhbGwoImZnc2VhIikKCiMjIyBuZXR3b3JrIHByb2JsZW0gOiB0YWxrZWQgdG8gbmFyaXN1IGFuZCB0YWxrZWQgYWJvdXQgdGhlIGF1dGhlbnRpY2F0aW9uCiMgbGlicmFyeShmZ3NlYSkKcmVxdWlyZShkYXRhLnRhYmxlKQpyZXF1aXJlKCdzdHJpbmdiJykKcmVxdWlyZShwYXJhbGxlbCkKcmVxdWlyZSgndGljdG9jJykKcmVxdWlyZShzdGF0YXIpCnJlcXVpcmUoJ2ludGVyYWN0aW9ucycpCnJlcXVpcmUoc3RhdHMpCnJlcXVpcmUocmVzaGFwZTIpCnJlcXVpcmUoZ2dwbG90MikKcmVxdWlyZShnZ3B1YnIpCnJlcXVpcmUoZ2dyZXBlbCkKcmVxdWlyZShnZ2ZvcmNlKQpyZXF1aXJlKGdyaWQpCnJlcXVpcmUoY293cGxvdCkKcmVxdWlyZShncmlkRXh0cmEpCnJlcXVpcmUocFJPQykKcmVxdWlyZShERUdyZXBvcnQpCnJlcXVpcmUodGlkeXZlcnNlKQoKI0Z1bmN0aW9ucyBuZWVkZWQKc291cmNlKCcuLi8zLlRvb2xzL215Q3VzdG9tX2Z1bmN0aW9ucy5SJykKYGBgCjwhLS0gT25UYXJnZXQgRGF0YSBhbmQgdGhlIHByZXByb2Nlc3NpbmctLT4KYGBge3J9CiMgc2V0d2QoJy9Vc2Vycy9zaW5oYW5lZS9Eb2N1bWVudHMvcHJvamVjdHMvZHJ1Zy5PblRhcmdldC8nKQpvblRhcmdldD1yZWFkUkRTKCcuLi9EYXRhL29uVGFyZ2V0X3YyLjAuUkRTJykKS25vd25UYXJnZXRfcHJlZGljdGlvbnM9cmVhZFJEUygnLi4vRGF0YS9Lbm93blRhcmdldF9wcmVkaWN0aW9uc192My5SRFMnKSAjIyByZXF1aXJlZCBkYXRhc2V0IGxhdGVzdCB2ZXJzaW9uCmRydWdDYW5kaWRhdGVzX2Zvcl9zZWNUYXJnZXRzPXJlYWRSRFMoJy4uL0RhdGEvZHJ1Z0NhbmRpZGF0ZXNfZm9yX3NlY1RhcmdldHMuUkRTJykKZHJ1Z1ZTY3Jpc3ByX2NvcnJfZmVhdHVyZXNfbGlzdD1yZWFkUkRTKCcuLi9EYXRhL2RydWdWU2NyaXNwcl9jb3JyX2ZlYXR1cmVzX2xpc3QuUkRTJykKYGBgCgo8IS0tIEdldCB0aGUgY29ycmVsYXRpb24gc3RyZW5ndGgsIFAgdmFsdWUgYW5kIHRoZSByYW5rIG9mIHRoZSBjb3JyZWxhdGlvbiBtYXRyaXgtLT4KYGBge3J9CmRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoPXNhcHBseShkcnVnVlNjcmlzcHJfY29ycl9mZWF0dXJlc19saXN0LCBmdW5jdGlvbih4KSB4WywyXSkKY29yck1hdF9QPXNhcHBseShkcnVnVlNjcmlzcHJfY29ycl9mZWF0dXJlc19saXN0LCBmdW5jdGlvbih4KSB4WywxXSkKY29yck1hdD1kcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aApjb3JyTWF0X3Jhbms9YXBwbHkoLWNvcnJNYXQsIDIsIHJhbmspCmBgYAo8IS0tIGtub3duIHRhcmdldCBwcmVkaWN0aW9uLS0+CmBgYHtyfQpkcnVnU3Vic2V0X21hcDJfYW5ub3RhdGlvbiA8LSBtYXRjaChyb3duYW1lcyhvblRhcmdldCRzZWNvbmRhcnlfcHJpc20pLCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkYnJvYWRfaWRfdHJpbW1lZCkKCmFsbF9kcnVnTmFtZXNfY29tbW9uID0gb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG5hbWVbZHJ1Z1N1YnNldF9tYXAyX2Fubm90YXRpb25dCmFsbF9kcnVnVGFyZ2V0cyA9IG9uVGFyZ2V0JGRydWdDYXRlZ29yeVtkcnVnU3Vic2V0X21hcDJfYW5ub3RhdGlvbixjKCduYW1lJywndGFyZ2V0JyldCmFsbF9kcnVnTU9BID0gb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYVtkcnVnU3Vic2V0X21hcDJfYW5ub3RhdGlvbl0KYGBgCgoKPCEtLSBJZGVudGlmeSB0aGUga25vd24gdGFyZ2V0IENvcnJlbGF0aW9uIC0tPgpgYGB7cn0KYWxsX2RydWdUYXJnZXRzX3NlcGVyYXRlZCA9IHN0cl9zcGxpdChhcy5jaGFyYWN0ZXIoYWxsX2RydWdUYXJnZXRzKSwgIiwgIikKCmFsbF9kcnVnVGFyZ2V0c19jb3JyZWxhdGlvbj1zYXBwbHkoMTpsZW5ndGgoYWxsX2RydWdUYXJnZXRzX3NlcGVyYXRlZCksCiAgICAgIGZ1bmN0aW9uKHgpIHsKICAgICAgICByZXRfY29yPWRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoWwogICAgICAgICAgbWF0Y2goYWxsX2RydWdUYXJnZXRzX3NlcGVyYXRlZFtbeF1dLAogICAgICAgICAgICAgICAgcm93bmFtZXMoZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpKSwgeF0KICAgICAgICBuYW1lcyhyZXRfY29yKT1lcnJfaGFuZGxlKGFsbF9kcnVnVGFyZ2V0c19zZXBlcmF0ZWRbW3hdXSkKICAgICAgICByZXRfY29yCiAgICAgICAgfSApCgpuYW1lcyhhbGxfZHJ1Z1RhcmdldHNfY29ycmVsYXRpb24pIDwtIGFzLmNoYXJhY3RlcihhbGxfZHJ1Z05hbWVzX2NvbW1vbikKYWxsX2RydWdUYXJnZXRzX2NvcnJlbGF0aW9uWydkYWJyYWZlbmliJ10KCiMjIyBEYXRhZnJhbWUgb2YgdGhlIGtub3dudGFyZ2V0X3ByZWRpY3Rpb24KYWxsX2RydWdUYXJnZXRzX01BWGNvcnJlbGF0aW9uPXNhcHBseShhbGxfZHJ1Z1RhcmdldHNfY29ycmVsYXRpb24sIGZ1bmN0aW9uKHgpIG1heCh4LCBuYS5ybT1UKSkKYWxsX2RydWdUYXJnZXRzX01BWGNvcnJHZW5lPXNhcHBseShhbGxfZHJ1Z1RhcmdldHNfY29ycmVsYXRpb24sCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZnVuY3Rpb24oeCkgbmFtZXMod2hpY2gubWF4KHgpKSkKYWxsX2RydWdUYXJnZXRzX01BWGNvcnJHZW5lW3NhcHBseShhbGxfZHJ1Z1RhcmdldHNfTUFYY29yckdlbmUsIGxlbmd0aCk9PTBdPU5BCktub3duVGFyZ2V0X3ByZWRpY3Rpb25zPWRhdGEuZnJhbWUoCiAgZHJ1Z05hbWU9bmFtZXMoYWxsX2RydWdUYXJnZXRzX01BWGNvcnJlbGF0aW9uKSwKICBNYXhUYXJnZXROYW1lPXVubGlzdChhbGxfZHJ1Z1RhcmdldHNfTUFYY29yckdlbmUpLAogIE1heGNvcnI9YWxsX2RydWdUYXJnZXRzX01BWGNvcnJlbGF0aW9uKQpLbm93blRhcmdldF9wcmVkaWN0aW9ucz1Lbm93blRhcmdldF9wcmVkaWN0aW9uc1tvcmRlcihLbm93blRhcmdldF9wcmVkaWN0aW9ucyRNYXhjb3JyLCBkZWNyZWFzaW5nID0gVCksXQpgYGAKCgo8IS0tIFByZXByb2Nlc3Npbmcgb2YgRHJ1ZyBDYXRlZ29yeSBEYXRhIHNldCB0byBpZGVudGlmeSBkcnVnIGlzIGluaGliaXRvciBvciBub3QgLS0+CjwhLS0gQ29tcHV0ZSBpZiBhIGRydWcgaXMgaW5oaWJpdG9yIG9yIG5vdCAtLT4KPCEtLSAgTm90ZTogdGVsbCB0aGUgYWN0aXZhdG9yIHBhcnQgdG8gc2FuanUgaXMuYWN0aXZhdG9yIH4xNjQwIGR1ZSB0byBncmVwKGFnb25pc3QpLCBpcy5hY3RpdmF0b3IuY2hlY2sgfjgwMC4gLS0+CmBgYHtyfQpvblRhcmdldCRkcnVnQ2F0ZWdvcnkgPSBvblRhcmdldCRkcnVnQ2F0ZWdvcnkgJT4lIGRwbHlyOjptdXRhdGUoaXMuaW5oaWJpdG9yID0gaWZlbHNlKGdyZXBsKCdpbmhpYml0b3InLCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKSB8CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBncmVwbCgnYW50YWdvbmlzdCcsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpIHwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdyZXBsKCdibG9ja2VyJywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgLFRSVUUsIEZBTFNFKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGlzLmFjdGl2YXRvciA9IGlmZWxzZShncmVwbCgnYWN0aXZhdG9yJywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgfAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ3JlcGwoJ1xcYmFnb25pc3RcXGInLCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKSB8CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBncmVwbCgnc3RpbXVsYW50Jywgb25UYXJnZXQkZHJ1Z0NhdGVnb3J5JG1vYSkgLFRSVUUsIEZBTFNFKSkKYGBgCgo8IS0tIE1BVENIRUQgTUFUUklYIGZvciBleHByZXNzaW9uIGRhdGEgZm9yIFN0ZXBfMiBpbnRlcmFjdGlvbiBvZiBleHByZXNzaW9uIGFuZCBtdXRhdGlvbiBkYXRhLS0+CmBgYHtyfQptYXRjaGVkX2NlbGxMaW5lcz1SZWR1Y2UoaW50ZXJzZWN0LAogICAgICAgICAgICAgICAgICAgICAgICAgbGlzdChjb2xuYW1lcyhvblRhcmdldCRleHByZXNzaW9uXzIwUTQpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2xuYW1lcyhvblRhcmdldCRhdmFuYV8yMlEyKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgY29sbmFtZXMob25UYXJnZXQkc2Vjb25kYXJ5X3ByaXNtKSkpCmV4cHJlc3Npb25fbWF0Y2hlZD1vblRhcmdldCRleHByZXNzaW9uXzIwUTRbLG1hdGNoZWRfY2VsbExpbmVzXQphdmFuYV9tYXRjaGVkPW9uVGFyZ2V0JGF2YW5hXzIyUTJbLG1hdGNoZWRfY2VsbExpbmVzXQpkcnVnX21hdGNoZWQ9b25UYXJnZXQkc2Vjb25kYXJ5X3ByaXNtWyxtYXRjaGVkX2NlbGxMaW5lc10KYGBgCg==</div>
 
 
 

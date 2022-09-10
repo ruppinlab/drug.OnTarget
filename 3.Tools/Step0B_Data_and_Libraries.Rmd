@@ -6,13 +6,7 @@ output: html_notebook
 <!-- Atomic inputs needed to run a code -->
 <!-- Libraries -->
 ```{r}
-# if (!require("BiocManager", quietly = TRUE))
-#     install.packages("BiocManager")
-# 
-# BiocManager::install("fgsea")
-
-### network problem : talked to narisu and talked about the authentication
-# library(fgsea)
+require(fgsea)
 require(data.table)
 require('stringb')
 require(parallel)
@@ -30,6 +24,7 @@ require(cowplot)
 require(gridExtra)
 require(pROC)
 require(DEGreport)
+require(tidyverse)
 
 #Functions needed
 source('../3.Tools/myCustom_functions.R')
@@ -60,35 +55,6 @@ all_drugMOA = onTarget$drugCategory$moa[drugSubset_map2_annotation]
 ```
 
 
-<!-- Identify the known target Correlation -->
-```{r}
-all_drugTargets_seperated = str_split(as.character(all_drugTargets), ", ")
-
-all_drugTargets_correlation=sapply(1:length(all_drugTargets_seperated),
-      function(x) {
-        ret_cor=drugVScrispr_corr_Strength[
-          match(all_drugTargets_seperated[[x]],
-                rownames(drugVScrispr_corr_Strength)), x]
-        names(ret_cor)=err_handle(all_drugTargets_seperated[[x]])
-        ret_cor
-        } )
-
-names(all_drugTargets_correlation) <- as.character(all_drugNames_common)
-all_drugTargets_correlation['dabrafenib']
-
-### Dataframe of the knowntarget_prediction
-all_drugTargets_MAXcorrelation=sapply(all_drugTargets_correlation, function(x) max(x, na.rm=T))
-all_drugTargets_MAXcorrGene=sapply(all_drugTargets_correlation,
-                                      function(x) names(which.max(x)))
-all_drugTargets_MAXcorrGene[sapply(all_drugTargets_MAXcorrGene, length)==0]=NA
-KnownTarget_predictions=data.frame(
-  drugName=names(all_drugTargets_MAXcorrelation),
-  MaxTargetName=unlist(all_drugTargets_MAXcorrGene),
-  Maxcorr=all_drugTargets_MAXcorrelation)
-KnownTarget_predictions=KnownTarget_predictions[order(KnownTarget_predictions$Maxcorr, decreasing = T),]
-```
-
-
 <!-- Preprocessing of Drug Category Data set to identify drug is inhibitor or not -->
 <!-- Compute if a drug is inhibitor or not -->
 <!--  Note: tell the activator part to sanju is.activator ~1640 due to grep(agonist), is.activator.check ~800. -->
@@ -101,13 +67,17 @@ onTarget$drugCategory = onTarget$drugCategory %>% dplyr::mutate(is.inhibitor = i
                                                                    grepl('stimulant', onTarget$drugCategory$moa) ,TRUE, FALSE))
 ```
 
-<!-- MATCHED MATRIX for expression data for Step_2 interaction of expression and mutation data-->
 ```{r}
-matched_cellLines=Reduce(intersect,
-                         list(colnames(onTarget$expression_20Q4),
+matched_cellLines = Reduce(intersect, 
+                         list(colnames(onTarget$expression),
                               colnames(onTarget$avana_22Q2),
-                              colnames(onTarget$secondary_prism)))
-expression_matched=onTarget$expression_20Q4[,matched_cellLines]
-avana_matched=onTarget$avana_22Q2[,matched_cellLines]
-drug_matched=onTarget$secondary_prism[,matched_cellLines]
+                              colnames(onTarget$secondary_prism),
+                              colnames(onTarget$mutations_matrix)
+                              ))
+expression_matched = onTarget$expression[,matched_cellLines]
+avana_matched = onTarget$avana_22Q2[,matched_cellLines]
+drug_matched = onTarget$secondary_prism[,matched_cellLines]
 ```
+
+
+
