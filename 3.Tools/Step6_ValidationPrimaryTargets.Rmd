@@ -17,60 +17,63 @@ knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
 <!-- By Curating BioGrid Chemical Interaction database we would like to test  -->
 <!-- V1_ROC -->
 ```{r}
-biogrid=read.csv('/Users/sinhas8/Project_TrueTarget/Data/BIOGRID-CHEMICALS-3.5.182.chemtab.txt',sep='\t')
-KnownTarget_predictions$drugName_stripall=stripall2match(KnownTarget_predictions$drugName)
+biogrid = read.csv('../Data/BIOGRID-CHEMICALS-3.5.182.chemtab.txt',sep='\t')
+
+KnownTarget_predictions$drugName_stripall = stripall2match(KnownTarget_predictions$drugName)
 biogrid$Chemical.Name_stripall = stripall2match(biogrid$Chemical.Name)
   
 # common_Drug_lowerCase=stripall2match(levels(biogrid$Chemical.Name))[
 #   !is.na(match(stripall2match(levels(biogrid$Chemical.Name)), 
-#                KnownTarget_predictions$drugName_stripall ))]
+#                KnownTarget_predictions$drugName_stripall))]
 dim(biogrid[!is.na(match(biogrid$Chemical.Name_stripall,
                          KnownTarget_predictions$drugName_stripall)),])
-biogrid_matched=biogrid[!is.na(match(biogrid$Chemical.Name_stripall,
-                         KnownTarget_predictions$drugName_stripall)),]
+
+common_drugname= match(biogrid$Chemical.Name_stripall, KnownTarget_predictions$drugName_stripall)
+
+biogrid_matched = biogrid[!is.na(common_drugname),]
+biogrid_matched$Chemical.Name = factor(as.character(biogrid_matched$Chemical.Name))
 # Available small molecules
-small_molecules_available=unique(biogrid_matched$Chemical.Name_stripall)
-KnownTarget_predictions_matched=KnownTarget_predictions[
-  !is.na(match(KnownTarget_predictions$drugName_stripall,
+small_molecules_available = unique(biogrid_matched$Chemical.Name_stripall)
+KnownTarget_predictions_matched=KnownTarget_predictions[!is.na(match(KnownTarget_predictions$drugName_stripall,
          small_molecules_available )),]
-biogrid_matched$Chemical.Name= factor(as.character(biogrid_matched$Chemical.Name))
-biogrid_matched_Subsetlist=split(biogrid_matched[,c('Official.Symbol', 'Chemical.Name',
+
+biogrid_matched_Subsetlist = split(biogrid_matched[,c('Official.Symbol', 'Chemical.Name',
                                                     'Interaction.Type', 'Action')],
                                  biogrid_matched$Chemical.Name)
-biogrid_matched_Subsetlist_reformat=lapply(biogrid_matched_Subsetlist, function(x)
+biogrid_matched_Subsetlist_reformat = lapply(biogrid_matched_Subsetlist, function(x)
   dcast(x, Official.Symbol + Chemical.Name + Action ~  Interaction.Type))
 
 # dcast(biogrid_matched_Subsetlist$Barbital, Official.Symbol + Chemical.Name + Action ~  Interaction.Type)
-biogrid_matched_Subsetlist_withScore=do.call(rbind, biogrid_matched_Subsetlist_reformat)
-colnames(biogrid_matched_Subsetlist_withScore)[4]='Score'
-biogrid_matched_Subsetlist_withScore$Score=as.numeric(biogrid_matched_Subsetlist_withScore$Score)
-biogrid_matched_Subsetlist_withScore$Score[is.na(biogrid_matched_Subsetlist_withScore$Score)]=1
-biogrid_matched_Subsetlist_withScore=biogrid_matched_Subsetlist_withScore[
+biogrid_matched_Subsetlist_withScore = do.call(rbind, biogrid_matched_Subsetlist_reformat) 
+
+biogrid_matched_Subsetlist_withScore = biogrid_matched_Subsetlist_withScore %>% 
+  rename(Score = colnames(biogrid_matched_Subsetlist_withScore)[4]) %>% 
+  mutate(Score = as.numeric(Score)) %>% replace(is.na(.), 1)
+
+biogrid_matched_Subsetlist_withScore = biogrid_matched_Subsetlist_withScore[
   order(biogrid_matched_Subsetlist_withScore$Score, decreasing = T),]
 ###########################################################################
 # Step 2
 ###########################################################################
-biogrid_matched_Subsetlist_withScore$Chemical.Name_stripall=stripall2match(biogrid_matched_Subsetlist_withScore$Chemical.Name)
-DrugBankScore_vsOurScore=data.frame(biogrid_matched_Subsetlist_withScore, 
+biogrid_matched_Subsetlist_withScore$Chemical.Name_stripall = stripall2match(biogrid_matched_Subsetlist_withScore$Chemical.Name)
+
+DrugBankScore_vsOurScore = data.frame(biogrid_matched_Subsetlist_withScore, 
                                     KnownTarget_predictions_matched[match(
                                       biogrid_matched_Subsetlist_withScore$Chemical.Name_stripall,
                                       KnownTarget_predictions_matched$drugName_stripall),])
-onTarget$drugCategory$name_stripall=stripall2match(onTarget$drugCategory$name)
+onTarget$drugCategory$name_stripall = stripall2match(onTarget$drugCategory$name)
 
-DrugBankScore_vsOurScore$drugCategory=onTarget$drugCategory$drug_category[
-  match(DrugBankScore_vsOurScore$drugName_stripall,
-        onTarget$drugCategory$name_stripall
-        )]
+DrugBankScore_vsOurScore$drugCategory = onTarget$drugCategory$drug_category[match(DrugBankScore_vsOurScore$drugName_stripall,
+        onTarget$drugCategory$name_stripall)]
 
-colnames(DrugBankScore_vsOurScore)[c(1)]='Drugbank_Gene'
-colnames(DrugBankScore_vsOurScore)[c(4)]='Citations_Count'
+colnames(DrugBankScore_vsOurScore)[c(1,4)] = c('Drugbank_Gene', 'Citations_Count')
 
 df2plot=as.data.frame(DrugBankScore_vsOurScore)
 
-df2plot$KnownTarget=onTarget$drugCategory$target[
-  match(df2plot$drugName_stripall,
-        onTarget$drugCategory$name_stripall
-        )]
+
+
+df2plot$KnownTarget=onTarget$drugCategory$target[match(df2plot$drugName_stripall,
+        onTarget$drugCategory$name_stripall)]
 df2plot$Count_KnownTarget=sapply(df2plot$KnownTarget,
                                  function(x) length(strsplit(as.character(x), '\\,')[[1]])) 
 # Create a random df unique to the input df
@@ -125,17 +128,17 @@ V1_ROC=test_AUC_V1(Citations_Count_thr=5, Count_KnownTarget_thr=4)
 <!-- From drugbank  -->
 <!-- V2A_ROC; V2B_ROC -->
 ```{r}
-load('/Users/sinhas8/Project_TrueTarget/Data/drugs2targets.RData')
+load('../Data/drugs2targets.RData')
 table(drugs2targets$action.simp.loose)
-numberOfTargets=table(drugs2targets$drug.name)
-drugs2targets$numberOfTargets=numberOfTargets[match(drugs2targets$drug.name, names(numberOfTargets))]
-active_drugs2targets=drugs2targets[which(drugs2targets$pharmaco.active=='yes' & 
+numberOfTargets = table(drugs2targets$drug.name)
+drugs2targets$numberOfTargets = numberOfTargets[match(drugs2targets$drug.name, names(numberOfTargets))]
+active_drugs2targets = drugs2targets[which(drugs2targets$pharmaco.active=='yes' & 
                                            drugs2targets$action.simp.strict=='inhibition'),]
-numberOfActiveTargets=table(as.character(active_drugs2targets$drug.name))
-active_drugs2targets$numberOfActiveTargets=numberOfActiveTargets[match(active_drugs2targets$drug.name, names(numberOfActiveTargets))]
-matched_gs3=active_drugs2targets[stripall2match(active_drugs2targets$drug.name) %in%
+numberOfActiveTargets = table(as.character(active_drugs2targets$drug.name))
+active_drugs2targets$numberOfActiveTargets = numberOfActiveTargets[match(active_drugs2targets$drug.name, names(numberOfActiveTargets))]
+matched_gs3 = active_drugs2targets[stripall2match(active_drugs2targets$drug.name) %in%
                                     KnownTarget_predictions$drugName_stripall,]
-matched_gs3=na.omit(matched_gs3)
+matched_gs3 = na.omit(matched_gs3)
 dim(matched_gs3)
 matched_gs3
 # The AUC is 0.69
@@ -173,14 +176,14 @@ test_AUC_V2<-function(seedNumber=1,
 # OnlY focusing on antagonist drugs V2A (0.72)
 V2A_ROC=test_AUC_V2(seedNumber=1, numberOfTargets_Thr=3, numberOfActiveTargets_Thr=2,
               drug_type='antagonist')
-# OnlY focusing on antagonist drugs V2B (0.69)
+# OnlY focusing on "antagonist"/ **inhibitor drugs V2B (0.69)
 V2B_ROC=test_AUC_V2(seedNumber=1, numberOfTargets_Thr=2, numberOfActiveTargets_Thr=2,
               drug_type='inhibitor')
 ```
 <!-- Validation V5: ChemicalProbes.org Scientific Advisory Board recommendation score -->
 <!-- It is important to note that if we increase our stringency, our prediction power increases -->
 ```{r}
-sab_score=readxl::read_xlsx('/Users/sinhas8/Project_TrueTarget/Data/SAB_Score_chemical_Probes.xlsx')
+sab_score=readxl::read_xlsx('../Data/SAB_Score_chemical_Probes.xlsx')
 sab_score$`Probe Name`=tolower(sab_score$`Probe Name`)
 sab_score[grep('EGFR',sab_score$`Protein target`),]
 sab_score_matched=sab_score[!is.na(match(stripall2match(sab_score$`Probe Name`),
@@ -222,18 +225,17 @@ test_AUC_A5<-function(seedNumber=1, numberOfTargets_Thr=2, Avg_Rating_thr=3){
   roc_curve_crispr=roc(Complete_Set$Label, Complete_Set$crispr_corr)
   roc_curve_crispr
 }
+## 
 V5_ROC=test_AUC_A5(seedNumber=1, numberOfTargets_Thr=2, Avg_Rating_thr=3)
 ```
 <!-- Validation V6: COSMICv91 Drug Resistance file -->
 <!-- V6_ROC -->
 ```{r}
-CosmicResistanceMutations=read.table('/Users/sinhas8/Project_TrueTarget/Data/CosmicResistanceMutations.tsv', sep='\t')
-dim(CosmicResistanceMutations)
-colnames(CosmicResistanceMutations)=as.character(unlist(CosmicResistanceMutations[1,]))
-head(sort(table(CosmicResistanceMutations$`Pubmed Id`), decreasing = T))
-head(CosmicResistanceMutations)
-CosmicResistanceMutations=CosmicResistanceMutations[-1,]
-CosmicResistanceMutations=CosmicResistanceMutations[-1,]
+CosmicResistanceMutations = read.table('../Data/CosmicResistanceMutations.tsv', sep='\t')
+
+colnames(CosmicResistanceMutations) = as.character(unlist(CosmicResistanceMutations[1,]))
+CosmicResistanceMutations = CosmicResistanceMutations[-1,]
+CosmicResistanceMutations = CosmicResistanceMutations[-1,]
 table(CosmicResistanceMutations$`Drug Name`)
 CosmicResistanceMutations[CosmicResistanceMutations$`Drug Name`=='Ibrutinib',]
 CosmicResistanceMutations$trimmed_geneName= sapply(CosmicResistanceMutations$`Gene Name`,function(x) strsplit(as.character(x), '_')[[1]][1])
@@ -297,17 +299,17 @@ V6_ROC=test_AUC_A6(seedNumber=1, numberOfTargets_Thr=5, Evidence_Strength_thr=50
 <!-- Validation V7: oncoKB resistance mutation is present-->
 <!-- V7_ROC -->
 ```{r}
-oncokb_resistance=read.csv('/Users/sinhas8/Project_TrueTarget/Data/oncokb_biomarker_drug_associations_resistance.tsv', sep='\t')
+oncokb_resistance = read.csv('../Data/oncokb_biomarker_drug_associations_resistance.tsv', sep='\t')
 # Preprocessing
-split_drugnames=strsplit(oncokb_resistance$Drugs..for.therapeutic.implications.only., ', ')
-oncokb_resistance_expanded=lapply(1:nrow(oncokb_resistance), function(x)
+split_drugnames = strsplit(oncokb_resistance$Drugs..for.therapeutic.implications.only., ', ')
+oncokb_resistance_expanded = lapply(1:nrow(oncokb_resistance), function(x)
   cbind(oncokb_resistance[x,],split_drugnames=split_drugnames[[x]]) )
-oncokb_resistance_expanded=do.call(rbind, oncokb_resistance_expanded)
+oncokb_resistance_expanded = do.call(rbind, oncokb_resistance_expanded)
 # remove Amplification
-oncokb_resistance_expanded=oncokb_resistance_expanded[-grep('Amp',oncokb_resistance_expanded$Alterations),]
-oncokb_resistance_expanded$known_target=onTarget$drugCategory$target[match_stripall(oncokb_resistance_expanded$split_drugnames, onTarget$drugCategory$name)]
-oncokb_resistance_expanded$count_target=sapply(strsplit(as.character(oncokb_resistance_expanded$known_target), ', '), length)
-oncokb_resistance_expanded$is.target=apply(oncokb_resistance_expanded, 1, function(x) grepl(x[2], x[7]))
+oncokb_resistance_expanded = oncokb_resistance_expanded[-grep('Amp',oncokb_resistance_expanded$Alterations),]
+oncokb_resistance_expanded$known_target = onTarget$drugCategory$target[match_stripall(oncokb_resistance_expanded$split_drugnames, onTarget$drugCategory$name)]
+oncokb_resistance_expanded$count_target = sapply(strsplit(as.character(oncokb_resistance_expanded$known_target), ', '), length)
+oncokb_resistance_expanded$is.target = apply(oncokb_resistance_expanded, 1, function(x) grepl(x[2], x[7]))
 
 test_AUC_A7<-function(seedNumber=1, numberOfTargets_Thr=5, which_level){
   cond1=oncokb_resistance_expanded$count_target<numberOfTargets_Thr
@@ -348,29 +350,29 @@ V7_ROC=test_AUC_A7(seedNumber=1, numberOfTargets_Thr=10, which_level = c('R1', '
 <!-- Validation V8: oncoKB mutation is present-->
 <!-- V8_ROC -->
 ```{r}
-oncokb_approved=read.csv('/Users/sinhas8/Project_TrueTarget/Data/oncokb_biomarker_drug_associations_approved.tsv', sep='\t')
+oncokb_approved=read.csv('../Data/oncokb_biomarker_drug_associations_approved.tsv', sep='\t')
 # Preprocessing
 oncokb_approved
-split_drugnames=strsplit(oncokb_approved$Drugs..for.therapeutic.implications.only., ', ')
-oncokb_approved_expanded=lapply(1:nrow(oncokb_approved), function(x)
+split_drugnames = strsplit(oncokb_approved$Drugs..for.therapeutic.implications.only., ', ')
+oncokb_approved_expanded = lapply(1:nrow(oncokb_approved), function(x)
   cbind(oncokb_approved[x,],split_drugnames=split_drugnames[[x]]) )
-oncokb_approved_expanded=do.call(rbind, oncokb_approved_expanded)
+oncokb_approved_expanded = do.call(rbind, oncokb_approved_expanded)
 # remove ceratin biomarker types are are not application
-to_remove_categories=c('Amp', 'Wildtype','High', 'Deletion', 'Duplication')
-maybe_categories=c('Fusion', 'Truncating',  'Oncogenic Mutations')
-to_remove_categories_id=unique(unlist(sapply(to_remove_categories, function(x) 
+to_remove_categories = c('Amp', 'Wildtype','High', 'Deletion', 'Duplication')
+maybe_categories = c('Fusion', 'Truncating',  'Oncogenic Mutations')
+to_remove_categories_id = unique(unlist(sapply(to_remove_categories, function(x) 
   grep(x,oncokb_approved_expanded$Alterations) )))
-oncokb_approved_expanded=oncokb_approved_expanded[-to_remove_categories_id,]
+oncokb_approved_expanded = oncokb_approved_expanded[-to_remove_categories_id,]
 #remove combinations
-oncokb_approved_expanded=oncokb_approved_expanded[
+oncokb_approved_expanded = oncokb_approved_expanded[
   -grep('\\+',oncokb_approved_expanded$split_drugnames),]
-oncokb_approved_expanded=oncokb_approved_expanded[!is.na(match_stripall(oncokb_approved_expanded$split_drugnames, onTarget$drugCategory$name)),]
+oncokb_approved_expanded = oncokb_approved_expanded[!is.na(match_stripall(oncokb_approved_expanded$split_drugnames, onTarget$drugCategory$name)),]
 
-oncokb_approved_expanded$known_target=onTarget$drugCategory$target[match_stripall(oncokb_approved_expanded$split_drugnames, onTarget$drugCategory$name)]
+oncokb_approved_expanded$known_target = onTarget$drugCategory$target[match_stripall(oncokb_approved_expanded$split_drugnames, onTarget$drugCategory$name)]
 
-oncokb_approved_expanded$count_target=sapply(strsplit(as.character(oncokb_approved_expanded$known_target), ', '), length)
+oncokb_approved_expanded$count_target = sapply(strsplit(as.character(oncokb_approved_expanded$known_target), ', '), length)
 #whether the biomarker is a target or not
-oncokb_approved_expanded$is.target=apply(oncokb_approved_expanded, 1, function(x) grepl(x[2], x[7]))
+oncokb_approved_expanded$is.target = apply(oncokb_approved_expanded, 1, function(x) grepl(x[2], x[7]))
 
 test_AUC_A8<-function(seedNumber=1, numberOfTargets_Thr=5, which_level){
   cond1=oncokb_approved_expanded$count_target<numberOfTargets_Thr
@@ -412,7 +414,7 @@ V8_ROC=test_AUC_A8(seedNumber=1, numberOfTargets_Thr=10, which_level = c(1:4))
 ```{r}
 ROC_list=list(COSMIC_resistance=V6_ROC, 
      oncoKB_resistance=V7_ROC, 
-     FDA_mutation_approval=V8_ROC,
+     # FDA_mutation_approval=V8_ROC,
      SAB=V5_ROC,
      Biogrid_Highly_Cited=V1_ROC,
      DrugBank_Active_Inhibitors=V2B_ROC,
@@ -435,34 +437,29 @@ Figure1A
 ```
 
 ```{r}
-names(ROC_list)=c('COSMIC resistance=0.94',
-                  'oncoKB resistance=0.95',
-                  'FDA mutation approval=0.91',
-                  'SAB=0.88',
-                  'Biogrid Highly Cited=0.76',
-                  'DrugBank Active Inhibitors=0.69',
-                  'DrugBank Active Antagonists=0.72')
-saveRDS(ROC_list, '/Users/sinhas8/Project_TrueTarget/Data/ROC_list.RDS')
+names(ROC_list)= 
+
+
+saveRDS(ROC_list, '../Data/ROC_list.RDS')
 Figure1B <- ggroc(ROC_list)+ 
   theme_bw(base_size = 18) + 
   theme(legend.title = element_blank(), 
         legend.position = c(0.8, 0.2),
-        legend.text = element_text(size=12),
+        legend.text = element_text(size=10),
         text = element_text(size=12)) +
   geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed")+
   labs(title="", x="Specificity", y="Sensitivity")
+Figure1B 
 ```
 
 ```{r}
 Figure1AB=ggarrange(Figure1A, Figure1B, labels = 'AUTO', nrow = 1)
-ggsave(Figure1AB, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1AB_v0.png',
-       width = 15, height = 6)
 ggsave(Figure1AB, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1AB_v0.pdf',
        width = 12, height = 6)
 ```
 <!-- Finding a threshold that best divides the positve vs negative labels -->
 ```{r}
-ROC_list$`COSMIC resistance=0.94`$thresholds[which.max(ROC_list$`COSMIC resistance=0.94`$sensitivities+ROC_list$`COSMIC resistance=0.94`$specificities)]
+ROC_list$`COSMIC resistance=  0.94`$thresholds[which.max(ROC_list$`COSMIC resistance=0.94`$sensitivities+ROC_list$`COSMIC resistance=0.94`$specificities)]
 sapply(ROC_list, function(x)
   x$thresholds[which.max(x$sensitivities+x$specificities)] )
 ```
