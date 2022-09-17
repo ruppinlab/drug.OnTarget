@@ -1773,8 +1773,9 @@ project</h1>
 <!-- Compute drug vs crispr correlation - primary target -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29ycmVsYXRpb25fYmV0X2NyaXNwcl9kcnVnIDwtIGZ1bmN0aW9uKGluZnVuY19kcnVnTmFtZSl7XG4gIGluZnVuY19kcnVnUmVzcD1vblRhcmdldCRzZWNvbmRhcnlfcHJpc21baW5mdW5jX2RydWdOYW1lLCBjb21tb25fY2VsbExpbmVzXVxuICBpbmZ1bmNfQ1JJU1BSUmVzcD1vblRhcmdldCRhdmFuYV8yMlEyWywgY29tbW9uX2NlbGxMaW5lc11cbiAgY29ycmVsYXRpb25fZGY9c2FwcGx5KDE6bnJvdyhpbmZ1bmNfQ1JJU1BSUmVzcCksZnVuY3Rpb24oeClcbiAgICB1bmxpc3QoY29yLnRlc3RfdHJpbW1lZF92MC5kZWZhdWx0KGluZnVuY19kcnVnUmVzcCwgaW5mdW5jX0NSSVNQUlJlc3BbeCxdKSkpXG4gIGNvcnJlbGF0aW9uX2RmPXQoY29ycmVsYXRpb25fZGYpXG4gIHJvdy5uYW1lcyhjb3JyZWxhdGlvbl9kZikgPC0gYWxsX2dlbmVuYW1lc1xuICBjb3JyZWxhdGlvbl9kZlxufVxuYGBgIn0= -->
-<pre class="r"><code>correlation_bet_crispr_drug &lt;- function(infunc_drugName){
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuY29ycmVsYXRpb25fYmV0X2NyaXNwcl9kcnVnIDwtIGZ1bmN0aW9uKGluZnVuY19kcnVnTmFtZSl7XG4gIGluZnVuY19kcnVnUmVzcD1vblRhcmdldCRzZWNvbmRhcnlfcHJpc21baW5mdW5jX2RydWdOYW1lLCBjb21tb25fY2VsbExpbmVzXVxuICBpbmZ1bmNfQ1JJU1BSUmVzcD1vblRhcmdldCRhdmFuYV8yMlEyWywgY29tbW9uX2NlbGxMaW5lc11cbiAgY29ycmVsYXRpb25fZGY9c2FwcGx5KDE6bnJvdyhpbmZ1bmNfQ1JJU1BSUmVzcCksZnVuY3Rpb24oeClcbiAgICB1bmxpc3QoY29yLnRlc3RfdHJpbW1lZF92MC5kZWZhdWx0KGluZnVuY19kcnVnUmVzcCwgaW5mdW5jX0NSSVNQUlJlc3BbeCxdKSkpXG4gIGNvcnJlbGF0aW9uX2RmPXQoY29ycmVsYXRpb25fZGYpXG4gIHJvdy5uYW1lcyhjb3JyZWxhdGlvbl9kZikgPC0gYWxsX2dlbmVuYW1lc1xuICBjb3JyZWxhdGlvbl9kZlxufVxuYGBgXG5gYGAifQ== -->
+<pre class="r"><code>```r
+correlation_bet_crispr_drug &lt;- function(infunc_drugName){
   infunc_drugResp=onTarget$secondary_prism[infunc_drugName, common_cellLines]
   infunc_CRISPRResp=onTarget$avana_22Q2[, common_cellLines]
   correlation_df=sapply(1:nrow(infunc_CRISPRResp),function(x)
@@ -1783,14 +1784,26 @@ project</h1>
   row.names(correlation_df) &lt;- all_genenames
   correlation_df
 }</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- Compute drug vs crispr correlation in cell lines where primary target is not expressed - secondary target -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29ycmVsYXRpb25fYmV0X2NyaXNwcl9kcnVnX3NlY29uZGFyeSA8LSBmdW5jdGlvbihpbmZ1bmNfZHJ1Z05hbWUsIENlbGxMaW5lc193aXRob3V0UHJpbWFyeSl7XG4gIGluZnVuY19kcnVnUmVzcD1vblRhcmdldCRzZWNvbmRhcnlfcHJpc21baW5mdW5jX2RydWdOYW1lLCBDZWxsTGluZXNfd2l0aG91dFByaW1hcnldXG4gIGluZnVuY19DUklTUFJSZXNwPW9uVGFyZ2V0JGF2YW5hXzIyUTJbLCBDZWxsTGluZXNfd2l0aG91dFByaW1hcnldXG4gIGNvcnJlbGF0aW9uX2RmPXNhcHBseSgxOm5yb3coaW5mdW5jX0NSSVNQUlJlc3ApLGZ1bmN0aW9uKHgpXG4gICAgdW5saXN0KGNvci50ZXN0X3RyaW1tZWRfdjAuZGVmYXVsdChpbmZ1bmNfZHJ1Z1Jlc3AsIGluZnVuY19DUklTUFJSZXNwW3gsXSkpKVxuICBjb3JyZWxhdGlvbl9kZj10KGNvcnJlbGF0aW9uX2RmKVxuICByb3cubmFtZXMoY29ycmVsYXRpb25fZGYpIDwtIGFsbF9nZW5lbmFtZXNcbiAgY29ycmVsYXRpb25fZGZcbn1cbmBgYCJ9 -->
-<pre class="r"><code>correlation_bet_crispr_drug_secondary &lt;- function(infunc_drugName, CellLines_withoutPrimary){
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+&lt;!-- Compute drug vs crispr correlation in cell lines where primary target is not expressed - secondary target --&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29ycmVsYXRpb25fYmV0X2NyaXNwcl9kcnVnX3NlY29uZGFyeV90YXJnZXQgPC0gZnVuY3Rpb24oaW5mdW5jX2RydWdOYW1lLCBDZWxsTGluZXNfd2l0aG91dFByaW1hcnkpe1xuICBpbmZ1bmNfZHJ1Z1Jlc3A9b25UYXJnZXQkc2Vjb25kYXJ5X3ByaXNtW2luZnVuY19kcnVnTmFtZSwgQ2VsbExpbmVzX3dpdGhvdXRQcmltYXJ5XVxuICBpbmZ1bmNfQ1JJU1BSUmVzcD1vblRhcmdldCRhdmFuYV8yMlEyWywgQ2VsbExpbmVzX3dpdGhvdXRQcmltYXJ5XVxuICBjb3JyZWxhdGlvbl9kZj1zYXBwbHkoMTpucm93KGluZnVuY19DUklTUFJSZXNwKSxmdW5jdGlvbih4KVxuICAgIHVubGlzdChjb3IudGVzdF90cmltbWVkX3YwLmRlZmF1bHQoaW5mdW5jX2RydWdSZXNwLCBpbmZ1bmNfQ1JJU1BSUmVzcFt4LF0pKSlcbiAgY29ycmVsYXRpb25fZGY9dChjb3JyZWxhdGlvbl9kZilcbiAgcm93Lm5hbWVzKGNvcnJlbGF0aW9uX2RmKSA8LSBhbGxfZ2VuZW5hbWVzXG4gIGNvcnJlbGF0aW9uX2RmXG59XG5gYGAifQ== --&gt;
+
+```r
+correlation_bet_crispr_drug_secondary_target &lt;- function(infunc_drugName, CellLines_withoutPrimary){
   infunc_drugResp=onTarget$secondary_prism[infunc_drugName, CellLines_withoutPrimary]
   infunc_CRISPRResp=onTarget$avana_22Q2[, CellLines_withoutPrimary]
   correlation_df=sapply(1:nrow(infunc_CRISPRResp),function(x)
@@ -1806,8 +1819,9 @@ project</h1>
 <!-- Functions for producing negative controld during primary target identification -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDcmVhdGUgYSByYW5kb20gZGYgdW5pcXVlIHRvIHRoZSBpbnB1dCBkZlxucmFuZG9taXplX0RGX3dpdGhfdW5pcXVlX1BhaXJzPC1mdW5jdGlvbihkZjJyYW5kb21pemU9UG9zaXRpdmVfU2V0X0RydWdHZW5lX1BhaXJzKXtcbiAgZGYycmFuZG9taXplX2NvbGxhcHNlZD1wYXN0ZShkZjJyYW5kb21pemVbLDFdLCBkZjJyYW5kb21pemVbLDJdLCBzZXAgPSAnXycpXG4gIGZpeGVkQ29sPWRmMnJhbmRvbWl6ZVssMl1cbiAgc2h1ZmZsZWRDb2w9c2FtcGxlKGRmMnJhbmRvbWl6ZVssMV0pXG4gIG5ld19kZj1wYXN0ZShzaHVmZmxlZENvbCwgZml4ZWRDb2wsIHNlcCA9ICdfJylcbiAgd2hpbGUoc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZik+MCl7XG4gICAgbmV3X2RmW2RmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZl09XG4gICAgICBwYXN0ZShzYW1wbGUoZGYycmFuZG9taXplWywxXSwgc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZikpLCBmaXhlZENvbFtkZjJyYW5kb21pemVfY29sbGFwc2VkPT1uZXdfZGZdLCBzZXAgPSAnXycpXG4gIH1cbiAgZGYycmV0dXJuPWRvLmNhbGwocmJpbmQsIHN0cnNwbGl0KG5ld19kZiwgJ18nKSlcbiAgZGYycmV0dXJuPWRhdGEuZnJhbWUoZGYycmV0dXJuWywxXSwgZGYycmV0dXJuWywyXSlcbiAgY29sbmFtZXMoZGYycmV0dXJuKT1jb2xuYW1lcyhkZjJyYW5kb21pemUpXG4gIGRmMnJldHVyblxufVxuXG5yYW5kb21pemVfREZfd2l0aF91bmlxdWVfUGFpcnNfVjI8LWZ1bmN0aW9uKGRmMnJhbmRvbWl6ZT1Qb3NpdGl2ZV9TZXRfRHJ1Z0dlbmVfUGFpcnMpe1xuICBkZjJyYW5kb21pemVfY29sbGFwc2VkPXBhc3RlKGRmMnJhbmRvbWl6ZVssMV0sIGRmMnJhbmRvbWl6ZVssMl0sIHNlcCA9ICdfJylcbiAgZml4ZWRDb2w9ZGYycmFuZG9taXplWywyXVxuICBzaHVmZmxlZENvbD1zYW1wbGUocm93bmFtZXMoY29yck1hdCksIG5yb3coZGYycmFuZG9taXplKSlcbiAgbmV3X2RmPXBhc3RlKHNodWZmbGVkQ29sLCBmaXhlZENvbCwgc2VwID0gJ18nKVxuICB3aGlsZShzdW0oZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmKT4wKXtcbiAgICBuZXdfZGZbZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmXT1cbiAgICAgIHBhc3RlKHNhbXBsZShyb3duYW1lcyhvblRhcmdldCRjb3JyTWF0KSwgc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZikpLFxuICAgICAgICAgICAgZml4ZWRDb2xbZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmXSwgc2VwID0gJ18nKVxuICB9XG4gIGRmMnJldHVybj1kby5jYWxsKHJiaW5kLCBzdHJzcGxpdChuZXdfZGYsICdfJykpXG4gIGRmMnJldHVybj1kYXRhLmZyYW1lKGRmMnJldHVyblssMV0sIGRmMnJldHVyblssMl0pXG4gIGNvbG5hbWVzKGRmMnJldHVybik9Y29sbmFtZXMoZGYycmFuZG9taXplKVxuICBkZjJyZXR1cm5cbn1cbmBgYCJ9 -->
-<pre class="r"><code># Create a random df unique to the input df
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuIyBDcmVhdGUgYSByYW5kb20gZGYgdW5pcXVlIHRvIHRoZSBpbnB1dCBkZlxucmFuZG9taXplX0RGX3dpdGhfdW5pcXVlX1BhaXJzPC1mdW5jdGlvbihkZjJyYW5kb21pemU9UG9zaXRpdmVfU2V0X0RydWdHZW5lX1BhaXJzKXtcbiAgZGYycmFuZG9taXplX2NvbGxhcHNlZD1wYXN0ZShkZjJyYW5kb21pemVbLDFdLCBkZjJyYW5kb21pemVbLDJdLCBzZXAgPSAnXycpXG4gIGZpeGVkQ29sPWRmMnJhbmRvbWl6ZVssMl1cbiAgc2h1ZmZsZWRDb2w9c2FtcGxlKGRmMnJhbmRvbWl6ZVssMV0pXG4gIG5ld19kZj1wYXN0ZShzaHVmZmxlZENvbCwgZml4ZWRDb2wsIHNlcCA9ICdfJylcbiAgd2hpbGUoc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZik+MCl7XG4gICAgbmV3X2RmW2RmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZl09XG4gICAgICBwYXN0ZShzYW1wbGUoZGYycmFuZG9taXplWywxXSwgc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZikpLCBmaXhlZENvbFtkZjJyYW5kb21pemVfY29sbGFwc2VkPT1uZXdfZGZdLCBzZXAgPSAnXycpXG4gIH1cbiAgZGYycmV0dXJuPWRvLmNhbGwocmJpbmQsIHN0cnNwbGl0KG5ld19kZiwgJ18nKSlcbiAgZGYycmV0dXJuPWRhdGEuZnJhbWUoZGYycmV0dXJuWywxXSwgZGYycmV0dXJuWywyXSlcbiAgY29sbmFtZXMoZGYycmV0dXJuKT1jb2xuYW1lcyhkZjJyYW5kb21pemUpXG4gIGRmMnJldHVyblxufVxuXG5yYW5kb21pemVfREZfd2l0aF91bmlxdWVfUGFpcnNfVjI8LWZ1bmN0aW9uKGRmMnJhbmRvbWl6ZT1Qb3NpdGl2ZV9TZXRfRHJ1Z0dlbmVfUGFpcnMpe1xuICBkZjJyYW5kb21pemVfY29sbGFwc2VkPXBhc3RlKGRmMnJhbmRvbWl6ZVssMV0sIGRmMnJhbmRvbWl6ZVssMl0sIHNlcCA9ICdfJylcbiAgZml4ZWRDb2w9ZGYycmFuZG9taXplWywyXVxuICBzaHVmZmxlZENvbD1zYW1wbGUocm93bmFtZXMoY29yck1hdCksIG5yb3coZGYycmFuZG9taXplKSlcbiAgbmV3X2RmPXBhc3RlKHNodWZmbGVkQ29sLCBmaXhlZENvbCwgc2VwID0gJ18nKVxuICB3aGlsZShzdW0oZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmKT4wKXtcbiAgICBuZXdfZGZbZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmXT1cbiAgICAgIHBhc3RlKHNhbXBsZShyb3duYW1lcyhvblRhcmdldCRjb3JyTWF0KSwgc3VtKGRmMnJhbmRvbWl6ZV9jb2xsYXBzZWQ9PW5ld19kZikpLFxuICAgICAgICAgICAgZml4ZWRDb2xbZGYycmFuZG9taXplX2NvbGxhcHNlZD09bmV3X2RmXSwgc2VwID0gJ18nKVxuICB9XG4gIGRmMnJldHVybj1kby5jYWxsKHJiaW5kLCBzdHJzcGxpdChuZXdfZGYsICdfJykpXG4gIGRmMnJldHVybj1kYXRhLmZyYW1lKGRmMnJldHVyblssMV0sIGRmMnJldHVyblssMl0pXG4gIGNvbG5hbWVzKGRmMnJldHVybik9Y29sbmFtZXMoZGYycmFuZG9taXplKVxuICBkZjJyZXR1cm5cbn1cbmBgYFxuYGBgIn0= -->
+<pre class="r"><code>```r
+# Create a random df unique to the input df
 randomize_DF_with_unique_Pairs&lt;-function(df2randomize=Positive_Set_DrugGene_Pairs){
   df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = &#39;_&#39;)
   fixedCol=df2randomize[,2]
@@ -1838,28 +1852,42 @@ randomize_DF_with_unique_Pairs_V2&lt;-function(df2randomize=Positive_Set_DrugGen
   colnames(df2return)=colnames(df2randomize)
   df2return
 }</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- Trimmed cor test -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29yLnRlc3RfdHJpbW1lZF92MCA8LSBmdW5jdGlvbih4LCAuLi4pIFVzZU1ldGhvZChcImNvci50ZXN0X3RyaW1tZWRfdjBcIilcbmNvci50ZXN0X3RyaW1tZWRfdjAuZGVmYXVsdCA8LVxuICBmdW5jdGlvbih4LCB5LCBhbHRlcm5hdGl2ZSA9IGMoXCJ0d28uc2lkZWRcIiwgXCJsZXNzXCIsIFwiZ3JlYXRlclwiKSxcbiAgICAgICAgICAgbWV0aG9kID0gYyhcInBlYXJzb25cIiksIGV4YWN0ID0gTlVMTCxcbiAgICAgICAgICAgIyBjb25mLmxldmVsID0gMC45NSxcbiAgICAgICAgICAgY29udGludWl0eSA9IEZBTFNFLCAuLi4pXG4gIHtcbiAgICBhbHRlcm5hdGl2ZSA8LSBtYXRjaC5hcmcoYWx0ZXJuYXRpdmUpXG4gICAgbWV0aG9kIDwtIG1hdGNoLmFyZyhtZXRob2QpXG4gICAgRE5BTUUgPC0gcGFzdGUoZGVwYXJzZShzdWJzdGl0dXRlKHgpKSwgXCJhbmRcIiwgZGVwYXJzZShzdWJzdGl0dXRlKHkpKSlcbiAgICBcbiAgICBpZihsZW5ndGgoeCkgIT0gbGVuZ3RoKHkpKVxuICAgICAgc3RvcChcIid4JyBhbmQgJ3knIG11c3QgaGF2ZSB0aGUgc2FtZSBsZW5ndGhcIilcbiAgICBpZighaXMubnVtZXJpYyh4KSkgc3RvcChcIid4JyBtdXN0IGJlIGEgbnVtZXJpYyB2ZWN0b3JcIilcbiAgICBpZighaXMubnVtZXJpYyh5KSkgc3RvcChcIid5JyBtdXN0IGJlIGEgbnVtZXJpYyB2ZWN0b3JcIilcbiAgICBPSyA8LSBjb21wbGV0ZS5jYXNlcyh4LCB5KVxuICAgIHggPC0geFtPS11cbiAgICB5IDwtIHlbT0tdXG4gICAgbiA8LSBsZW5ndGgoeClcbiAgICBcbiAgICBOVkFMIDwtIDBcbiAgICAjIGNvbmYuaW50IDwtIEZBTFNFXG4gICAgXG4gICAgaWYobWV0aG9kID09IFwicGVhcnNvblwiKSB7XG4gICAgICBpZihuIDwgM0wpXG4gICAgICAgIHN0b3AoXCJub3QgZW5vdWdoIGZpbml0ZSBvYnNlcnZhdGlvbnNcIilcbiAgICAgIG1ldGhvZCA8LSBcIlBlYXJzb24ncyBwcm9kdWN0LW1vbWVudCBjb3JyZWxhdGlvblwiXG4gICAgICBuYW1lcyhOVkFMKSA8LSBcImNvcnJlbGF0aW9uXCJcbiAgICAgIHIgPC0gY29yKHgsIHkpXG4gICAgICBkZiA8LSBuIC0gMkxcbiAgICAgIEVTVElNQVRFIDwtIGMoY29yID0gcilcbiAgICAgIFBBUkFNRVRFUiA8LSBjKGRmID0gZGYpXG4gICAgICBTVEFUSVNUSUMgPC0gYyh0ID0gc3FydChkZikgKiByIC8gc3FydCgxIC0gcl4yKSlcbiAgICAgICMgRG8gbm90IGNvbXB1dGUgY29uZmlkZW5jZSBJbnRcbiAgICAgICMgaWYobiA+IDMpIHsgIyMgY29uZmlkZW5jZSBpbnQuXG4gICAgICAjICAgaWYoIW1pc3NpbmcoY29uZi5sZXZlbCkgJiZcbiAgICAgICMgICAgICAobGVuZ3RoKGNvbmYubGV2ZWwpICE9IDEgfHwgIWlzLmZpbml0ZShjb25mLmxldmVsKSB8fFxuICAgICAgIyAgICAgICBjb25mLmxldmVsIDwgMCB8fCBjb25mLmxldmVsID4gMSkpXG4gICAgICAjICAgICBzdG9wKFwiJ2NvbmYubGV2ZWwnIG11c3QgYmUgYSBzaW5nbGUgbnVtYmVyIGJldHdlZW4gMCBhbmQgMVwiKVxuICAgICAgIyAgIGNvbmYuaW50IDwtIFRSVUVcbiAgICAgICMgICB6IDwtIGF0YW5oKHIpXG4gICAgICAjICAgc2lnbWEgPC0gMSAvIHNxcnQobiAtIDMpXG4gICAgICAjICAgY2ludCA8LVxuICAgICAgIyAgICAgc3dpdGNoKGFsdGVybmF0aXZlLFxuICAgICAgIyAgICAgICAgICAgIGxlc3MgPSBjKC1JbmYsIHogKyBzaWdtYSAqIHFub3JtKGNvbmYubGV2ZWwpKSxcbiAgICAgICMgICAgICAgICAgICBncmVhdGVyID0gYyh6IC0gc2lnbWEgKiBxbm9ybShjb25mLmxldmVsKSwgSW5mKSxcbiAgICAgICMgICAgICAgICAgICB0d28uc2lkZWQgPSB6ICtcbiAgICAgICMgICAgICAgICAgICAgIGMoLTEsIDEpICogc2lnbWEgKiBxbm9ybSgoMSArIGNvbmYubGV2ZWwpIC8gMikpXG4gICAgICAjICAgY2ludCA8LSB0YW5oKGNpbnQpXG4gICAgICAjICAgYXR0cihjaW50LCBcImNvbmYubGV2ZWxcIikgPC0gY29uZi5sZXZlbFxuICAgICAgIyB9XG4gICAgICBQVkFMIDwtIHN3aXRjaChhbHRlcm5hdGl2ZSxcbiAgICAgICAgICAgICAgICAgICAgIFwibGVzc1wiID0gcHQoU1RBVElTVElDLCBkZiksXG4gICAgICAgICAgICAgICAgICAgICBcImdyZWF0ZXJcIiA9IHB0KFNUQVRJU1RJQywgZGYsIGxvd2VyLnRhaWw9RkFMU0UpLFxuICAgICAgICAgICAgICAgICAgICAgXCJ0d28uc2lkZWRcIiA9IDIgKiBtaW4ocHQoU1RBVElTVElDLCBkZiksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcHQoU1RBVElTVElDLCBkZiwgbG93ZXIudGFpbD1GQUxTRSkpKVxuICAgIH1cbiAgICBlbHNlIHtcbiAgICAgIGlmKG4gPCAyKVxuICAgICAgICBzdG9wKFwibm90IGVub3VnaCBmaW5pdGUgb2JzZXJ2YXRpb25zXCIpXG4gICAgICBQQVJBTUVURVIgPC0gTlVMTFxuICAgICAgVElFUyA8LSAobWluKGxlbmd0aCh1bmlxdWUoeCkpLCBsZW5ndGgodW5pcXVlKHkpKSkgPCBuKVxuICAgICAgaWYobWV0aG9kID09IFwia2VuZGFsbFwiKSB7XG4gICAgICAgIG1ldGhvZCA8LSBcIktlbmRhbGwncyByYW5rIGNvcnJlbGF0aW9uIHRhdVwiXG4gICAgICAgIG5hbWVzKE5WQUwpIDwtIFwidGF1XCJcbiAgICAgICAgciA8LSBjb3IoeCx5LCBtZXRob2QgPSBcImtlbmRhbGxcIilcbiAgICAgICAgRVNUSU1BVEUgPC0gYyh0YXUgPSByKVxuICAgICAgICBcbiAgICAgICAgaWYoIWlzLmZpbml0ZShFU1RJTUFURSkpIHsgICMgYWxsIHggb3IgYWxsIHkgdGhlIHNhbWVcbiAgICAgICAgICBFU1RJTUFURVtdIDwtIE5BXG4gICAgICAgICAgU1RBVElTVElDIDwtIGMoVCA9IE5BKVxuICAgICAgICAgIFBWQUwgPC0gTkFcbiAgICAgICAgfVxuICAgICAgICBlbHNlIHtcbiAgICAgICAgICBpZihpcy5udWxsKGV4YWN0KSlcbiAgICAgICAgICAgIGV4YWN0IDwtIChuIDwgNTApXG4gICAgICAgICAgaWYoZXhhY3QgJiYgIVRJRVMpIHtcbiAgICAgICAgICAgIHEgPC0gcm91bmQoKHIgKyAxKSAqIG4gKiAobiAtIDEpIC8gNClcbiAgICAgICAgICAgIFNUQVRJU1RJQyA8LSBjKFQgPSBxKVxuICAgICAgICAgICAgcGtlbmRhbGwgPC0gZnVuY3Rpb24ocSwgbikgLkNhbGwoQ19wS2VuZGFsbCwgcSwgbilcbiAgICAgICAgICAgIFBWQUwgPC1cbiAgICAgICAgICAgICAgc3dpdGNoKGFsdGVybmF0aXZlLFxuICAgICAgICAgICAgICAgICAgICAgXCJ0d28uc2lkZWRcIiA9IHtcbiAgICAgICAgICAgICAgICAgICAgICAgaWYocSA+IG4gKiAobiAtIDEpIC8gNClcbiAgICAgICAgICAgICAgICAgICAgICAgICBwIDwtIDEgLSBwa2VuZGFsbChxIC0gMSwgbilcbiAgICAgICAgICAgICAgICAgICAgICAgZWxzZVxuICAgICAgICAgICAgICAgICAgICAgICAgIHAgPC0gcGtlbmRhbGwocSwgbilcbiAgICAgICAgICAgICAgICAgICAgICAgbWluKDIgKiBwLCAxKVxuICAgICAgICAgICAgICAgICAgICAgfSxcbiAgICAgICAgICAgICAgICAgICAgIFwiZ3JlYXRlclwiID0gMSAtIHBrZW5kYWxsKHEgLSAxLCBuKSxcbiAgICAgICAgICAgICAgICAgICAgIFwibGVzc1wiID0gcGtlbmRhbGwocSwgbikpXG4gICAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICAgIHh0aWVzIDwtIHRhYmxlKHhbZHVwbGljYXRlZCh4KV0pICsgMVxuICAgICAgICAgICAgeXRpZXMgPC0gdGFibGUoeVtkdXBsaWNhdGVkKHkpXSkgKyAxXG4gICAgICAgICAgICBUMCA8LSBuICogKG4gLSAxKS8yXG4gICAgICAgICAgICBUMSA8LSBzdW0oeHRpZXMgKiAoeHRpZXMgLSAxKSkvMlxuICAgICAgICAgICAgVDIgPC0gc3VtKHl0aWVzICogKHl0aWVzIC0gMSkpLzJcbiAgICAgICAgICAgIFMgPC0gciAqIHNxcnQoKFQwIC0gVDEpICogKFQwIC0gVDIpKVxuICAgICAgICAgICAgdjAgPC0gbiAqIChuIC0gMSkgKiAoMiAqIG4gKyA1KVxuICAgICAgICAgICAgdnQgPC0gc3VtKHh0aWVzICogKHh0aWVzIC0gMSkgKiAoMiAqIHh0aWVzICsgNSkpXG4gICAgICAgICAgICB2dSA8LSBzdW0oeXRpZXMgKiAoeXRpZXMgLSAxKSAqICgyICogeXRpZXMgKyA1KSlcbiAgICAgICAgICAgIHYxIDwtIHN1bSh4dGllcyAqICh4dGllcyAtIDEpKSAqIHN1bSh5dGllcyAqICh5dGllcyAtIDEpKVxuICAgICAgICAgICAgdjIgPC0gc3VtKHh0aWVzICogKHh0aWVzIC0gMSkgKiAoeHRpZXMgLSAyKSkgKlxuICAgICAgICAgICAgICBzdW0oeXRpZXMgKiAoeXRpZXMgLSAxKSAqICh5dGllcyAtIDIpKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXJfUyA8LSAodjAgLSB2dCAtIHZ1KSAvIDE4ICtcbiAgICAgICAgICAgICAgdjEgLyAoMiAqIG4gKiAobiAtIDEpKSArXG4gICAgICAgICAgICAgIHYyIC8gKDkgKiBuICogKG4gLSAxKSAqIChuIC0gMikpXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGlmKGV4YWN0ICYmIFRJRVMpXG4gICAgICAgICAgICAgIHdhcm5pbmcoXCJDYW5ub3QgY29tcHV0ZSBleGFjdCBwLXZhbHVlIHdpdGggdGllc1wiKVxuICAgICAgICAgICAgaWYgKGNvbnRpbnVpdHkpIFMgPC0gc2lnbihTKSAqIChhYnMoUykgLSAxKVxuICAgICAgICAgICAgU1RBVElTVElDIDwtIGMoeiA9IFMgLyBzcXJ0KHZhcl9TKSlcbiAgICAgICAgICAgIFBWQUwgPC0gc3dpdGNoKGFsdGVybmF0aXZlLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJsZXNzXCIgPSBwbm9ybShTVEFUSVNUSUMpLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJncmVhdGVyXCIgPSBwbm9ybShTVEFUSVNUSUMsIGxvd2VyLnRhaWw9RkFMU0UpLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJ0d28uc2lkZWRcIiA9IDIgKiBtaW4ocG5vcm0oU1RBVElTVElDKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwbm9ybShTVEFUSVNUSUMsIGxvd2VyLnRhaWw9RkFMU0UpKSlcbiAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICAgIH0gZWxzZSB7XG4gICAgICAgIG1ldGhvZCA8LSBcIlNwZWFybWFuJ3MgcmFuayBjb3JyZWxhdGlvbiByaG9cIlxuICAgICAgICBpZiAoaXMubnVsbChleGFjdCkpXG4gICAgICAgICAgZXhhY3QgPC0gVFJVRVxuICAgICAgICBuYW1lcyhOVkFMKSA8LSBcInJob1wiXG4gICAgICAgIHIgPC0gY29yKHJhbmsoeCksIHJhbmsoeSkpXG4gICAgICAgIEVTVElNQVRFIDwtIGMocmhvID0gcilcbiAgICAgICAgaWYoIWlzLmZpbml0ZShFU1RJTUFURSkpIHsgICMgYWxsIHggb3IgYWxsIHkgdGhlIHNhbWVcbiAgICAgICAgICBFU1RJTUFURVtdIDwtIE5BXG4gICAgICAgICAgU1RBVElTVElDIDwtIGMoUyA9IE5BKVxuICAgICAgICAgIFBWQUwgPC0gTkFcbiAgICAgICAgfVxuICAgICAgICBlbHNlIHtcbiAgICAgICAgICAjIyBVc2UgdGhlIHRlc3Qgc3RhdGlzdGljIFMgPSBzdW0ocmFuayh4KSAtIHJhbmsoeSkpXjJcbiAgICAgICAgICAjIyBhbmQgQVMgODkgZm9yIG9idGFpbmluZyBiZXR0ZXIgcC12YWx1ZXMgdGhhbiB2aWEgdGhlXG4gICAgICAgICAgIyMgc2ltcGxlIG5vcm1hbCBhcHByb3hpbWF0aW9uLlxuICAgICAgICAgICMjIEluIHRoZSBjYXNlIG9mIG5vIHRpZXMsIFMgPSAoMS1yaG8pICogKG5eMy1uKS82LlxuICAgICAgICAgIHBzcGVhcm1hbiA8LSBmdW5jdGlvbihxLCBuLCBsb3dlci50YWlsID0gVFJVRSkge1xuICAgICAgICAgICAgaWYobiA8PSAxMjkwICYmIGV4YWN0KSAjIG4qKG5eMiAtIDEpIGRvZXMgbm90IG92ZXJmbG93XG4gICAgICAgICAgICAgIC5DYWxsKENfcFJobywgcm91bmQocSkgKyAyKmxvd2VyLnRhaWwsIG4sIGxvd2VyLnRhaWwpXG4gICAgICAgICAgICBlbHNlIHsgIyBmb3IgbGFyZ2UgbjogYXN5bXB0b3RpYyB0X3tuLTJ9XG4gICAgICAgICAgICAgIGRlbiA8LSAobioobl4yLTEpKS82ICMgY2FyZWZ1bCBmb3Igb3ZlcmZsb3dcbiAgICAgICAgICAgICAgIyMgS2VuZGFsbCBldCBhbGwgKDE5MzkpIHAuIDI2MFxuICAgICAgICAgICAgICBpZiAoY29udGludWl0eSkgZGVuIDwtIGRlbiArIDFcbiAgICAgICAgICAgICAgciA8LSAxIC0gcS9kZW5cbiAgICAgICAgICAgICAgcHQociAvIHNxcnQoKDEgLSByXjIpLyhuLTIpKSwgZGYgPSBuLTIsXG4gICAgICAgICAgICAgICAgIGxvd2VyLnRhaWwgPSAhbG93ZXIudGFpbClcbiAgICAgICAgICAgIH1cbiAgICAgICAgICB9XG4gICAgICAgICAgcSA8LSAobl4zIC0gbikgKiAoMSAtIHIpIC8gNlxuICAgICAgICAgIFNUQVRJU1RJQyA8LSBjKFMgPSBxKVxuICAgICAgICAgIGlmKFRJRVMgJiYgZXhhY3Qpe1xuICAgICAgICAgICAgZXhhY3QgPC0gRkFMU0VcbiAgICAgICAgICAgIHdhcm5pbmcoXCJDYW5ub3QgY29tcHV0ZSBleGFjdCBwLXZhbHVlIHdpdGggdGllc1wiKVxuICAgICAgICAgIH1cbiAgICAgICAgICBQVkFMIDwtXG4gICAgICAgICAgICBzd2l0Y2goYWx0ZXJuYXRpdmUsXG4gICAgICAgICAgICAgICAgICAgXCJ0d28uc2lkZWRcIiA9IHtcbiAgICAgICAgICAgICAgICAgICAgIHAgPC0gaWYocSA+IChuXjMgLSBuKSAvIDYpXG4gICAgICAgICAgICAgICAgICAgICAgIHBzcGVhcm1hbihxLCBuLCBsb3dlci50YWlsID0gRkFMU0UpXG4gICAgICAgICAgICAgICAgICAgICBlbHNlXG4gICAgICAgICAgICAgICAgICAgICAgIHBzcGVhcm1hbihxLCBuLCBsb3dlci50YWlsID0gVFJVRSlcbiAgICAgICAgICAgICAgICAgICAgIG1pbigyICogcCwgMSlcbiAgICAgICAgICAgICAgICAgICB9LFxuICAgICAgICAgICAgICAgICAgIFwiZ3JlYXRlclwiID0gcHNwZWFybWFuKHEsIG4sIGxvd2VyLnRhaWwgPSBUUlVFKSxcbiAgICAgICAgICAgICAgICAgICBcImxlc3NcIiA9IHBzcGVhcm1hbihxLCBuLCBsb3dlci50YWlsID0gRkFMU0UpKVxuICAgICAgICB9XG4gICAgICB9XG4gICAgfVxuICAgIFxuICAgIFJWQUwgPC0gbGlzdChcbiAgICAgICMgc3RhdGlzdGljID0gU1RBVElTVElDLFxuICAgICAgIyBwYXJhbWV0ZXIgPSBQQVJBTUVURVIsXG4gICAgICBwLnZhbHVlID0gYXMubnVtZXJpYyhQVkFMKSxcbiAgICAgIGVzdGltYXRlID0gRVNUSU1BVEVcbiAgICAgICMgLFxuICAgICAgIyBudWxsLnZhbHVlID0gTlZBTCxcbiAgICAgICMgYWx0ZXJuYXRpdmUgPSBhbHRlcm5hdGl2ZSxcbiAgICAgICMgbWV0aG9kID0gbWV0aG9kLFxuICAgICAgIyBkYXRhLm5hbWUgPSBETkFNRVxuICAgIClcbiAgICAjIGlmKGNvbmYuaW50KVxuICAgICMgICBSVkFMIDwtIGMoUlZBTCwgbGlzdChjb25mLmludCA9IGNpbnQpKVxuICAgIGNsYXNzKFJWQUwpIDwtIFwiaHRlc3RcIlxuICAgIFJWQUxcbiAgfVxuY29yLnRlc3QuZm9ybXVsYSA8LVxuICBmdW5jdGlvbihmb3JtdWxhLCBkYXRhLCBzdWJzZXQsIG5hLmFjdGlvbiwgLi4uKVxuICB7XG4gICAgaWYobWlzc2luZyhmb3JtdWxhKVxuICAgICAgIHx8ICFpbmhlcml0cyhmb3JtdWxhLCBcImZvcm11bGFcIilcbiAgICAgICB8fCBsZW5ndGgoZm9ybXVsYSkgIT0gMkwpXG4gICAgICBzdG9wKFwiJ2Zvcm11bGEnIG1pc3Npbmcgb3IgaW52YWxpZFwiKVxuICAgIG0gPC0gbWF0Y2guY2FsbChleHBhbmQuZG90cyA9IEZBTFNFKVxuICAgIGlmKGlzLm1hdHJpeChldmFsKG0kZGF0YSwgcGFyZW50LmZyYW1lKCkpKSlcbiAgICAgIG0kZGF0YSA8LSBhcy5kYXRhLmZyYW1lKGRhdGEpXG4gICAgIyMgbmVlZCBzdGF0czo6IGZvciBub24tc3RhbmRhcmQgZXZhbHVhdGlvblxuICAgIG1bWzFMXV0gPC0gcXVvdGUoc3RhdHM6Om1vZGVsLmZyYW1lKVxuICAgIG0kLi4uIDwtIE5VTExcbiAgICBtZiA8LSBldmFsKG0sIGVudmlyb25tZW50KGZvcm11bGEpKVxuICAgIGlmKGxlbmd0aChtZikgIT0gMkwpXG4gICAgICBzdG9wKFwiaW52YWxpZCBmb3JtdWxhXCIpXG4gICAgRE5BTUUgPC0gcGFzdGUobmFtZXMobWYpLCBjb2xsYXBzZSA9IFwiIGFuZCBcIilcbiAgICBuYW1lcyhtZikgPC0gYyhcInhcIiwgXCJ5XCIpXG4gICAgeSA8LSBkby5jYWxsKFwiY29yLnRlc3RfdHJpbW1lZF92MFwiLCBjKG1mLCBsaXN0KC4uLikpKVxuICAgIHkkZGF0YS5uYW1lIDwtIEROQU1FXG4gICAgeVxuICB9XG5cbmBgYCJ9 -->
-<pre class="r"><code>cor.test_trimmed_v0 &lt;- function(x, ...) UseMethod(&quot;cor.test_trimmed_v0&quot;)
+<pre><code>
+&lt;!-- rnb-source-end --&gt;
+
+&lt;!-- rnb-chunk-end --&gt;
+
+
+&lt;!-- rnb-text-begin --&gt;
+
+
+&lt;!-- Trimmed cor test --&gt;
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxuY29yLnRlc3RfdHJpbW1lZF92MCA8LSBmdW5jdGlvbih4LCAuLi4pIFVzZU1ldGhvZChcXGNvci50ZXN0X3RyaW1tZWRfdjBcXClcbmNvci50ZXN0X3RyaW1tZWRfdjAuZGVmYXVsdCA8LVxuICBmdW5jdGlvbih4LCB5LCBhbHRlcm5hdGl2ZSA9IGMoXFx0d28uc2lkZWRcXCwgXFxsZXNzXFwsIFxcZ3JlYXRlclxcKSxcbiAgICAgICAgICAgbWV0aG9kID0gYyhcXHBlYXJzb25cXCksIGV4YWN0ID0gTlVMTCxcbiAgICAgICAgICAgIyBjb25mLmxldmVsID0gMC45NSxcbiAgICAgICAgICAgY29udGludWl0eSA9IEZBTFNFLCAuLi4pXG4gIHtcbiAgICBhbHRlcm5hdGl2ZSA8LSBtYXRjaC5hcmcoYWx0ZXJuYXRpdmUpXG4gICAgbWV0aG9kIDwtIG1hdGNoLmFyZyhtZXRob2QpXG4gICAgRE5BTUUgPC0gcGFzdGUoZGVwYXJzZShzdWJzdGl0dXRlKHgpKSwgXFxhbmRcXCwgZGVwYXJzZShzdWJzdGl0dXRlKHkpKSlcbiAgICBcbiAgICBpZihsZW5ndGgoeCkgIT0gbGVuZ3RoKHkpKVxuICAgICAgc3RvcChcXCd4JyBhbmQgJ3knIG11c3QgaGF2ZSB0aGUgc2FtZSBsZW5ndGhcXClcbiAgICBpZighaXMubnVtZXJpYyh4KSkgc3RvcChcXCd4JyBtdXN0IGJlIGEgbnVtZXJpYyB2ZWN0b3JcXClcbiAgICBpZighaXMubnVtZXJpYyh5KSkgc3RvcChcXCd5JyBtdXN0IGJlIGEgbnVtZXJpYyB2ZWN0b3JcXClcbiAgICBPSyA8LSBjb21wbGV0ZS5jYXNlcyh4LCB5KVxuICAgIHggPC0geFtPS11cbiAgICB5IDwtIHlbT0tdXG4gICAgbiA8LSBsZW5ndGgoeClcbiAgICBcbiAgICBOVkFMIDwtIDBcbiAgICAjIGNvbmYuaW50IDwtIEZBTFNFXG4gICAgXG4gICAgaWYobWV0aG9kID09IFxccGVhcnNvblxcKSB7XG4gICAgICBpZihuIDwgM0wpXG4gICAgICAgIHN0b3AoXFxub3QgZW5vdWdoIGZpbml0ZSBvYnNlcnZhdGlvbnNcXClcbiAgICAgIG1ldGhvZCA8LSBcXFBlYXJzb24ncyBwcm9kdWN0LW1vbWVudCBjb3JyZWxhdGlvblxcXG4gICAgICBuYW1lcyhOVkFMKSA8LSBcXGNvcnJlbGF0aW9uXFxcbiAgICAgIHIgPC0gY29yKHgsIHkpXG4gICAgICBkZiA8LSBuIC0gMkxcbiAgICAgIEVTVElNQVRFIDwtIGMoY29yID0gcilcbiAgICAgIFBBUkFNRVRFUiA8LSBjKGRmID0gZGYpXG4gICAgICBTVEFUSVNUSUMgPC0gYyh0ID0gc3FydChkZikgKiByIC8gc3FydCgxIC0gcl4yKSlcbiAgICAgICMgRG8gbm90IGNvbXB1dGUgY29uZmlkZW5jZSBJbnRcbiAgICAgICMgaWYobiA+IDMpIHsgIyMgY29uZmlkZW5jZSBpbnQuXG4gICAgICAjICAgaWYoIW1pc3NpbmcoY29uZi5sZXZlbCkgJiZcbiAgICAgICMgICAgICAobGVuZ3RoKGNvbmYubGV2ZWwpICE9IDEgfHwgIWlzLmZpbml0ZShjb25mLmxldmVsKSB8fFxuICAgICAgIyAgICAgICBjb25mLmxldmVsIDwgMCB8fCBjb25mLmxldmVsID4gMSkpXG4gICAgICAjICAgICBzdG9wKFxcJ2NvbmYubGV2ZWwnIG11c3QgYmUgYSBzaW5nbGUgbnVtYmVyIGJldHdlZW4gMCBhbmQgMVxcKVxuICAgICAgIyAgIGNvbmYuaW50IDwtIFRSVUVcbiAgICAgICMgICB6IDwtIGF0YW5oKHIpXG4gICAgICAjICAgc2lnbWEgPC0gMSAvIHNxcnQobiAtIDMpXG4gICAgICAjICAgY2ludCA8LVxuICAgICAgIyAgICAgc3dpdGNoKGFsdGVybmF0aXZlLFxuICAgICAgIyAgICAgICAgICAgIGxlc3MgPSBjKC1JbmYsIHogKyBzaWdtYSAqIHFub3JtKGNvbmYubGV2ZWwpKSxcbiAgICAgICMgICAgICAgICAgICBncmVhdGVyID0gYyh6IC0gc2lnbWEgKiBxbm9ybShjb25mLmxldmVsKSwgSW5mKSxcbiAgICAgICMgICAgICAgICAgICB0d28uc2lkZWQgPSB6ICtcbiAgICAgICMgICAgICAgICAgICAgIGMoLTEsIDEpICogc2lnbWEgKiBxbm9ybSgoMSArIGNvbmYubGV2ZWwpIC8gMikpXG4gICAgICAjICAgY2ludCA8LSB0YW5oKGNpbnQpXG4gICAgICAjICAgYXR0cihjaW50LCBcXGNvbmYubGV2ZWxcXCkgPC0gY29uZi5sZXZlbFxuICAgICAgIyB9XG4gICAgICBQVkFMIDwtIHN3aXRjaChhbHRlcm5hdGl2ZSxcbiAgICAgICAgICAgICAgICAgICAgIFxcbGVzc1xcID0gcHQoU1RBVElTVElDLCBkZiksXG4gICAgICAgICAgICAgICAgICAgICBcXGdyZWF0ZXJcXCA9IHB0KFNUQVRJU1RJQywgZGYsIGxvd2VyLnRhaWw9RkFMU0UpLFxuICAgICAgICAgICAgICAgICAgICAgXFx0d28uc2lkZWRcXCA9IDIgKiBtaW4ocHQoU1RBVElTVElDLCBkZiksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcHQoU1RBVElTVElDLCBkZiwgbG93ZXIudGFpbD1GQUxTRSkpKVxuICAgIH1cbiAgICBlbHNlIHtcbiAgICAgIGlmKG4gPCAyKVxuICAgICAgICBzdG9wKFxcbm90IGVub3VnaCBmaW5pdGUgb2JzZXJ2YXRpb25zXFwpXG4gICAgICBQQVJBTUVURVIgPC0gTlVMTFxuICAgICAgVElFUyA8LSAobWluKGxlbmd0aCh1bmlxdWUoeCkpLCBsZW5ndGgodW5pcXVlKHkpKSkgPCBuKVxuICAgICAgaWYobWV0aG9kID09IFxca2VuZGFsbFxcKSB7XG4gICAgICAgIG1ldGhvZCA8LSBcXEtlbmRhbGwncyByYW5rIGNvcnJlbGF0aW9uIHRhdVxcXG4gICAgICAgIG5hbWVzKE5WQUwpIDwtIFxcdGF1XFxcbiAgICAgICAgciA8LSBjb3IoeCx5LCBtZXRob2QgPSBcXGtlbmRhbGxcXClcbiAgICAgICAgRVNUSU1BVEUgPC0gYyh0YXUgPSByKVxuICAgICAgICBcbiAgICAgICAgaWYoIWlzLmZpbml0ZShFU1RJTUFURSkpIHsgICMgYWxsIHggb3IgYWxsIHkgdGhlIHNhbWVcbiAgICAgICAgICBFU1RJTUFURVtdIDwtIE5BXG4gICAgICAgICAgU1RBVElTVElDIDwtIGMoVCA9IE5BKVxuICAgICAgICAgIFBWQUwgPC0gTkFcbiAgICAgICAgfVxuICAgICAgICBlbHNlIHtcbiAgICAgICAgICBpZihpcy5udWxsKGV4YWN0KSlcbiAgICAgICAgICAgIGV4YWN0IDwtIChuIDwgNTApXG4gICAgICAgICAgaWYoZXhhY3QgJiYgIVRJRVMpIHtcbiAgICAgICAgICAgIHEgPC0gcm91bmQoKHIgKyAxKSAqIG4gKiAobiAtIDEpIC8gNClcbiAgICAgICAgICAgIFNUQVRJU1RJQyA8LSBjKFQgPSBxKVxuICAgICAgICAgICAgcGtlbmRhbGwgPC0gZnVuY3Rpb24ocSwgbikgLkNhbGwoQ19wS2VuZGFsbCwgcSwgbilcbiAgICAgICAgICAgIFBWQUwgPC1cbiAgICAgICAgICAgICAgc3dpdGNoKGFsdGVybmF0aXZlLFxuICAgICAgICAgICAgICAgICAgICAgXFx0d28uc2lkZWRcXCA9IHtcbiAgICAgICAgICAgICAgICAgICAgICAgaWYocSA+IG4gKiAobiAtIDEpIC8gNClcbiAgICAgICAgICAgICAgICAgICAgICAgICBwIDwtIDEgLSBwa2VuZGFsbChxIC0gMSwgbilcbiAgICAgICAgICAgICAgICAgICAgICAgZWxzZVxuICAgICAgICAgICAgICAgICAgICAgICAgIHAgPC0gcGtlbmRhbGwocSwgbilcbiAgICAgICAgICAgICAgICAgICAgICAgbWluKDIgKiBwLCAxKVxuICAgICAgICAgICAgICAgICAgICAgfSxcbiAgICAgICAgICAgICAgICAgICAgIFxcZ3JlYXRlclxcID0gMSAtIHBrZW5kYWxsKHEgLSAxLCBuKSxcbiAgICAgICAgICAgICAgICAgICAgIFxcbGVzc1xcID0gcGtlbmRhbGwocSwgbikpXG4gICAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICAgIHh0aWVzIDwtIHRhYmxlKHhbZHVwbGljYXRlZCh4KV0pICsgMVxuICAgICAgICAgICAgeXRpZXMgPC0gdGFibGUoeVtkdXBsaWNhdGVkKHkpXSkgKyAxXG4gICAgICAgICAgICBUMCA8LSBuICogKG4gLSAxKS8yXG4gICAgICAgICAgICBUMSA8LSBzdW0oeHRpZXMgKiAoeHRpZXMgLSAxKSkvMlxuICAgICAgICAgICAgVDIgPC0gc3VtKHl0aWVzICogKHl0aWVzIC0gMSkpLzJcbiAgICAgICAgICAgIFMgPC0gciAqIHNxcnQoKFQwIC0gVDEpICogKFQwIC0gVDIpKVxuICAgICAgICAgICAgdjAgPC0gbiAqIChuIC0gMSkgKiAoMiAqIG4gKyA1KVxuICAgICAgICAgICAgdnQgPC0gc3VtKHh0aWVzICogKHh0aWVzIC0gMSkgKiAoMiAqIHh0aWVzICsgNSkpXG4gICAgICAgICAgICB2dSA8LSBzdW0oeXRpZXMgKiAoeXRpZXMgLSAxKSAqICgyICogeXRpZXMgKyA1KSlcbiAgICAgICAgICAgIHYxIDwtIHN1bSh4dGllcyAqICh4dGllcyAtIDEpKSAqIHN1bSh5dGllcyAqICh5dGllcyAtIDEpKVxuICAgICAgICAgICAgdjIgPC0gc3VtKHh0aWVzICogKHh0aWVzIC0gMSkgKiAoeHRpZXMgLSAyKSkgKlxuICAgICAgICAgICAgICBzdW0oeXRpZXMgKiAoeXRpZXMgLSAxKSAqICh5dGllcyAtIDIpKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXJfUyA8LSAodjAgLSB2dCAtIHZ1KSAvIDE4ICtcbiAgICAgICAgICAgICAgdjEgLyAoMiAqIG4gKiAobiAtIDEpKSArXG4gICAgICAgICAgICAgIHYyIC8gKDkgKiBuICogKG4gLSAxKSAqIChuIC0gMikpXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGlmKGV4YWN0ICYmIFRJRVMpXG4gICAgICAgICAgICAgIHdhcm5pbmcoXFxDYW5ub3QgY29tcHV0ZSBleGFjdCBwLXZhbHVlIHdpdGggdGllc1xcKVxuICAgICAgICAgICAgaWYgKGNvbnRpbnVpdHkpIFMgPC0gc2lnbihTKSAqIChhYnMoUykgLSAxKVxuICAgICAgICAgICAgU1RBVElTVElDIDwtIGMoeiA9IFMgLyBzcXJ0KHZhcl9TKSlcbiAgICAgICAgICAgIFBWQUwgPC0gc3dpdGNoKGFsdGVybmF0aXZlLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxsZXNzXFwgPSBwbm9ybShTVEFUSVNUSUMpLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxncmVhdGVyXFwgPSBwbm9ybShTVEFUSVNUSUMsIGxvd2VyLnRhaWw9RkFMU0UpLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgXFx0d28uc2lkZWRcXCA9IDIgKiBtaW4ocG5vcm0oU1RBVElTVElDKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwbm9ybShTVEFUSVNUSUMsIGxvd2VyLnRhaWw9RkFMU0UpKSlcbiAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICAgIH0gZWxzZSB7XG4gICAgICAgIG1ldGhvZCA8LSBcXFNwZWFybWFuJ3MgcmFuayBjb3JyZWxhdGlvbiByaG9cXFxuICAgICAgICBpZiAoaXMubnVsbChleGFjdCkpXG4gICAgICAgICAgZXhhY3QgPC0gVFJVRVxuICAgICAgICBuYW1lcyhOVkFMKSA8LSBcXHJob1xcXG4gICAgICAgIHIgPC0gY29yKHJhbmsoeCksIHJhbmsoeSkpXG4gICAgICAgIEVTVElNQVRFIDwtIGMocmhvID0gcilcbiAgICAgICAgaWYoIWlzLmZpbml0ZShFU1RJTUFURSkpIHsgICMgYWxsIHggb3IgYWxsIHkgdGhlIHNhbWVcbiAgICAgICAgICBFU1RJTUFURVtdIDwtIE5BXG4gICAgICAgICAgU1RBVElTVElDIDwtIGMoUyA9IE5BKVxuICAgICAgICAgIFBWQUwgPC0gTkFcbiAgICAgICAgfVxuICAgICAgICBlbHNlIHtcbiAgICAgICAgICAjIyBVc2UgdGhlIHRlc3Qgc3RhdGlzdGljIFMgPSBzdW0ocmFuayh4KSAtIHJhbmsoeSkpXjJcbiAgICAgICAgICAjIyBhbmQgQVMgODkgZm9yIG9idGFpbmluZyBiZXR0ZXIgcC12YWx1ZXMgdGhhbiB2aWEgdGhlXG4gICAgICAgICAgIyMgc2ltcGxlIG5vcm1hbCBhcHByb3hpbWF0aW9uLlxuICAgICAgICAgICMjIEluIHRoZSBjYXNlIG9mIG5vIHRpZXMsIFMgPSAoMS1yaG8pICogKG5eMy1uKS82LlxuICAgICAgICAgIHBzcGVhcm1hbiA8LSBmdW5jdGlvbihxLCBuLCBsb3dlci50YWlsID0gVFJVRSkge1xuICAgICAgICAgICAgaWYobiA8PSAxMjkwICYmIGV4YWN0KSAjIG4qKG5eMiAtIDEpIGRvZXMgbm90IG92ZXJmbG93XG4gICAgICAgICAgICAgIC5DYWxsKENfcFJobywgcm91bmQocSkgKyAyKmxvd2VyLnRhaWwsIG4sIGxvd2VyLnRhaWwpXG4gICAgICAgICAgICBlbHNlIHsgIyBmb3IgbGFyZ2UgbjogYXN5bXB0b3RpYyB0X3tuLTJ9XG4gICAgICAgICAgICAgIGRlbiA8LSAobioobl4yLTEpKS82ICMgY2FyZWZ1bCBmb3Igb3ZlcmZsb3dcbiAgICAgICAgICAgICAgIyMgS2VuZGFsbCBldCBhbGwgKDE5MzkpIHAuIDI2MFxuICAgICAgICAgICAgICBpZiAoY29udGludWl0eSkgZGVuIDwtIGRlbiArIDFcbiAgICAgICAgICAgICAgciA8LSAxIC0gcS9kZW5cbiAgICAgICAgICAgICAgcHQociAvIHNxcnQoKDEgLSByXjIpLyhuLTIpKSwgZGYgPSBuLTIsXG4gICAgICAgICAgICAgICAgIGxvd2VyLnRhaWwgPSAhbG93ZXIudGFpbClcbiAgICAgICAgICAgIH1cbiAgICAgICAgICB9XG4gICAgICAgICAgcSA8LSAobl4zIC0gbikgKiAoMSAtIHIpIC8gNlxuICAgICAgICAgIFNUQVRJU1RJQyA8LSBjKFMgPSBxKVxuICAgICAgICAgIGlmKFRJRVMgJiYgZXhhY3Qpe1xuICAgICAgICAgICAgZXhhY3QgPC0gRkFMU0VcbiAgICAgICAgICAgIHdhcm5pbmcoXFxDYW5ub3QgY29tcHV0ZSBleGFjdCBwLXZhbHVlIHdpdGggdGllc1xcKVxuICAgICAgICAgIH1cbiAgICAgICAgICBQVkFMIDwtXG4gICAgICAgICAgICBzd2l0Y2goYWx0ZXJuYXRpdmUsXG4gICAgICAgICAgICAgICAgICAgXFx0d28uc2lkZWRcXCA9IHtcbiAgICAgICAgICAgICAgICAgICAgIHAgPC0gaWYocSA+IChuXjMgLSBuKSAvIDYpXG4gICAgICAgICAgICAgICAgICAgICAgIHBzcGVhcm1hbihxLCBuLCBsb3dlci50YWlsID0gRkFMU0UpXG4gICAgICAgICAgICAgICAgICAgICBlbHNlXG4gICAgICAgICAgICAgICAgICAgICAgIHBzcGVhcm1hbihxLCBuLCBsb3dlci50YWlsID0gVFJVRSlcbiAgICAgICAgICAgICAgICAgICAgIG1pbigyICogcCwgMSlcbiAgICAgICAgICAgICAgICAgICB9LFxuICAgICAgICAgICAgICAgICAgIFxcZ3JlYXRlclxcID0gcHNwZWFybWFuKHEsIG4sIGxvd2VyLnRhaWwgPSBUUlVFKSxcbiAgICAgICAgICAgICAgICAgICBcXGxlc3NcXCA9IHBzcGVhcm1hbihxLCBuLCBsb3dlci50YWlsID0gRkFMU0UpKVxuICAgICAgICB9XG4gICAgICB9XG4gICAgfVxuICAgIFxuICAgIFJWQUwgPC0gbGlzdChcbiAgICAgICMgc3RhdGlzdGljID0gU1RBVElTVElDLFxuICAgICAgIyBwYXJhbWV0ZXIgPSBQQVJBTUVURVIsXG4gICAgICBwLnZhbHVlID0gYXMubnVtZXJpYyhQVkFMKSxcbiAgICAgIGVzdGltYXRlID0gRVNUSU1BVEVcbiAgICAgICMgLFxuICAgICAgIyBudWxsLnZhbHVlID0gTlZBTCxcbiAgICAgICMgYWx0ZXJuYXRpdmUgPSBhbHRlcm5hdGl2ZSxcbiAgICAgICMgbWV0aG9kID0gbWV0aG9kLFxuICAgICAgIyBkYXRhLm5hbWUgPSBETkFNRVxuICAgIClcbiAgICAjIGlmKGNvbmYuaW50KVxuICAgICMgICBSVkFMIDwtIGMoUlZBTCwgbGlzdChjb25mLmludCA9IGNpbnQpKVxuICAgIGNsYXNzKFJWQUwpIDwtIFxcaHRlc3RcXFxuICAgIFJWQUxcbiAgfVxuY29yLnRlc3QuZm9ybXVsYSA8LVxuICBmdW5jdGlvbihmb3JtdWxhLCBkYXRhLCBzdWJzZXQsIG5hLmFjdGlvbiwgLi4uKVxuICB7XG4gICAgaWYobWlzc2luZyhmb3JtdWxhKVxuICAgICAgIHx8ICFpbmhlcml0cyhmb3JtdWxhLCBcXGZvcm11bGFcXClcbiAgICAgICB8fCBsZW5ndGgoZm9ybXVsYSkgIT0gMkwpXG4gICAgICBzdG9wKFxcJ2Zvcm11bGEnIG1pc3Npbmcgb3IgaW52YWxpZFxcKVxuICAgIG0gPC0gbWF0Y2guY2FsbChleHBhbmQuZG90cyA9IEZBTFNFKVxuICAgIGlmKGlzLm1hdHJpeChldmFsKG0kZGF0YSwgcGFyZW50LmZyYW1lKCkpKSlcbiAgICAgIG0kZGF0YSA8LSBhcy5kYXRhLmZyYW1lKGRhdGEpXG4gICAgIyMgbmVlZCBzdGF0czo6IGZvciBub24tc3RhbmRhcmQgZXZhbHVhdGlvblxuICAgIG1bWzFMXV0gPC0gcXVvdGUoc3RhdHM6Om1vZGVsLmZyYW1lKVxuICAgIG0kLi4uIDwtIE5VTExcbiAgICBtZiA8LSBldmFsKG0sIGVudmlyb25tZW50KGZvcm11bGEpKVxuICAgIGlmKGxlbmd0aChtZikgIT0gMkwpXG4gICAgICBzdG9wKFxcaW52YWxpZCBmb3JtdWxhXFwpXG4gICAgRE5BTUUgPC0gcGFzdGUobmFtZXMobWYpLCBjb2xsYXBzZSA9IFxcIGFuZCBcXClcbiAgICBuYW1lcyhtZikgPC0gYyhcXHhcXCwgXFx5XFwpXG4gICAgeSA8LSBkby5jYWxsKFxcY29yLnRlc3RfdHJpbW1lZF92MFxcLCBjKG1mLCBsaXN0KC4uLikpKVxuICAgIHkkZGF0YS5uYW1lIDwtIEROQU1FXG4gICAgeVxuICB9XG5cbmBgYFxuYGBgIn0= --&gt;
+
+```r
+```r
+cor.test_trimmed_v0 &lt;- function(x, ...) UseMethod(\cor.test_trimmed_v0\)
 cor.test_trimmed_v0.default &lt;-
-  function(x, y, alternative = c(&quot;two.sided&quot;, &quot;less&quot;, &quot;greater&quot;),
-           method = c(&quot;pearson&quot;), exact = NULL,
+  function(x, y, alternative = c(\two.sided\, \less\, \greater\),
+           method = c(\pearson\), exact = NULL,
            # conf.level = 0.95,
            continuity = FALSE, ...)
   {
     alternative &lt;- match.arg(alternative)
     method &lt;- match.arg(method)
-    DNAME &lt;- paste(deparse(substitute(x)), &quot;and&quot;, deparse(substitute(y)))
+    DNAME &lt;- paste(deparse(substitute(x)), \and\, deparse(substitute(y)))
     
     if(length(x) != length(y))
-      stop(&quot;&#39;x&#39; and &#39;y&#39; must have the same length&quot;)
-    if(!is.numeric(x)) stop(&quot;&#39;x&#39; must be a numeric vector&quot;)
-    if(!is.numeric(y)) stop(&quot;&#39;y&#39; must be a numeric vector&quot;)
+      stop(\&#39;x&#39; and &#39;y&#39; must have the same length\)
+    if(!is.numeric(x)) stop(\&#39;x&#39; must be a numeric vector\)
+    if(!is.numeric(y)) stop(\&#39;y&#39; must be a numeric vector\)
     OK &lt;- complete.cases(x, y)
     x &lt;- x[OK]
     y &lt;- y[OK]
@@ -1868,11 +1896,11 @@ cor.test_trimmed_v0.default &lt;-
     NVAL &lt;- 0
     # conf.int &lt;- FALSE
     
-    if(method == &quot;pearson&quot;) {
+    if(method == \pearson\) {
       if(n &lt; 3L)
-        stop(&quot;not enough finite observations&quot;)
-      method &lt;- &quot;Pearson&#39;s product-moment correlation&quot;
-      names(NVAL) &lt;- &quot;correlation&quot;
+        stop(\not enough finite observations\)
+      method &lt;- \Pearson&#39;s product-moment correlation\
+      names(NVAL) &lt;- \correlation\
       r &lt;- cor(x, y)
       df &lt;- n - 2L
       ESTIMATE &lt;- c(cor = r)
@@ -1883,7 +1911,7 @@ cor.test_trimmed_v0.default &lt;-
       #   if(!missing(conf.level) &amp;&amp;
       #      (length(conf.level) != 1 || !is.finite(conf.level) ||
       #       conf.level &lt; 0 || conf.level &gt; 1))
-      #     stop(&quot;&#39;conf.level&#39; must be a single number between 0 and 1&quot;)
+      #     stop(\&#39;conf.level&#39; must be a single number between 0 and 1\)
       #   conf.int &lt;- TRUE
       #   z &lt;- atanh(r)
       #   sigma &lt;- 1 / sqrt(n - 3)
@@ -1894,23 +1922,23 @@ cor.test_trimmed_v0.default &lt;-
       #            two.sided = z +
       #              c(-1, 1) * sigma * qnorm((1 + conf.level) / 2))
       #   cint &lt;- tanh(cint)
-      #   attr(cint, &quot;conf.level&quot;) &lt;- conf.level
+      #   attr(cint, \conf.level\) &lt;- conf.level
       # }
       PVAL &lt;- switch(alternative,
-                     &quot;less&quot; = pt(STATISTIC, df),
-                     &quot;greater&quot; = pt(STATISTIC, df, lower.tail=FALSE),
-                     &quot;two.sided&quot; = 2 * min(pt(STATISTIC, df),
+                     \less\ = pt(STATISTIC, df),
+                     \greater\ = pt(STATISTIC, df, lower.tail=FALSE),
+                     \two.sided\ = 2 * min(pt(STATISTIC, df),
                                            pt(STATISTIC, df, lower.tail=FALSE)))
     }
     else {
       if(n &lt; 2)
-        stop(&quot;not enough finite observations&quot;)
+        stop(\not enough finite observations\)
       PARAMETER &lt;- NULL
       TIES &lt;- (min(length(unique(x)), length(unique(y))) &lt; n)
-      if(method == &quot;kendall&quot;) {
-        method &lt;- &quot;Kendall&#39;s rank correlation tau&quot;
-        names(NVAL) &lt;- &quot;tau&quot;
-        r &lt;- cor(x,y, method = &quot;kendall&quot;)
+      if(method == \kendall\) {
+        method &lt;- \Kendall&#39;s rank correlation tau\
+        names(NVAL) &lt;- \tau\
+        r &lt;- cor(x,y, method = \kendall\)
         ESTIMATE &lt;- c(tau = r)
         
         if(!is.finite(ESTIMATE)) {  # all x or all y the same
@@ -1927,15 +1955,15 @@ cor.test_trimmed_v0.default &lt;-
             pkendall &lt;- function(q, n) .Call(C_pKendall, q, n)
             PVAL &lt;-
               switch(alternative,
-                     &quot;two.sided&quot; = {
+                     \two.sided\ = {
                        if(q &gt; n * (n - 1) / 4)
                          p &lt;- 1 - pkendall(q - 1, n)
                        else
                          p &lt;- pkendall(q, n)
                        min(2 * p, 1)
                      },
-                     &quot;greater&quot; = 1 - pkendall(q - 1, n),
-                     &quot;less&quot; = pkendall(q, n))
+                     \greater\ = 1 - pkendall(q - 1, n),
+                     \less\ = pkendall(q, n))
           } else {
             xties &lt;- table(x[duplicated(x)]) + 1
             yties &lt;- table(y[duplicated(y)]) + 1
@@ -1955,21 +1983,21 @@ cor.test_trimmed_v0.default &lt;-
               v2 / (9 * n * (n - 1) * (n - 2))
             
             if(exact &amp;&amp; TIES)
-              warning(&quot;Cannot compute exact p-value with ties&quot;)
+              warning(\Cannot compute exact p-value with ties\)
             if (continuity) S &lt;- sign(S) * (abs(S) - 1)
             STATISTIC &lt;- c(z = S / sqrt(var_S))
             PVAL &lt;- switch(alternative,
-                           &quot;less&quot; = pnorm(STATISTIC),
-                           &quot;greater&quot; = pnorm(STATISTIC, lower.tail=FALSE),
-                           &quot;two.sided&quot; = 2 * min(pnorm(STATISTIC),
+                           \less\ = pnorm(STATISTIC),
+                           \greater\ = pnorm(STATISTIC, lower.tail=FALSE),
+                           \two.sided\ = 2 * min(pnorm(STATISTIC),
                                                  pnorm(STATISTIC, lower.tail=FALSE)))
           }
         }
       } else {
-        method &lt;- &quot;Spearman&#39;s rank correlation rho&quot;
+        method &lt;- \Spearman&#39;s rank correlation rho\
         if (is.null(exact))
           exact &lt;- TRUE
-        names(NVAL) &lt;- &quot;rho&quot;
+        names(NVAL) &lt;- \rho\
         r &lt;- cor(rank(x), rank(y))
         ESTIMATE &lt;- c(rho = r)
         if(!is.finite(ESTIMATE)) {  # all x or all y the same
@@ -1998,19 +2026,19 @@ cor.test_trimmed_v0.default &lt;-
           STATISTIC &lt;- c(S = q)
           if(TIES &amp;&amp; exact){
             exact &lt;- FALSE
-            warning(&quot;Cannot compute exact p-value with ties&quot;)
+            warning(\Cannot compute exact p-value with ties\)
           }
           PVAL &lt;-
             switch(alternative,
-                   &quot;two.sided&quot; = {
+                   \two.sided\ = {
                      p &lt;- if(q &gt; (n^3 - n) / 6)
                        pspearman(q, n, lower.tail = FALSE)
                      else
                        pspearman(q, n, lower.tail = TRUE)
                      min(2 * p, 1)
                    },
-                   &quot;greater&quot; = pspearman(q, n, lower.tail = TRUE),
-                   &quot;less&quot; = pspearman(q, n, lower.tail = FALSE))
+                   \greater\ = pspearman(q, n, lower.tail = TRUE),
+                   \less\ = pspearman(q, n, lower.tail = FALSE))
         }
       }
     }
@@ -2028,16 +2056,16 @@ cor.test_trimmed_v0.default &lt;-
     )
     # if(conf.int)
     #   RVAL &lt;- c(RVAL, list(conf.int = cint))
-    class(RVAL) &lt;- &quot;htest&quot;
+    class(RVAL) &lt;- \htest\
     RVAL
   }
 cor.test.formula &lt;-
   function(formula, data, subset, na.action, ...)
   {
     if(missing(formula)
-       || !inherits(formula, &quot;formula&quot;)
+       || !inherits(formula, \formula\)
        || length(formula) != 2L)
-      stop(&quot;&#39;formula&#39; missing or invalid&quot;)
+      stop(\&#39;formula&#39; missing or invalid\)
     m &lt;- match.call(expand.dots = FALSE)
     if(is.matrix(eval(m$data, parent.frame())))
       m$data &lt;- as.data.frame(data)
@@ -2046,14 +2074,15 @@ cor.test.formula &lt;-
     m$... &lt;- NULL
     mf &lt;- eval(m, environment(formula))
     if(length(mf) != 2L)
-      stop(&quot;invalid formula&quot;)
-    DNAME &lt;- paste(names(mf), collapse = &quot; and &quot;)
-    names(mf) &lt;- c(&quot;x&quot;, &quot;y&quot;)
-    y &lt;- do.call(&quot;cor.test_trimmed_v0&quot;, c(mf, list(...)))
+      stop(\invalid formula\)
+    DNAME &lt;- paste(names(mf), collapse = \ and \)
+    names(mf) &lt;- c(\x\, \y\)
+    y &lt;- do.call(\cor.test_trimmed_v0\, c(mf, list(...)))
     y$data.name &lt;- DNAME
     y
   }
 </code></pre>
+<p>```</p>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 

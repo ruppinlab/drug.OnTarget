@@ -49,20 +49,68 @@ onTarget=readRDS('../Data/onTarget_v2.0.RDS')
 ```
 
 ```
-## Error: vector memory exhausted (limit reached?)
+## Warning in gzfile(file, "rb"): cannot open compressed file '../Data/onTarget_v2.0.RDS', probable reason 'No such file or directory'
+```
+
+```
+## Error in gzfile(file, "rb"): cannot open the connection
 ```
 
 ```r
 KnownTarget_predictions=readRDS('../Data/KnownTarget_predictions_v3.RDS') ## required dataset latest version
+```
+
+```
+## Warning in gzfile(file, "rb"): cannot open compressed file '../Data/KnownTarget_predictions_v3.RDS', probable reason 'No such file or directory'
+```
+
+```
+## Error in gzfile(file, "rb"): cannot open the connection
+```
+
+```r
 drugCandidates_for_secTargets=readRDS('../Data/drugCandidates_for_secTargets.RDS')
+```
+
+```
+## Warning in gzfile(file, "rb"): cannot open compressed file '../Data/drugCandidates_for_secTargets.RDS', probable reason 'No such file or directory'
+```
+
+```
+## Error in gzfile(file, "rb"): cannot open the connection
+```
+
+```r
 drugVScrispr_corr_features_list=readRDS('../Data/drugVScrispr_corr_features_list.RDS')
+```
+
+```
+## Warning in gzfile(file, "rb"): cannot open compressed file '../Data/drugVScrispr_corr_features_list.RDS', probable reason 'No such file or directory'
+```
+
+```
+## Error in gzfile(file, "rb"): cannot open the connection
 ```
 
 <!-- Get the correlation strength, P value and the rank of the correlation matrix-->
 
 ```r
 drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_features_list, function(x) x[,2])
+```
+
+```
+## Error in x[, 2]: incorrect number of dimensions
+```
+
+```r
 corrMat_P=sapply(drugVScrispr_corr_features_list, function(x) x[,1])
+```
+
+```
+## Error in x[, 1]: incorrect number of dimensions
+```
+
+```r
 corrMat=drugVScrispr_corr_Strength
 corrMat_rank=apply(-corrMat, 2, rank)
 ```
@@ -101,6 +149,7 @@ matched_cellLines = Reduce(intersect,
 expression_matched = onTarget$expression[,matched_cellLines]
 avana_matched = onTarget$avana_22Q2[,matched_cellLines]
 drug_matched = onTarget$secondary_prism[,matched_cellLines]
+mutation_matched=onTarget$mutations_matrix[,matched_cellLines]
 ```
 
 
