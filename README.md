@@ -111,12 +111,27 @@ Run gene enrichment function, it will take some time, ~20 mins. The result of th
 
 To generate the figures:
 > Goto >> Tools 
-
-* Figure 1: Validation of our model
-
-
-
+---
+* Figure 1: Validation of our model: Overview of our pipeline and performance across eight gold-standard datasets.
 > Figure_1_ValidationPrimaryTarget_AUC.RMD
+
+In this step we are tested DeepTarget in eight independent gold standard datasets comprising high-confidence drug-target pairs collected from diverse sources (detailed defination in Manuscriprt, Method section). These datasets include drug-target pairs that have 
+1) Clinical resistance mutation in the target from COSMIC (COSMIC resistance, N=16).
+2) OncoKB (oncoKB resistance, N=28).
+3) FDA Approval for a target mutation (FDA mutation-approval, N=86).
+4) High-confidence as per the scientific advisory board of ChemicalProbes.org (SAB, N=24).
+5) Multiple independent reports as per BioGrid (Biogrid Highly Cited, N=28).
+6) Pharmacologically active status as per DrugBank, i.e., the drugs interacts directly with the target as part of its mechanism of action and are inhibitors (DrugBank Active Inhibitors, N=90).
+7) DrugBank Active Antagonists (N=52).
+8) Highly selective inhibitors based on their binding profile (SelecChem selective inhibitors, N=142).
+
+We first defined the function to create randomize controls samples for testing. and tested the AUC for each of these 8 dataset. We have also ploted the data distribution (Box plot) and AUC plot for indiviisual dataset, which is shown in Figure 1 B -D.  
+
+---
+
+
+
+
 
 * Figure 2: Mutation Analysis and Validation
 
