@@ -1,9 +1,10 @@
 ## DeepTarget: Deep mechanism of action of cancer drugs by integrating large-scale genetic and drug screens
- Goal: Our aim is to identify drug targets by integrating large-scale drug and genetic screens.
+> Goal: 
  
 ### Prerequisites
-RStudio, R
-Majorly Packages required: fgsea; data.table; parallel; ggplot2; pROC; tidyverse;
+> Software: RStudio, R
+
+> Packages required: fgsea; data.table; parallel; ggplot2; pROC; tidyverse;
 
 ### Custom Function required for the pipeline:
 
@@ -112,39 +113,53 @@ Run gene enrichment function, it will take some time, ~20 mins. The result of th
 To generate the figures:
 > Goto >> Tools 
 ---
-* Figure 1: Validation of our model: Overview of our pipeline and performance across eight gold-standard datasets.
+* Figure 1: Validation of our model: Run this file to replicate the Main Figure 2 of the Manuscript. 
 > Figure_1_ValidationPrimaryTarget_AUC.RMD
 
 In this step we are tested DeepTarget in eight independent gold standard datasets comprising high-confidence drug-target pairs collected from diverse sources (detailed defination in Manuscriprt, Method section). These datasets include drug-target pairs that have 
-1) Clinical resistance mutation in the target from COSMIC (COSMIC resistance, N=16).
-2) OncoKB (oncoKB resistance, N=28).
+1) Clinical resistance mutation in the target from COSMIC (COSMIC resistance, N=16), https://cancer.sanger.ac.uk/cosmic/download.
+2) OncoKB (oncoKB resistance, N=28), https://www.oncokb.org/actionableGenes#sections=Tx.
 3) FDA Approval for a target mutation (FDA mutation-approval, N=86).
-4) High-confidence as per the scientific advisory board of ChemicalProbes.org (SAB, N=24).
-5) Multiple independent reports as per BioGrid (Biogrid Highly Cited, N=28).
-6) Pharmacologically active status as per DrugBank, i.e., the drugs interacts directly with the target as part of its mechanism of action and are inhibitors (DrugBank Active Inhibitors, N=90).
+4) High-confidence as per the scientific advisory board of ChemicalProbes.org (SAB, N=24), (https://www.chemicalprobes.org/information-centre#historical-compounds).
+5) Multiple independent reports as per BioGrid (Biogrid Highly Cited, N=28), https://thebiogrid.org/.
+6) Pharmacologically active status as per DrugBank, i.e., the drugs interacts directly with the target as part of its mechanism of action and are inhibitors (DrugBank Active Inhibitors, N=90), https://go.drugbank.com/
 7) DrugBank Active Antagonists (N=52).
-8) Highly selective inhibitors based on their binding profile (SelecChem selective inhibitors, N=142).
+8) Highly selective inhibitors based on their binding profile (SelecChem selective inhibitors, N=142), https://www.selleckchem.com/.
 
 We first defined the function to create randomize controls samples for testing. and tested the AUC for each of these 8 dataset. We have also ploted the data distribution (Box plot) and AUC plot for indiviisual dataset, which is shown in Figure 1 B -D.  
 
+
+* Figure 2: Mutation Analysis and Validation: Run this file to replicate the Main Figure 2 of the Manuscript
+> Figure_2_Mutation_analysis.RMD (Please complete figure 2C- H)
+
+* Figure 3: Secondary Target Analysis and Validation : Run this file to replicate the Main Figure 3 of the Manuscript and Supplementary Figure 12
+> Figure_3_and supp_12_secondary_target_and_validation.RMD
+
+* Figure 4: Applications:
+  * DeepTarget confirms the reported targets of half of the cancer drugs.
+  * The predicted drug’s specificity to its target can determine its clinical advancement.
+
+Run this file to replicate the Main Figure 4 of the Manuscript and Supplementary Figure 7
+
+> Figure_4_and_supp_7.Rmd
+
+* Figure 5: Applications: 
+  * Predicting drugs that target undruggable cancer oncogenes and their mutant-forms
+> (Not completed)
 ---
+## Supplementary Figure: 
+* Figure 1
 
 
+* Figure 2
 
 
+* Figure 3 and 5
+Figures for Pathway enrichment: 
+Run this file to replicate the Supplementary Figure 3 and 5
 
-* Figure 2: Mutation Analysis and Validation
+> Figure_supp_3_and_5_Target-at_PathwayResolution.Rmd
 
-> Figure_2_Mutation_analysis.RMD
-
-* Figure 3: Secondary Target Analysis and Validation
-
-> Figure_3_and supp_12_secondary_target_and_validation.RMD
-
-* Figure 4: Applications: Where we 
-
-> Figure_3_and supp_12_secondary_target_and_validation.RMD
-
-
-
-
+* Figure 10
+> Figure_Supp_10.Rmd
+---
