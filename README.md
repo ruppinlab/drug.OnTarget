@@ -73,6 +73,11 @@ The result of the correlation is saved in the Data folder:
 > KnowTraget_prediction.RDS (Final)
 ---
 
+4) Step_4: 
+> create_CorrMat_secondary.Rmd
+---
+
+
 ### Figures
 
 To generate the figures:
