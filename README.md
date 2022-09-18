@@ -17,13 +17,14 @@ This step is very important and imported to every file to generate figures.
 In this file, we have pre-loaded and preprocessed all the datasets (Other than Validation data) and libraries required for analysis, main Figure and supplementary figure.
 
 
-### Data Curation File:
+### Data Curation File: 
+Goto >> Tools >> Data_curation_code
 
 #### Requred Files: For detailed method section, visit to Manuscript
 We collected the viability screens after CRISPR-Cas9 and drug treatment from the DepMap database: https://depmap.org/portal/. 
 
 ---
-1) KnowTraget_prediction: Goto >> Tools >> Data_curation_code
+1) Step_1: KnowTraget_prediction:
 
 > Step_0A_data_curation_and saving.Rmd
 
@@ -44,7 +45,6 @@ Variable defined in the:
 
 ---
 2) Step_2: KnowTraget_prediction: Extending the data of KnowTraget_prediction by including RNAexpression data.
-Goto >> Tools >> Data_curation_code
 
 * Required Data: 
   * OnTarget_v2.RDS 
@@ -59,7 +59,6 @@ The result of the correlation is saved in the Data folder:
 ---
 
 3) Step_3: KnowTraget_prediction: Extending the data of KnowTraget_prediction by including Mutation data.
-Goto >> Tools >> Data_curation_code
 
 * Required Data: 
   * OnTarget_v2.RDS 
@@ -73,10 +72,37 @@ The result of the correlation is saved in the Data folder:
 > KnowTraget_prediction.RDS (Final)
 ---
 
-4) Step_4: 
+4) Step_4: Creating correlation matrix for secondary target.
 > create_CorrMat_secondary.Rmd
+
+* Required Data: 
+  * OnTarget_v2.RDS 
+  * KnowTraget_prediction.RDS
+
+* Required File: 
+  * Step0_Write_Functions.Rmd
+
+In this step, we repeated our target identification process (Step 1) in cell lines where their primary targets are not expressed to produce a secondary-DKS Score for such drugs. This saved dataset is used in secondary target analysis and figure generation.
+
+The result of the correlation is saved in the Data folder:
+> drugVScrispr_corr_features_list_secondary.RDS
 ---
 
+5) Step_5: Pathway Enrichment
+> create_CorrMat_secondary.Rmd
+* Required library/package: 
+  * library(fgsea)
+  
+* Required File: 
+  * Step0_Write_Functions.Rmd
+  * Step0B_Data_and_Libraries.Rmd (required dataset already loaded)
+
+In this step, We are runing the pathway enrichment test across all the pathway (n=800) for all the drug (drugs from KnownTraget_prediction file) and save it in dataset gsea_enrichment_all_drugs, which will be used in Pathway enrichment test analysis and supplemntary figure generation.
+
+Run gene enrichment function, it will take some time, ~20 mins. The result of the correlation is saved in the Data folder:
+> moa_pathways.RDS
+> gsea_enrichment_all_drugs.RDS
+---
 
 ### Figures
 
