@@ -3,11 +3,12 @@ title: "Pathway enrichment test and data curation"
 output: html_notebook
 ---
 
-# Creating the Pathway enrichment dataset to further produce the figure (supplementary figure 3 and 7)
+# Creating the Pathway enrichment dataset to further produce the figure (supplementary figure 3 and 5)
 
 ```{r}
 knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
 knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+require(fgsea)
 library(fgsea)
 library(ggforce)
 library(tidyverse)

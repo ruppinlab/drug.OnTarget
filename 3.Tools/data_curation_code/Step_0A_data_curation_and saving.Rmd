@@ -26,6 +26,7 @@ source('../myCustom_functions.R')
 <!-- loading on On true Target file -->
 ```{r}
 onTarget=readRDS('../../Data/onTarget_v2.0.RDS')
+knitr::knit('../Step0_Write_Functions.Rmd')
 ```
 
 <!-- Run correlation btw all crispr vs all drugs -->
@@ -46,9 +47,9 @@ toc()
 ```
 
 ```{r}
-## Save RDS file
-# saveRDS(drugVScrispr_corr_features_list,
-#         '../Data/drugVScrispr_corr_features_list.RDS')
+# Save RDS file
+saveRDS(drugVScrispr_corr_features_list,
+        '../Data/drugVScrispr_corr_features_list.RDS')
 ```
 
 <!-- Defining the cormat strength, Pvalue and the rank to save in known target prediction-->
@@ -128,11 +129,6 @@ KnownTarget_predictions$KnownTargetCorrFDR = sapply(1:nrow(KnownTarget_predictio
   err_handle(corrMat_FDR[KnownTarget_predictions[x,'MaxTargetName'], KnownTarget_predictions[x,'drugBroadID']]) ) 
 
 saveRDS(KnownTarget_predictions, '../../Data/KnownTarget_predictions.RDS')
-```
-
-```{r}
-KnownTarget_predictions_v3=readRDS('../Data/KnownTarget_predictions_v3.RDS') ## required dataset latest version
-KnownTarget_predictions_v3= KnownTarget_predictions_v3[order(KnownTarget_predictions_v3$Maxcorr, decreasing = T),]
 ```
 
 

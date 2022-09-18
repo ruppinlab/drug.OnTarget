@@ -8,7 +8,9 @@ date: "2022-09-17"
 
 <!-- libraries and data required -->
 ```{r}
-knitr::knit('Step_0A_data_curation_and saving.Rmd')
+onTarget=readRDS('../../Data/onTarget_v2.0.RDS')
+knitr::knit('../Step0_Write_Functions.Rmd')
+KnownTarget_predictions= readRDS('../../Data/KnownTarget_predictions.RDS')
 clinical_data= read.csv('../../Data/biomarkers.csv')
 ```
 
@@ -87,4 +89,13 @@ KnownTarget_predictions = KnownTarget_predictions %>%
   relocate(c(cellLines_withLOWexp, Maxcorr_Q, drugBroadID, Whether_interaction, PredictedRank, interaction_strength, interaction_P), .before = BestTargetName)
 
 saveRDS(KnownTarget_predictions, '../../Data/KnownTarget_predictions.RDS')
+drugCandidates_for_secTargets
 ```
+
+```{r}
+drugs_wdBoth_interaction_andTrueKnownTarget=KnownTarget_predictions$PredictedRank < 100 & KnownTarget_predictions$Whether_interaction
+drugCandidates_for_secTargets=KnownTarget_predictions[which(drugs_wdBoth_interaction_andTrueKnownTarget),]
+sort(table(KnownTarget_predictions$MaxTargetName[which(drugs_wdBoth_interaction_andTrueKnownTarget)]))
+saveRDS(drugCandidates_for_secTargets, '../../Data/drugCandidates_for_secTargets_v1.RDS')
+```
+

@@ -2,7 +2,7 @@
 title: "Functions needed for true target project "
 output: html_notebook
 ---
-<!-- Functions needed for TrueTarget Project -->
+<!-- Functions needed for DeepTarget Project -->
 <!-- Compute drug vs crispr correlation - primary target -->
 ```{r}
 correlation_bet_crispr_drug <- function(infunc_drugName){

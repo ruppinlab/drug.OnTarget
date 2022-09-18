@@ -9,8 +9,9 @@ date: "2022-09-17"
 
 <!-- libraries and data required -->
 ```{r}
-knitr::knit('Step_0A_data_curation_and saving.Rmd')
-knitr::knit('Step_0B_Data_curation_Interaction.Rmd')
+onTarget=readRDS('../../Data/onTarget_v2.0.RDS')
+knitr::knit('../Step0_Write_Functions.Rmd')
+KnownTarget_predictions= readRDS('../../Data/KnownTarget_predictions.RDS')
 ```
 
 
