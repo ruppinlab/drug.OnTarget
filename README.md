@@ -36,46 +36,10 @@ The result of the correlation is saved in the Data folder:
 ---
 
 Variable defined in the:
-Variable Name	| Defination
-drugName	| 
-MaxTargetName	| 
-Maxcorr
-"cellLines_withLOWexp
-"	
-"Maxcorr_Q
-"	
-"drugBroadID
-"	
-Whether_interaction	
-"Whether_interaction
-"	
-PredictedRank	
-interaction_strength	
-"interaction_P
-"	
-"drugName_stripall
-"	
-"BestTargetName
-"	
-BestTargetCorr	
-"BestTargetCorrP
-"	
-"KnownTargetCorrP
-"	
-"KnownTarget_meanCorr
-"	
-"phase
-"	
-BestTargetCorrFDR	
-"KnownTargetCorrFDR
-"	
-"mutation_interaction_strength
-"	
-"mutation_interaction_P
-"	
-"predicted_resistance_mutation
-"	
-drugCategory	
+| Variable Name | Defination |
+| -----------| ----------- | 
+| MaxtargetName | If a drug have multiple target, what is the best target which have best correlation. |
+| Maxcorr | The respective correlation stregth of the drug target pair. |
 
 
 ### Figures
