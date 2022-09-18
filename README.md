@@ -6,7 +6,7 @@
 
 > Packages required: fgsea; data.table; parallel; ggplot2; pROC; tidyverse;
 
-### Custom Function required for the pipeline:
+### Custom Function required for the pipeline: 
 
 > Step0_Write_Functions.Rmd
 
@@ -19,7 +19,7 @@ In this file, we have pre-loaded and preprocessed all the datasets (Other than V
 
 
 ### Data Curation File: 
-Goto >> Tools >> Data_curation_code
+>> Tools >> Data_curation_code
 
 #### Requred Files: For detailed method section, visit to Manuscript
 We collected the viability screens after CRISPR-Cas9 and drug treatment from the DepMap database: https://depmap.org/portal/. 
@@ -124,7 +124,9 @@ Run gene enrichment function, it will take some time, ~20 mins. The result of th
   * Step0_Write_Functions.Rmd
   * Step0B_Data_and_Libraries.Rmd (required dataset already loaded)
 
-* To generate the figures: Goto >> Tools 
+* To generate the figures:  
+
+>> Tools 
 ---
 1) Figure 1: Validation of our model: Run this file to replicate the Main Figure 2 of the Manuscript. 
 > Figure_1_ValidationPrimaryTarget_AUC.RMD
