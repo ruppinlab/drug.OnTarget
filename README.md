@@ -6,11 +6,14 @@ RStudio, R
 Majorly Packages required: fgsea; data.table; parallel; ggplot2; pROC; tidyverse;
 
 ### Custom Function required for the pipeline:
+
 > Step0_Write_Functions.Rmd
+
 In this file, we defined all function which are required for the analysis and validation of our pipeline. 
 This step is very important and imported to every file to generate figures.
 
 > Step0B_Data_and_Libraries.Rmd
+
 In this file, we have pre-loaded and preprocessed all the datasets (Other than Validation data) and libraries required for analysis, main Figure and supplementary figure.
 
 
@@ -29,7 +32,7 @@ Goto >> Tools >> Data_curation_code
 Step_0A_data_curation_and saving : In this Step, we compute the correlation between the crispr KO and the Drug response. Using the correlation strenth (Pearson Correlation Rho), the p value and rank, we curated data KnownTarget_predition which will be majorly used the futher analysis and validation of our Pipeline. 
 
 The result of the correlation is saved in the Data folder:
->> drugVScrispr_corr_features_list.RDS
+> drugVScrispr_corr_features_list.RDS
 ---
 
 
