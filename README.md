@@ -19,7 +19,7 @@ In this file, we have pre-loaded and preprocessed all the datasets (Other than V
 
 
 ### Data Curation File: 
->> Tools >> Data_curation_code
+> Tools >> Data_curation_code
 
 #### Requred Files: For detailed method section, visit to Manuscript
 We collected the viability screens after CRISPR-Cas9 and drug treatment from the DepMap database: https://depmap.org/portal/. 
@@ -126,7 +126,7 @@ Run gene enrichment function, it will take some time, ~20 mins. The result of th
 
 * To generate the figures:  
 
->> Tools 
+> Tools 
 ---
 1) Figure 1: Validation of our model: Run this file to replicate the Main Figure 2 of the Manuscript. 
 > Figure_1_ValidationPrimaryTarget_AUC.RMD
