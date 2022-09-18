@@ -6,11 +6,11 @@ RStudio, R
 Majorly Packages required: fgsea; data.table; parallel; ggplot2; pROC; tidyverse;
 
 ### Custom Function required for the pipeline:
-1) Step0_Write_Functions.Rmd
+> Step0_Write_Functions.Rmd
 In this file, we defined all function which are required for the analysis and validation of our pipeline. 
 This step is very important and imported to every file to generate figures.
 
-2) Step0B_Data_and_Libraries.Rmd
+> Step0B_Data_and_Libraries.Rmd
 In this file, we have pre-loaded and preprocessed all the datasets (Other than Validation data) and libraries required for analysis, main Figure and supplementary figure.
 
 
