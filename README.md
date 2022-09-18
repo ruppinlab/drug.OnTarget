@@ -23,17 +23,18 @@ In this file, we have pre-loaded and preprocessed all the datasets (Other than V
 We collected the viability screens after CRISPR-Cas9 and drug treatment from the DepMap database: https://depmap.org/portal/. 
 
 ---
-1) KnowTraget_prediction:
-Goto >> Tools >> Data_curation_code
+1) KnowTraget_prediction: Goto >> Tools >> Data_curation_code
 
-* Required Data: OnTarget_v2.Rdata (Data folder)
+> Step_0A_data_curation_and saving.Rmd
+
+* Required Data: OnTarget_v2.RDS
 * Required File: Step0_Write_Functions.Rmd ## all function required for the project is defined here.
 
-Step_0A_data_curation_and saving : In this Step, we compute the correlation between the crispr KO and the Drug response. Using the correlation strenth (Pearson Correlation Rho), the p value and rank, we curated data KnownTarget_predition which will be majorly used the futher analysis and validation of our Pipeline. 
+In this Step, we first mined large-scale drug response screens (PRISM) for more than ~1500 cancer drugs and genome-wide CRISPR-Cas9 knockout viability profiles (CRISPR-KO essentiality, AVANA) from DepMap, which were commonly performed across 371 cancer cell lines. Integrating these two screens, we calculated a (drug, target) pair-wise similarity score (Pearson Correlation) between viability after drug treatment and that observed for each gene CRISPR-KO termed it the Drug-KO Similarity score (DKS score). This score can range from -1 to 1. Using this DKS Score, we curated data KnownTarget_predition which will be majorly used the futher analysis and validation of our Pipeline. 
 
 The result of the correlation is saved in the Data folder:
 > drugVScrispr_corr_features_list.RDS
----
+> KnowTraget_prediction.RDS
 
 Variable defined in the:
 | Variable Name | Defination |
@@ -41,28 +42,59 @@ Variable defined in the:
 | MaxtargetName | If a drug have multiple target, what is the best target which have best correlation. |
 | Maxcorr | The respective correlation stregth of the drug target pair. |
 
+---
+2) Step_2: KnowTraget_prediction: Extending the data of KnowTraget_prediction by including RNAexpression data.
+Goto >> Tools >> Data_curation_code
+
+* Required Data: 
+  * OnTarget_v2.RDS 
+  * KnowTraget_prediction.RDS
+
+* Required File: Step0_Write_Functions.Rmd
+
+To this end, we first tested if indeed the correlation between the drug response and viability after the primary target CRISPR-KO (DKS score) decreases in cell lines where the primary target is not expressed. For this we computed the interaction between the expression data of the Cellines and DKS score and included these information which will be used when we will perform secondary target analysis and figure generation. 
+
+The result of the correlation is saved in the Data folder:
+> KnowTraget_prediction.RDS
+---
+
+3) Step_3: KnowTraget_prediction: Extending the data of KnowTraget_prediction by including Mutation data.
+Goto >> Tools >> Data_curation_code
+
+* Required Data: 
+  * OnTarget_v2.RDS 
+  * KnowTraget_prediction.RDS
+
+* Required File: Step0_Write_Functions.Rmd
+
+We next identify whether a given drug more specifically targets the mutant or the wild-type form of its known target protein. For this we computed the interaction between the mutation data of the Cellines and DKS score and included these information which will be used when we will perform Mutation Analysis, Validation and figures.
+
+The result of the correlation is saved in the Data folder:
+> KnowTraget_prediction.RDS (Final)
+---
 
 ### Figures
 
 To generate the figures:
+> Goto >> Tools 
 
-Figure 1: Validation of our model
+* Figure 1: Validation of our model
 
 
 
-* Goto >> Tools>> Figure_1_ValidationPrimaryTarget_AUC.RMD
+> Figure_1_ValidationPrimaryTarget_AUC.RMD
 
-Figure 2: Mutation Analysis and Validation
+* Figure 2: Mutation Analysis and Validation
 
-* Goto >> Tools>> Figure_2_Mutation_analysis.RMD
+> Figure_2_Mutation_analysis.RMD
 
-Figure 3: Secondary Target Analysis and Validation
+* Figure 3: Secondary Target Analysis and Validation
 
-* Goto >> Tools>> Figure_3_and supp_12_secondary_target_and_validation.RMD
+> Figure_3_and supp_12_secondary_target_and_validation.RMD
 
-Figure 4: Applications: Where we 
+* Figure 4: Applications: Where we 
 
-* Goto >> Tools>> Figure_3_and supp_12_secondary_target_and_validation.RMD
+> Figure_3_and supp_12_secondary_target_and_validation.RMD
 
 
 
