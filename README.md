@@ -51,6 +51,7 @@ Variable defined in the:
 * Required Data: 
   * OnTarget_v2.RDS 
   * KnowTraget_prediction.RDS
+  * biomarkers.csv
 
 * Required File: 
   * Step0_Write_Functions.Rmd
@@ -59,6 +60,7 @@ To this end, we first tested if indeed the correlation between the drug response
 
 The result of the correlation is saved in the Data folder:
 > KnowTraget_prediction.RDS
+> drugCandidates_for_secTargets.RDS
 ---
 
 3) Step_3: KnowTraget_prediction: Extending the data of KnowTraget_prediction by including Mutation data.
@@ -110,8 +112,19 @@ Run gene enrichment function, it will take some time, ~20 mins. The result of th
 
 ### Figures
 
-To generate the figures:
-> Goto >> Tools 
+* Required Dataset: 
+  * OnTarget_V2.RDS
+  * drugVScrispr_corr_features_list.RDS
+  * drugCandidates_for_secTargets.RDS
+  * KnownTarget_predictions.RDS
+  * drugVScrispr_corr_features_list_secondary.RDS
+  * gsea_enrichment_all_drugs.RDS
+
+* Required File: 
+  * Step0_Write_Functions.Rmd
+  * Step0B_Data_and_Libraries.Rmd (required dataset already loaded)
+
+* To generate the figures: Goto >> Tools 
 ---
 1) Figure 1: Validation of our model: Run this file to replicate the Main Figure 2 of the Manuscript. 
 > Figure_1_ValidationPrimaryTarget_AUC.RMD
