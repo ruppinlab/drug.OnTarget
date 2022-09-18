@@ -27,9 +27,10 @@ We collected the viability screens after CRISPR-Cas9 and drug treatment from the
 1) Step_1: KnowTraget_prediction:
 
 > Step_0A_data_curation_and saving.Rmd
-
-* Required Data: OnTarget_v2.RDS
-* Required File: Step0_Write_Functions.Rmd ## all function required for the project is defined here.
+* Required Data: 
+  * OnTarget_v2.RDS
+* Required File: 
+  * Step0_Write_Functions.Rmd
 
 In this Step, we first mined large-scale drug response screens (PRISM) for more than ~1500 cancer drugs and genome-wide CRISPR-Cas9 knockout viability profiles (CRISPR-KO essentiality, AVANA) from DepMap, which were commonly performed across 371 cancer cell lines. Integrating these two screens, we calculated a (drug, target) pair-wise similarity score (Pearson Correlation) between viability after drug treatment and that observed for each gene CRISPR-KO termed it the Drug-KO Similarity score (DKS score). This score can range from -1 to 1. Using this DKS Score, we curated data KnownTarget_predition which will be majorly used the futher analysis and validation of our Pipeline. 
 
@@ -45,12 +46,13 @@ Variable defined in the:
 
 ---
 2) Step_2: KnowTraget_prediction: Extending the data of KnowTraget_prediction by including RNAexpression data.
-
+> Step_0B_Data_curation_Interaction.Rmd
 * Required Data: 
   * OnTarget_v2.RDS 
   * KnowTraget_prediction.RDS
 
-* Required File: Step0_Write_Functions.Rmd
+* Required File: 
+  * Step0_Write_Functions.Rmd
 
 To this end, we first tested if indeed the correlation between the drug response and viability after the primary target CRISPR-KO (DKS score) decreases in cell lines where the primary target is not expressed. For this we computed the interaction between the expression data of the Cellines and DKS score and included these information which will be used when we will perform secondary target analysis and figure generation. 
 
@@ -59,12 +61,13 @@ The result of the correlation is saved in the Data folder:
 ---
 
 3) Step_3: KnowTraget_prediction: Extending the data of KnowTraget_prediction by including Mutation data.
-
+> Step_0C_Data_curation_Mutation_interaction.Rmd
 * Required Data: 
   * OnTarget_v2.RDS 
   * KnowTraget_prediction.RDS
 
-* Required File: Step0_Write_Functions.Rmd
+* Required File: 
+  * Step0_Write_Functions.Rmd
 
 We next identify whether a given drug more specifically targets the mutant or the wild-type form of its known target protein. For this we computed the interaction between the mutation data of the Cellines and DKS score and included these information which will be used when we will perform Mutation Analysis, Validation and figures.
 
@@ -74,7 +77,6 @@ The result of the correlation is saved in the Data folder:
 
 4) Step_4: Creating correlation matrix for secondary target.
 > create_CorrMat_secondary.Rmd
-
 * Required Data: 
   * OnTarget_v2.RDS 
   * KnowTraget_prediction.RDS
