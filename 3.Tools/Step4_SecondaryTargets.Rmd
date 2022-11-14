@@ -79,13 +79,14 @@ secTargets_example_df_ordered[cand_Targetname,]
 # secTargets_example_df_ordered[c('BRAF', 'RAF1', 'SIK1', 'NEK11', 'LIMK1'),]
 ```
 
-
 ```{r}
 drug_matched[cand_drugBroadID,CellLinesWD_Target_low_expression]
 ```
+
 ```{r}
 onTarget$drugCategory[grep(cand_drugBroadID,onTarget$drugCategory$broad_id_trimmed),]
 ```
+
 ```{r}
 secTargets_example=Identify_secondary_Target_list(infunc_cellLines=colnames(avana_matched),
                                infunc_drugBroadID=cand_drugBroadID)

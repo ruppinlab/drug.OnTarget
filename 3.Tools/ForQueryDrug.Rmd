@@ -1,0 +1,185 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+<!-- This script does a deep target characterization of a query drug -->
+<!-- Scripts and data needed -->
+```{r}
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
+require(ComplexHeatmap)
+```
+<!-- Preprocessing -->
+```{r}
+drugVScrispr_corr_Strength=as.data.frame(drugVScrispr_corr_Strength)
+drugVScrispr_corr_Strength_rank=apply(drugVScrispr_corr_Strength, 2, rank)
+#Total genes are 17387
+drugVScrispr_corr_Strength_rank= 17387 -as.data.frame(drugVScrispr_corr_Strength_rank)
+```
+<!-- Create variables here that are used recurrently to improve readability -->
+```{r}
+drugBroadID=colnames(drugVScrispr_corr_Strength)
+matched_common_drugName=onTarget$drugCategory$name[match(colnames(drugVScrispr_corr_Strength), onTarget$drugCategory$broad_id_trimmed)]
+matched_Target=onTarget$drugCategory$target[match(colnames(drugVScrispr_corr_Strength), onTarget$drugCategory$broad_id_trimmed)]
+matched_MOA=onTarget$drugCategory$moa[match(colnames(drugVScrispr_corr_Strength), onTarget$drugCategory$broad_id_trimmed)]
+```
+
+<!-- Provide query drug -->
+```{r}
+Query_Drug='UMI77'
+```
+<!-- Note 1: Please write a script to provide all the synonyms of a given Query_Drug -->
+<!-- Check if the drug is in our screens and if yes, please provide drugID -->
+```{r}
+Query_DrugID=match_stripall(Query_Drug, onTarget$drugCategory$name)
+Query_DrugID_knownInfo=onTarget$drugCategory[Query_DrugID,]
+Query_DrugID_knownInfo=apply(Query_DrugID_knownInfo, 2, function(x) x)
+Query_DrugID_broadID=Query_DrugID_knownInfo['broad_id_trimmed']
+Query_DrugID_matched=which(drugBroadID %in% Query_DrugID_broadID)
+if(is.na(Query_DrugID)){ print('Not in our screens')
+} else{ print('It is present in our screens') }
+if(is.na(Query_DrugID_matched[1])){ print('Present in shallow screens only(one dosage)')
+} else{ print('Present in our deep screens(multiple dosages)') }
+
+# Information gathered about drug
+Query_Drug; Query_DrugID; Query_DrugID_broadID; Query_DrugID_matched; Query_DrugID_knownInfo
+```
+<!-- Query drug treatment Viability profile -->
+```{r, fig.height=6.5}
+Response_profile_QF=data.frame(ess_Query_Drug=drug_matched[Query_DrugID_broadID,],
+           lineage=onTarget$annotation_20Q4$lineage[
+             match(matched_cellLines, onTarget$annotation_20Q4$DepMap_ID)])
+sort(table(as.character(Response_profile_QF$lineage)))
+Response_profile_QF=Response_profile_QF[
+  order(Response_profile_QF$ess_Query_Drug, decreasing = T),]
+p1 <- ggplot(Response_profile_QF,
+             aes(y=ess_Query_Drug,
+                 x=1:nrow(Response_profile_QF), color=lineage))+
+  geom_point()+
+  theme_bw(base_size = 15)+
+  theme(legend.position = 'bottom')+
+  labs(y=paste('Viability after',Query_Drug), x='Cell Lines')
+p1
+```
+<!-- Predict Primary target profile of the drug -->
+```{r}
+PrimaryTargetingDrug_df=data.frame(Confidence=unlist(drugVScrispr_corr_Strength[,Query_DrugID_broadID]),
+                                   Confidence_Rank=unlist(drugVScrispr_corr_Strength_rank[,Query_DrugID_broadID]))
+rownames(PrimaryTargetingDrug_df)=rownames(drugVScrispr_corr_Strength)
+PrimaryTargetingDrug_df=PrimaryTargetingDrug_df[order(PrimaryTargetingDrug_df$Confidence_Rank),]
+PrimaryTargetingDrug_df
+```
+```{r}
+PrimaryTargetingDrug_df[c('CDK4', 'CDK6'),]
+kinase_PrimaryTargetingDrug_df=PrimaryTargetingDrug_df[human_Kinases$`HGNC Name`,]
+kinase_PrimaryTargetingDrug_df=kinase_PrimaryTargetingDrug_df[order(kinase_PrimaryTargetingDrug_df$Confidence_Rank),]
+kinase_PrimaryTargetingDrug_df$kinase=1:nrow(kinase_PrimaryTargetingDrug_df)
+kinase_PrimaryTargetingDrug_df[c('CDK4', 'CDK6'),]
+```
+
+<!-- Predict Primary target profile of the drug in various cancer types -->
+```{r}
+# Pulling from Step8_cancerSpecific_PrimaryTarget directly from the version on Sept8th2022
+cancerSpec_PriTarget=PrimaryTarget_Profile_inDiff_CanTypes_prep
+cancerSpec_PriTarget=lapply(cancerSpec_PriTarget, function(x) data.frame(x, targetRank=rank(-x[,2]) ) )
+```
+<!-- Test the Primary target prediction vs known infromation;; This part is only for TG-02 drug; Needs modification to generalize-->
+```{r}
+Query_DrugID_knownInfo_targets_list=strsplit(Query_DrugID_knownInfo['target'], ', ')
+expanded_targets_list=c(Query_DrugID_knownInfo_targets_list$target,'CDK5', 'TYK2', 'ERK5', 'CDK3', 'CSF1R', 'LCK', 'MAPK13', 'TYRO3')
+PrimaryTargetingDrug_df[expanded_targets_list,]
+```
+<!-- Check where the known targets ranks are in cancer specific ranking -->
+```{r}
+expanded_targets_corrStrength=sapply(cancerSpec_PriTarget, function(x) x[expanded_targets_list,2])
+rownames(expanded_targets_corrStrength)=expanded_targets_list
+expanded_targets_corrRank=sapply(cancerSpec_PriTarget, function(x) x[expanded_targets_list,3])
+rownames(expanded_targets_corrRank)=expanded_targets_list
+```
+
+```{r}
+matched_Lineages=onTarget$annotation_20Q4$lineage[match(matched_cellLines, onTarget$annotation_20Q4$DepMap_ID)]
+matched_primary_disease=onTarget$annotation_20Q4$primary_disease[
+  match(matched_cellLines, onTarget$annotation_20Q4$DepMap_ID)]
+matched_primary_disease_freq=table(as.character(matched_primary_disease))
+primary_diseaseWD_greaterThan_20_cellLines=names(which(matched_primary_disease_freq>=20))
+# Add fre info to colnames of the "expanded_targets_corrStrength" matrix
+colnames(expanded_targets_corrStrength)=
+paste(primary_diseaseWD_greaterThan_20_cellLines,';',
+      matched_primary_disease_freq[which(matched_primary_disease_freq>=20)], sep = '')
+colnames(expanded_targets_corrRank)=
+paste(primary_diseaseWD_greaterThan_20_cellLines,';',
+      matched_primary_disease_freq[which(matched_primary_disease_freq>=20)], sep = '')
+```
+
+```{r}
+expanded_targets_corrRank=na.omit(expanded_targets_corrRank)
+expanded_targets_corrRank=apply(expanded_targets_corrRank, 1, function(x) {
+  x[x>1500]=20000
+  x } )
+Heatmap(na.omit(expanded_targets_corrRank), name = "Target Rank")
+```
+
+<!-- Corr Strength based heatmap -->
+```{r}
+expanded_targets_corrStrength=na.omit(expanded_targets_corrStrength)
+expanded_targets_corrStrength=apply(expanded_targets_corrStrength, 1, function(x) {
+  x[x<0]=0
+  x } )
+rownames(expanded_targets_corrStrength)
+Heatmap(expanded_targets_corrStrength,  name = "cor Strength")
+```
+<!-- A deep dive into one cancer type focusing on Kinases -->
+```{r}
+human_Kinases=readxl::read_xlsx('/Users/sinhas8/Project_TrueTarget/Data/human_Kinases.xlsx')
+cancerSpec_PriTarget_corrStrength=sapply(cancerSpec_PriTarget, function(x) x[human_Kinases$`HGNC Name`,2])
+rownames(cancerSpec_PriTarget_corrStrength)=human_Kinases$`HGNC Name`
+cancerSpec_PriTarget_corrStrength=na.omit(cancerSpec_PriTarget_corrStrength)
+AllTargets_in_BrainCancer=data.frame(geneName=names(sort(cancerSpec_PriTarget_corrStrength[,"Brain Cancer"], decreasing = T)),
+                                     CorrStr=sort(cancerSpec_PriTarget_corrStrength[,"Brain Cancer"], decreasing = T),
+                                     Generank=1:nrow(cancerSpec_PriTarget_corrStrength))
+AllTargets_in_BrainCancer[AllTargets_in_BrainCancer$geneName %in% expanded_targets_list,]
+dim(AllTargets_in_BrainCancer)
+```
+
+<!-- Get Secondary Targets Matrix and preprocess -->
+```{r}
+drugVScrispr_corr_features_list_secondary=readRDS(
+        '/Users/sinhas8/Project_TrueTarget/Data/drugVScrispr_corr_features_list_secondary.RDS')
+# <!-- All corrmat, corrmat_P, corrmat_FDR, corrmat_rank -->
+sec_corrMat=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,2])))
+sec_corrMat_P=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,1])))
+sec_corrMat_rank=apply(-sec_corrMat, 2, rank)
+```
+<!-- Find secondary targets of the drugs -->
+```{r}
+secTarget_Query_Drug=data.frame(corr=sec_corrMat[,Query_DrugID_broadID],
+                     P=sec_corrMat_P[,Query_DrugID_broadID],
+                     corr_rank=sec_corrMat_rank[,Query_DrugID_broadID])
+rownames(secTarget_Query_Drug)=make.names(rownames(sec_corrMat), unique = T)
+secTarget_Query_Drug[c('CDK4', 'CDK6'),]
+```
+<!-- Check Expression pattern of the Query Target -->
+```{r}
+TargetExp=data.frame(expression=unlist(onTarget$expression_20Q4['CDK9',matched_cellLines]))
+ggplot(TargetExp, aes(x=expression))+
+  geom_histogram()
+```
+
+```{r}
+grep('CDK9',onTarget$drugCategory$target)
+KnownTarget_predictions[grep('CDK9',KnownTarget_predictions$MaxTargetName),]
+grep('CDK9',KnownTarget_predictions$BestTargetName)
+KnownTarget_predictions[grep('ibrutinib',KnownTarget_predictions$drugName),]
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

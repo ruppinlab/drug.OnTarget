@@ -1,0 +1,136 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- Our high-level goal is to add the layer of binding as well to our DeepTarget Pipline -->
+<!-- With this in mind, Our first idea is to only consider the solution space of Kinases for kinase inhibitor -->
+```{r}
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+```
+<!-- Curate all kinase Inhibitors -->
+```{r}
+tyroKinase_Inb=onTarget$drugCategory[grep('tinib',onTarget$drugCategory$name),]
+Cyclin_dependent_kinase_Inb=onTarget$drugCategory[grep('ciclib',onTarget$drugCategory$name),]
+Phosphatidylinositol_kinase_Inb=onTarget$drugCategory[grep('lisib',onTarget$drugCategory$name),]
+kinase_inhibitors=unlist(c(tyroKinase_Inb$name, Cyclin_dependent_kinase_Inb$name,
+                           Phosphatidylinositol_kinase_Inb$name))
+```
+
+```{r}
+ROC_list=readRDS('/Users/sinhas8/Project_TrueTarget/Data/ROC_list.RDS')
+ROC_list$`COSMIC resistance=0.94`$original.predictor
+ROC_list$`COSMIC resistance=0.94`[[2]]
+```
+
+```{r}
+Comp_Gold_Standard_df=readRDS('/Users/sinhas8/Project_TrueTarget/Data/Comp_Gold_Standard.RDS')
+```
+<!-- Compute what is the ROC and specificity of the model -->
+<!-- Stratifcation Score with genome-wide space only -->
+```{r}
+kinase_inhibitors_id=stripall2match(Comp_Gold_Standard_df$Chemical.Name) %in% stripall2match(kinase_inhibitors)
+Comp_Gold_Standard_df_kinases=Comp_Gold_Standard_df[kinase_inhibitors_id,]
+roc_standardProcess=roc(Comp_Gold_Standard_df$Label[kinase_inhibitors_id], Comp_Gold_Standard_df$crispr_corr[kinase_inhibitors_id])
+mean(Comp_Gold_Standard_df_kinases$crispr_corr[ Comp_Gold_Standard_df_kinases$Label=='Positive'])/17386
+mean(Comp_Gold_Standard_df_kinases$crispr_corr[Comp_Gold_Standard_df_kinases$Label=='Negative'])/17386
+roc_standardProcess$auc
+```
+<!-- Create a new corrMat_rank considering only the space of Human Kinases  -->
+```{r}
+human_Kinases_screen=human_Kinases$`HGNC Name`[human_Kinases$`HGNC Name` %in% rownames(corrMat)]
+total_kinases_count=length(human_Kinases_screen)
+corrMat_rank_KinaseSpace=apply(-corrMat[human_Kinases_screen,], 2, rank)
+```
+<!-- Create neagtive and positive labels for Kinase Inhibitors specific space-->
+```{r}
+Comp_Gold_Standard_df_kinases_positive=Comp_Gold_Standard_df_kinases[Comp_Gold_Standard_df_kinases$Label=='Positive',1:2]
+randomize_DF_with_unique_Pairs_V2_forKinases <- function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(rownames(corrMat_rank_KinaseSpace), nrow(df2randomize))
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(rownames(corrMat_rank_KinaseSpace), sum(df2randomize_collapsed==new_df)),
+            fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
+}
+Comp_Gold_Standard_df_kinases_negative=randomize_DF_with_unique_Pairs_V2_forKinases(Comp_Gold_Standard_df_kinases_positive)
+Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace=rbind(data.frame(Comp_Gold_Standard_df_kinases_positive, Label='Positive'),
+                                                             data.frame(Comp_Gold_Standard_df_kinases_negative, Label='Negative'))
+Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$drug_BroadID=Comp_Gold_Standard_df_kinases[
+  match(Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$Chemical.Name, Comp_Gold_Standard_df_kinases$Chemical.Name), c('drug_BroadID') ]
+```
+<!-- CRISPR Rank based on kinase space only -->
+```{r}
+Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$crispr_cor=sapply(1:nrow(Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace), function(x)
+  err_handle(corrMat_rank_KinaseSpace[Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$Drugbank_Gene[x],
+                                      Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$drug_BroadID[x]]) )
+Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$crispr_cor_strength=sapply(1:nrow(Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace), function(x)
+  err_handle(corrMat[Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$Drugbank_Gene[x],
+                     Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$drug_BroadID[x]]) )
+```
+<!-- Stratifcation Score with kinase space only; Cor stregnth -->
+```{r}
+roc_KinaseSpaceonly=roc(Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$Label,
+                        Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$crispr_cor)
+```
+<!-- Different Kind of model Scores -->
+```{r}
+#Use correlation Rank
+Comp_Gold_Standard_df_kinases$crispr_corr_rank=sapply(1:nrow(Comp_Gold_Standard_df_kinases), function(x)
+  err_handle(corrMat_rank[as.character(Comp_Gold_Standard_df_kinases$Drugbank_Gene)[x], as.character(Comp_Gold_Standard_df_kinases$drug_BroadID)[x]]))
+#Use correlation Maginitude
+Comp_Gold_Standard_df_kinases$crispr_corr_mag=sapply(1:nrow(Comp_Gold_Standard_df_kinases), function(x)
+  err_handle(corrMat[as.character(Comp_Gold_Standard_df_kinases$Drugbank_Gene)[x], as.character(Comp_Gold_Standard_df_kinases$drug_BroadID)[x]]))
+#Use correlation Significance
+Comp_Gold_Standard_df_kinases$crispr_corr_P=sapply(1:nrow(Comp_Gold_Standard_df_kinases), function(x)
+  err_handle(corrMat_P[as.character(Comp_Gold_Standard_df_kinases$Drugbank_Gene)[x], as.character(Comp_Gold_Standard_df_kinases$drug_BroadID)[x]]))
+Comp_Gold_Standard_df_kinases$crispr_bothPandMAG=sapply(1:nrow(Comp_Gold_Standard_df_kinases), function(x)
+  err_handle(corrMat_bothMAGandP[as.character(Comp_Gold_Standard_df_kinases$Drugbank_Gene)[x], as.character(Comp_Gold_Standard_df_kinases$drug_BroadID)[x]]))
+#Use correlation strength Z-score
+Comp_Gold_Standard_df_kinases$crispr_corr_z=sapply(1:nrow(Comp_Gold_Standard_df_kinases), function(x)
+  err_handle(corrMat_z[as.character(Comp_Gold_Standard_df_kinases$Drugbank_Gene)[x], as.character(Comp_Gold_Standard_df_kinases$drug_BroadID)[x]]))
+```
+
+<!-- Compute the proportion of possibel false positives -->
+```{r}
+kinaseSpace=Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace[-grep('Ibrutinib',Comp_Gold_Standard_df_kinases_NegativesfromKinaseSpace$Chemical.Name, ignore.case = T),]
+GenomeSpace=Comp_Gold_Standard_df_kinases[-grep('Ibrutinib',Comp_Gold_Standard_df_kinases$Chemical.Name, ignore.case = T),]
+
+Figure1H_data <- rbind(
+  data.frame(False_Positive_Prop=mean(kinaseSpace$crispr_cor[kinaseSpace$Label=='Positive'])/nrow(corrMat), Space="Kinase Proteins"),
+  data.frame(False_Positive_Prop=mean(GenomeSpace$crispr_corr_rank[GenomeSpace$Label=='Positive'])/nrow(corrMat), Space="Genome-Wide")
+  )
+Figure1H_data
+```
+
+<!-- Plot the decrease of False positives proportions from the same pipeline -->
+```{r}
+Figure1H <- ggplot(Figure1H_data, aes(x=str_wrap(Space, 6), y=False_Positive_Prop))+
+   geom_segment( aes(x=str_wrap(Space, 6), xend=str_wrap(Space, 6), y=0, yend=False_Positive_Prop), color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6) +
+  theme_bw(base_size = 12) +
+  labs(y='Proportion of False positives',
+       x='Search Space')
+ggsave(Figure1H, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1H.pdf', width = 3)
+ggsave(Figure1H, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1H.svg', width = 3)
+ggsave(Figure1H, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure1H.png', width = 3)
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

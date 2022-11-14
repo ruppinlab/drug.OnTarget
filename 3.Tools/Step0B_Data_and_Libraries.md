@@ -27,10 +27,6 @@ require(parallel); require('tictoc'); library(fgsea); library(ggplot2)
 ##   print.data.table
 ```
 
-```
-## Want to understand how all the pieces fit together? Read R for Data Science: https://r4ds.had.co.nz/
-```
-
 ```r
 require(ggpubr); require(statar); require('interactions')
 ```
@@ -53,6 +49,25 @@ require(stats); require(reshape2); require(pROC)
 
 ```
 ## Loading required package: reshape2
+```
+
+```
+## Loading required package: pROC
+```
+
+```
+## Type 'citation("pROC")' for a citation.
+```
+
+```
+## 
+## Attaching package: 'pROC'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     cov, smooth, var
 ```
 
 ```r
@@ -148,14 +163,56 @@ require(DEGreport)
 ```r
 setwd('/Users/sinhas8/Project_TrueTarget/Tools_github/')
 onTarget=readRDS('../Data/onTarget_v2.0.RDS')
-KnownTarget_predictions=readRDS('/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions_v3.RDS')
+KnownTarget_predictions=readRDS('/Users/sinhas8/Project_TrueTarget/Data/KnownTarget_predictions_v4.RDS')
 drugCandidates_for_secTargets=readRDS('../Data/drugCandidates_for_secTargets.RDS')
+dim(drugCandidates_for_secTargets)
+```
+
+```
+## [1] 32 10
+```
+
+```r
 drugVScrispr_corr_features_list=readRDS('../Data/drugVScrispr_corr_features_list.RDS')
+human_Kinases=readxl::read_xlsx('/Users/sinhas8/Project_TrueTarget/Data/human_Kinases.xlsx')
 drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_features_list, function(x) x[,2])
 corrMat_P=sapply(drugVScrispr_corr_features_list, function(x) x[,1])
 corrMat=drugVScrispr_corr_Strength
 corrMat_rank=apply(-corrMat, 2, rank)
 
+#corrmat-Z
+#Z-score in the first possible way.
+corrMat_z=apply(corrMat, 2, scale)
+rownames(corrMat_z)=rownames(corrMat)
+corrMat_log10P=-log10(corrMat_P)
+corrMat_bothMAGandP=corrMat_log10P*corrMat_z
+
+#Add Secondary-DKS score
+drugVScrispr_corr_features_list_secondary=readRDS('/Users/sinhas8/Project_TrueTarget/Data/drugVScrispr_corr_features_list_secondary.RDS')
+sec_corrMat=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,2])))
+```
+
+```
+## Error in err_handle(x[, 2]): could not find function "err_handle"
+```
+
+```r
+sec_corrMat_P=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,1])))
+```
+
+```
+## Error in err_handle(x[, 1]): could not find function "err_handle"
+```
+
+```r
+sec_corrMat_rank=apply(-sec_corrMat, 2, rank)
+```
+
+```
+## Error in apply(-sec_corrMat, 2, rank): object 'sec_corrMat' not found
+```
+
+```r
 #Functions needed
 source('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/myCustom_functions.R')
 ```
@@ -220,10 +277,8 @@ expression_matched=onTarget$expression_20Q4[,matched_cellLines]
 avana_matched=onTarget$avana_22Q2[,matched_cellLines]
 drug_matched=onTarget$secondary_prism[,matched_cellLines]
 ```
-
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
 
 The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-

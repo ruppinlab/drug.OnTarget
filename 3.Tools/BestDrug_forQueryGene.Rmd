@@ -1,0 +1,77 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+<!-- This script provides the best possible drug to hit the gene -->
+<!-- Scripts and data needed -->
+```{r}
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
+```
+<!-- Preprocessing -->
+```{r}
+range(drugVScrispr_corr_Strength)
+drugVScrispr_corr_Strength=as.data.frame(drugVScrispr_corr_Strength)
+drugVScrispr_corr_Strength_rank=apply(drugVScrispr_corr_Strength, 2, rank)
+drugVScrispr_corr_Strength_rank= 17387 -as.data.frame(drugVScrispr_corr_Strength_rank)
+matched_common_drugName=onTarget$drugCategory$name[match(colnames(drugVScrispr_corr_Strength), onTarget$drugCategory$broad_id_trimmed)]
+matched_Target=onTarget$drugCategory$target[match(colnames(drugVScrispr_corr_Strength), onTarget$drugCategory$broad_id_trimmed)]
+matched_MOA=onTarget$drugCategory$moa[match(colnames(drugVScrispr_corr_Strength), onTarget$drugCategory$broad_id_trimmed)]
+```
+
+<!-- Provide query gene -->
+```{r}
+Query_Gene='TRMT12'
+```
+
+<!-- Query gene essentiality profile -->
+```{r, fig.height=2}
+ess_QG_df=data.frame(ess_query_gene=avana_matched[Query_Gene,],
+           lineage=onTarget$annotation_20Q4$lineage[match(names(ess_query_gene), onTarget$annotation_20Q4$DepMap_ID)])
+ess_QG_df=ess_QG_df[order(ess_QG_df$ess_query_gene, decreasing = T),]
+p1 <- ggplot(ess_QG_df, aes(y=ess_query_gene, x=1:nrow(ess_QG_df), color=lineage))+
+  geom_point()+
+  theme_bw(base_size = 15)+
+  theme(legend.position = 'bottom')
+p1
+```
+<!-- Drugs whose primary target might be query gene -->
+```{r}
+PrimaryTargetingDrug_df=data.frame(confidence=unlist(drugVScrispr_corr_Strength[Query_Gene,]),
+                                   DrugRank=unlist(drugVScrispr_corr_Strength_rank[Query_Gene,]))
+PrimaryTargetingDrug_df$druglabel=''
+PrimaryTargetingDrug_df[PrimaryTargetingDrug_df$DrugRank<50,]
+PrimaryTargetingDrug_df$druglabel[PrimaryTargetingDrug_df$DrugRank<50]=as.character(matched_common_drugName[PrimaryTargetingDrug_df$DrugRank<50])
+PrimaryTargetingDrug_df$Target=''
+PrimaryTargetingDrug_df$Target[PrimaryTargetingDrug_df$DrugRank<50]=as.character(matched_Target[PrimaryTargetingDrug_df$DrugRank<50])
+PrimaryTargetingDrug_df$MOA=''
+PrimaryTargetingDrug_df$MOA[PrimaryTargetingDrug_df$DrugRank<50]=as.character(matched_MOA[PrimaryTargetingDrug_df$DrugRank<50])
+
+table(PrimaryTargetingDrug_df$druglabel)
+
+p2 <- ggplot(PrimaryTargetingDrug_df, aes(x=confidence,
+                                          y=DrugRank,
+                                          color=confidence,
+                                          label=druglabel))+
+  geom_point()+
+  geom_label_repel(nudge_y = -5000)+
+  theme_bw(base_size = 15)+
+  scale_y_reverse()+
+  labs(x='Confidence Score', 
+       paste(Query_Gene, 'Rank') )
+p2
+```
+<!-- Is there any existing drug in our screens targeting this gene? -->
+```{r}
+grep('TRMT',onTarget$drugCategory$target)
+```
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

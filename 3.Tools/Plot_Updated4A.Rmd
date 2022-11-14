@@ -1,0 +1,86 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- Updated 4A -->
+```{r}
+KnownTarget_predictions_bckp=KnownTarget_predictions
+KnownTarget_predictions=KnownTarget_predictions_bckp
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Preclinical'] = 1
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 1'] = 2
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 2'] = 3
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Phase 3'] = 4
+df2plot_join_with_launch_data$clinical_stage[df2plot_join_with_launch_data$phase== 'Launched'] = 5
+```
+
+```{r}
+KnownTarget_predictions = KnownTarget_predictions[!is.na(KnownTarget_predictions$phase),]
+KnownTarget_predictions = KnownTarget_predictions[!(KnownTarget_predictions$phase == 'Withdrawn'),]
+
+KnownTarget_predictions = KnownTarget_predictions %>% mutate(phase = replace(phase, phase == 'Phase 1/Phase 2', 'Phase 2'))
+KnownTarget_predictions = KnownTarget_predictions %>% mutate(phase = replace(phase, phase == 'Phase 2/Phase 3', 'Phase 3'))
+KnownTarget_predictions$clinical_stage=KnownTarget_predictions$phase
+# KnownTarget_predictions$clinical_stage[KnownTarget_predictions$phase== 'Withdrawn'] = 1
+KnownTarget_predictions$clinical_stage[KnownTarget_predictions$phase== 'Preclinical'] = 1
+KnownTarget_predictions$clinical_stage[KnownTarget_predictions$phase== 'Phase 1'] = 2
+KnownTarget_predictions$clinical_stage[KnownTarget_predictions$phase== 'Phase 2'] = 3
+KnownTarget_predictions$clinical_stage[KnownTarget_predictions$phase== 'Phase 3'] = 4
+KnownTarget_predictions$clinical_stage[KnownTarget_predictions$phase== 'Launched'] = 5
+table(KnownTarget_predictions$clinical_stage)
+```
+```{r}
+topGenes=names(which(table(KnownTarget_predictions$MaxTargetName)>8))
+KnownTarget_predictions$clinical_stage=as.numeric(KnownTarget_predictions$clinical_stage)
+corr_test=sapply(topGenes, function(x) {
+  infuncID=which(KnownTarget_predictions$MaxTargetName==x)
+  unlist(cor.test_trimmed_v0(KnownTarget_predictions$Maxcorr[infuncID],
+                             KnownTarget_predictions$clinical_stage[infuncID])) 
+})
+mean(corr_test[2,], na.rm = T)
+```
+```{r}
+id2plot=which(KnownTarget_predictions$MaxTargetName %in% c('EGFR', 'MAP2K1', 'MET'))
+df2plot=KnownTarget_predictions[id2plot,]
+df2plot$clinical_stage=factor(df2plot$clinical_stage)
+median_data=aggregate(Maxcorr ~ clinical_stage+MaxTargetName,df2plot, median)
+Figure4ABC <- ggplot(df2plot, aes(x=factor(clinical_stage), y=Maxcorr, color=as.numeric(clinical_stage)))+
+  geom_boxplot()+
+  theme_bw(base_size = 14)+
+  facet_wrap(MaxTargetName~., scales = 'free')+
+  stat_smooth(method = "lm", se=T, aes(x=as.numeric(clinical_stage), y=Maxcorr))+
+  geom_cor(aes(x=as.numeric(clinical_stage), y=Maxcorr), method = 'pearson')+
+  labs(y='DKS Score', x='Clinical Stage', color='Clinical Stage')
+
+ggsave(Figure4ABC, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure4ABC.pdf', width = 11, height = 5)
+```
+
+```{r}
+id2plot=which(KnownTarget_predictions$MaxTargetName %in% c('BRAF'))
+df2plot=KnownTarget_predictions[id2plot,]
+
+Figure2I <- ggplot(df2plot, aes(x=factor(clinical_stage),
+                                  y=mutation_interaction_strength,
+                                  color=as.numeric(clinical_stage)))+
+  geom_boxplot()+
+  theme_bw(base_size = 14)+
+  facet_wrap(MaxTargetName~., scales = 'free')+
+  stat_smooth(method = "lm", se=T, aes(x=as.numeric(clinical_stage),
+                                       y=mutation_interaction_strength))+
+  geom_cor(aes(x=as.numeric(clinical_stage),
+               y=mutation_interaction_strength), method = 'pearson', ypos = 0.2, xpos = 3)+
+  labs(y='Mutant Specificity', x='Clinical Stage', color='Clinical Stage')+
+  stat_compare_means(comparisons = list(c('1', '5')), method = 'wilcox')
+ggsave(Figure2I, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure2I.pdf', width = 5, height = 5)
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

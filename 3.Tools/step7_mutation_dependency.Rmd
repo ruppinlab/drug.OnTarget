@@ -204,6 +204,7 @@ write.csv(all_bioactive_compounds_matched_only_mostfreqtargets,
 ```{r}
 all_bioactive_compounds_matched[grep('RAF',stripall2match(all_bioactive_compounds_matched$Target), ignore.case = T),]
 ```
+
 ```{r}
 braf_inhibitors_in_screen=onTarget$drugCategory$name[grep('RAF',onTarget$drugCategory$target)]
 braf_inhibitors_in_screen=data.frame(PRISM_drugname=braf_inhibitors_in_screen)

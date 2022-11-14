@@ -1,0 +1,143 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+```{r echo = T, results = 'hide'}
+library(pROC)
+library(stringr)
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools_github/3.Tools/Step0B_Data_and_Libraries.Rmd')
+```
+
+```{r}
+Comp_Gold_Standard_df=readRDS('/Users/sinhas8/Project_TrueTarget/Data/Comp_Gold_Standard.RDS')
+ROC_list=readRDS('/Users/sinhas8/Project_TrueTarget/Data/ROC_list.RDS')
+```
+
+```{r}
+positive_id=Comp_Gold_Standard_df$Label=='Positive'
+Comp_Gold_Standard_df$uniq_ID=paste(Comp_Gold_Standard_df$Chemical.Name, Comp_Gold_Standard_df$Drugbank_Gene)
+Drugs_in_morethan1Datasets=names(which(table(Comp_Gold_Standard_df$uniq_ID[positive_id])>1))
+# Drugs_in_morethan1Datasets=names(which(table(unlist(sapply(Comp_Gold_Standard_df, function(x) paste(x$Chemical.Name, x$Drugbank_Gene)[x$Label=='Positive'] )))>1))
+Drugs_in_morethan1Datasets=strsplit_customv0(Drugs_in_morethan1Datasets, infunc_split_by = ' ',retreving_onject_id = 1)
+platinum_dataset_ID=Comp_Gold_Standard_df$Chemical.Name %in% Drugs_in_morethan1Datasets
+platinum_dataset=Comp_Gold_Standard_df[platinum_dataset_ID,]
+platinum_dataset=unique(platinum_dataset)
+platinum_dataset_bckp=platinum_dataset
+```
+
+<!-- Create new negatives -->
+```{r}
+platinum_dataset=platinum_dataset_bckp
+platinum_dataset_positive=platinum_dataset[grep('Positive',platinum_dataset$Label),]
+platinum_dataset_positive_stripped=platinum_dataset_positive[,1:4]
+set.seed(3)
+platinum_dataset_Neg_stripped= do.call(rbind, lapply(1:100, function(x)
+  randomize_DF_with_unique_Pairs_V2(platinum_dataset_positive_stripped[,1:2])))
+platinum_dataset_Neg_stripped=data.frame(platinum_dataset_Neg_stripped,
+                                         drug_BroadID=platinum_dataset_positive$drug_BroadID,
+                                         Label='Negative')
+platinum_dataset=rbind(platinum_dataset_positive_stripped, 
+                            platinum_dataset_Neg_stripped)
+```
+<!-- Different Kind of model Scores -->
+```{r}
+#Use correlation Rank
+platinum_dataset$crispr_corr_rank=sapply(1:nrow(platinum_dataset), function(x)
+  err_handle(corrMat_rank[as.character(platinum_dataset$Drugbank_Gene)[x], as.character(platinum_dataset$drug_BroadID)[x]]))
+#Use correlation Maginitude
+platinum_dataset$crispr_corr_mag=sapply(1:nrow(platinum_dataset), function(x)
+  err_handle(corrMat[as.character(platinum_dataset$Drugbank_Gene)[x], as.character(platinum_dataset$drug_BroadID)[x]]))
+#Use correlation Significance
+platinum_dataset$crispr_corr_P=sapply(1:nrow(platinum_dataset), function(x)
+  err_handle(corrMat_P[as.character(platinum_dataset$Drugbank_Gene)[x], as.character(platinum_dataset$drug_BroadID)[x]]))
+platinum_dataset$crispr_bothPandMAG=sapply(1:nrow(platinum_dataset), function(x)
+  err_handle(corrMat_bothMAGandP[as.character(platinum_dataset$Drugbank_Gene)[x], as.character(platinum_dataset$drug_BroadID)[x]]))
+#Use correlation strength Z-score
+platinum_dataset$crispr_corr_z=sapply(1:nrow(platinum_dataset), function(x)
+  err_handle(corrMat_z[as.character(platinum_dataset$Drugbank_Gene)[x], as.character(platinum_dataset$drug_BroadID)[x]]))
+```
+<!-- Find the threshold -->
+```{r}
+#Rank
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr_rank)
+thr_best_spec=roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+hits_per_drug=apply(corrMat_rank, 2, function(x) sum(x<thr_best_spec))
+mean(hits_per_drug[hits_per_drug>0])
+
+#Magnitude
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr_mag)
+thr_best_spec=roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+hits_per_drug=apply(corrMat, 2, function(x) sum(x>thr_best_spec))
+roc_platinum$auc
+
+#Z-score
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_corr_z)
+thr_best_spec=roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+hits_per_drug=apply(corrMat_z, 2, function(x) sum(x>thr_best_spec))
+mean(hits_per_drug)
+mean(hits_per_drug[hits_per_drug>0])
+
+#both P and Z-score
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_bothPandMAG)
+thr_best_spec=roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+hits_per_drug=apply(corrMat_bothMAGandP, 2, function(x) sum(x>thr_best_spec))
+range(hits_per_drug)
+mean(hits_per_drug[hits_per_drug>0])
+sum(hits_per_drug>0)
+sum(hits_per_drug[hits_per_drug>0]==1)/length(hits_per_drug[hits_per_drug>0])
+sum(hits_per_drug[hits_per_drug>0]==1)/length(hits_per_drug[hits_per_drug>0])
+roc_platinum$auc
+
+# df2find_threshold=data.frame(spec=roc_platinum$specificities,
+#                              sens=roc_platinum$sensitivities,
+#                              thr=roc_platinum$thresholds)
+```
+
+```{r}
+df2plotFigure1H=data.frame(sensitivity=roc_platinum$sensitivities, specificities=roc_platinum$specificities)
+df2plotFigure1H <- rbind(data.frame(rank_Threshold=roc_platinum$thresholds,
+                                    Score=roc_platinum$specificities,
+                                    Model_score='specificity'),
+      data.frame(rank_Threshold=roc_platinum$thresholds, Score=roc_platinum$sensitivities,Model_score='sensitivity'))
+
+df2plotFigure1H=df2plotFigure1H[!is.infinite(df2plotFigure1H$rank_Threshold),]
+roc_platinum$thresholds[which.min(abs(roc_platinum$sensitivities-roc_platinum$specificities))]
+FigureS1C <- ggplot(df2plotFigure1H, aes(x=rank_Threshold, y=Score, color=Model_score))+
+  geom_point()+
+  geom_line()+
+  scale_x_reverse()+
+  theme_bw(base_size = 18)+
+  geom_vline(xintercept = roc_platinum$thresholds[which.max(roc_platinum$specificities)],
+             linetype='dashed', color='blue')+
+  # theme(legend.position='none')+
+  labs(x='Threshold')
+FigureS1C
+```
+```{r}
+platinum_dataset$crispr_bothPandMAG=sapply(1:nrow(platinum_dataset), function(x)
+  err_handle(corrMat_bothMAGandP[as.character(platinum_dataset$Drugbank_Gene)[x], as.character(platinum_dataset$drug_BroadID)[x]]))
+roc_platinum=roc(platinum_dataset$Label, platinum_dataset$crispr_bothPandMAG)
+thr_best_spec=roc_platinum$thresholds[which.max(roc_platinum$specificities)]
+hits_per_drug=apply(corrMat_bothMAGandP, 2, function(x) sum(x>thr_best_spec))
+
+hits_per_drug=data.frame(Targets=apply(corrMat_bothMAGandP, 2, function(x) sum(x>thr_best_spec)))
+hits_per_drug=data.frame(Targets=hits_per_drug[hits_per_drug>0,])
+
+Figure1I <- ggplot(hits_per_drug, aes(x = Targets)) + 
+  geom_histogram(aes(y = ..count..),
+                 colour = 1, fill = "white", bins = 25) +
+  theme_bw(base_size = 12)+
+  labs(x='Number of Target\nPassing Threshold', y='Number of Drugs')
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

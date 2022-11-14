@@ -25,10 +25,11 @@ cond1=onTarget$drugCategory$drug_category=='targeted cancer'
 cond2=!is.na(as.character(onTarget$drugCategory$target))
 cond3=sapply(strsplit(as.character(onTarget$drugCategory$target), ', '), length)==1
 cond4=onTarget$drugCategory$is.inhibitor
+CancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond4]
 ```
 <!-- Predicting targets for drugs with wrong targets -->
 ```{r}
-CancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond4]
+
 # CancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond3 & cond4]
 CancerInhibitors_mapping=match_stripall(CancerInhibitors,
                                         KnownTarget_predictions$drugBroadID)

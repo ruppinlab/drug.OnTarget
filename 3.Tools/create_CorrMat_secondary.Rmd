@@ -47,6 +47,7 @@ saveRDS(drugVScrispr_corr_features_list_secondary,
 ```
 <!-- All corrmat, corrmat_P, corrmat_FDR, corrmat_rank -->
 ```{r}
+drugVScrispr_corr_features_list_secondary=readRDS('/Users/sinhas8/Project_TrueTarget/Data/drugVScrispr_corr_features_list_secondary.RDS')
 sec_corrMat=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,2])))
 sec_corrMat_P=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,1])))
 sec_corrMat_rank=apply(-sec_corrMat, 2, rank)

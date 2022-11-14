@@ -1,0 +1,70 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+<!-- Create Supplementary Tables -->
+```{r}
+require('openxlsx')
+```
+```{r}
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+```
+<!-- TableS2 -->
+```{r}
+TableS2 <- KnownTarget_predictions[,c('drugName', 'MaxTargetName','mutation_interaction_strength','mutation_interaction_P')]
+colnames(TableS2)[2:4]=c('Known Target', 'Mutation Specificity Strength', 'Mutation Specificity P')
+```
+```{r}
+TableS3 <- KnownTarget_predictions[,c('drugName', 'MaxTargetName','Maxcorr','KnownTargetCorrP')]
+colnames(TableS3)[2:4]=c('Known Target', 'DKS Score', 'DKS Score P')
+```
+<!-- Table S4 -->
+```{r}
+# <!-- Predicting targets for drugs with wrongly annotated drugs or no targets -->
+cond1=onTarget$drugCategory$drug_category=='targeted cancer'
+cond2=!is.na(as.character(onTarget$drugCategory$target))
+cond3=onTarget$drugCategory$is.inhibitor
+CancerInhibitors=onTarget$drugCategory$broad_id_trimmed[cond1 & cond2 & cond3]
+CancerInhibitors_mapping=match_stripall(CancerInhibitors,
+                                        KnownTarget_predictions$drugBroadID)
+CancerInhibitors=KnownTarget_predictions[na.omit(CancerInhibitors_mapping),]
+CancerInhibitors=unique(CancerInhibitors)
+colnames(CancerInhibitors)[16]='KnownTarget_meanExp'
+# <!-- How many drugs are wrongly annotated after removing the low-expressed ones-->
+remove_not_expressed=CancerInhibitors$KnownTarget_meanExp>3
+launched=CancerInhibitors$phase=='Launched'
+sum(CancerInhibitors$PredictedRank[remove_not_expressed & launched]<523,
+    na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed & launched)])
+sum(CancerInhibitors$PredictedRank[remove_not_expressed]<523,
+    na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed)])
+# <!-- How many drugs are wrongly annotated -->
+CancerInhibitors$improvement_over_known=CancerInhibitors$BestTargetCorr - CancerInhibitors$Maxcorr
+sum(CancerInhibitors$PredictedRank[remove_not_expressed & launched]<523,
+    na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed & launched)])
+sum(CancerInhibitors$PredictedRank[remove_not_expressed]<523,
+    na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed)])
+wrongly_annotated=which(CancerInhibitors$BestTargetCorr>0.23 &
+      CancerInhibitors$BestTargetCorrFDR<0.1 &
+      CancerInhibitors$improvement_over_known>0.2 &
+    CancerInhibitors$Maxcorr<0.23 & 
+    CancerInhibitors$PredictedRank>523  )
+TableS4_raw=CancerInhibitors[wrongly_annotated,]
+TableS4=TableS4_raw[,c(1, 2, 3, 15, 8, 12, 13, 14)]
+colnames(TableS4)[-1]=c('Known Target', 'Known Target DKS', 'Known Target DKS P','Known Target DKS Rank',
+                        'Predicted Target', 'predicted Target DKS', 'Predicted Target DKS P')
+```
+```{r}
+all_supp_data <- list(TableS2=TableS2, TableS3=TableS3, TableS4=TableS4)
+write.xlsx(all_supp_data, file = '/Users/sinhas8/Project_TrueTarget/Data/Supp_tables.xlsx')
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

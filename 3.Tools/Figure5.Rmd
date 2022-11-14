@@ -113,40 +113,89 @@ mut_diffential_targeting_drugs_approved=mut_diffential_targeting_drugs[which(mut
 mut_diffential_targeting_drugs_approved[
   order(mut_diffential_targeting_drugs_approved$mutation_interaction_strength*
           (-log10(mut_diffential_targeting_drugs_approved$mutation_interaction_P))),]
-
+```
+<!-- PARP1 -->
+```{r}
 GOI='PARP1';DOI='olaparib'
-DOI_id=mut_diffential_targeting_drugs$drugBroadID[match_stripall( DOI, mut_diffential_targeting_drugs$drugName)]
-Figure5J_data=data.frame(crispr=avana_matched[GOI,], drug_response=drug_matched[DOI_id,], mutation=mutation_matched[GOI,])
+common_colnames=Reduce(intersect, list(colnames(avana_matched),
+                                       colnames(drug_matched),
+                                       colnames(onTarget$mutations_matrix)))
+
+DOI_id=onTarget$drugCategory$broad_id_trimmed[match_stripall(DOI, onTarget$drugCategory$name)]
+Figure5J_data=data.frame(crispr=avana_matched[GOI,common_colnames],
+                         drug_response=drug_matched[DOI_id,common_colnames],
+                         mutation=onTarget$mutations_matrix[GOI,common_colnames])
 Figure5J_data$mutation=factor(Figure5J_data$mutation)
 levels(Figure5J_data$mutation)=c('WT', 'mutant')
 Figure5J <- ggplot(Figure5J_data, aes(x=crispr, y=drug_response, color=factor(mutation)))+
   # geom_point()+
-  stat_smooth(method = 'lm', se=F)+
+  stat_smooth(method = 'lm', se=T)+
   theme_bw(base_size = 15)+
   labs(x='Viability after PARP CRISPR-KO', y='Response to Olaparib', color='PARP1\nmutation\nstatus')+
   stat_cor(label.y = c(1.2,1.3), size=3)
 ```
-
+<!-- TUBB -->
 ```{r}
 mut_diffential_targeting_drugs_approved=mut_diffential_targeting_drugs[which(mut_diffential_targeting_drugs$phase=='Launched'),]
 mut_diffential_targeting_drugs_approved[
   order(mut_diffential_targeting_drugs_approved$mutation_interaction_strength*
           (-log10(mut_diffential_targeting_drugs_approved$mutation_interaction_P))),]
-
 mut_diffential_targeting_drugs[grep('TUBA1B',mut_diffential_targeting_drugs$MaxTargetName),]
-GOI='TUBA1B';DOI='vinorelbine'
-DOI_id=mut_diffential_targeting_drugs$drugBroadID[match_stripall( DOI, mut_diffential_targeting_drugs$drugName)]
-Figure5J_data=data.frame(crispr=avana_matched[GOI,], drug_response=drug_matched[DOI_id,], mutation=mutation_matched[GOI,])
+```
+
+
+```{r}
+# GOI='TUBB';DOI='vinorelbine'
+# DOI_id=onTarget$drugCategory$broad_id_trimmed[match_stripall(DOI, onTarget$drugCategory$name)]
+# 
+# Figure5J_data=data.frame(crispr=avana_matched[GOI,common_colnames],
+#                          drug_response=drug_matched[DOI_id,common_colnames],
+#                          mutation=onTarget$mutations_matrix[GOI,common_colnames])
+# Figure5J_data$mutation=factor(Figure5J_data$mutation)
+# levels(Figure5J_data$mutation)=c('WT', 'mutant')
+# Figure5K <- ggplot(Figure5J_data, aes(x=crispr, y=drug_response, color=factor(mutation)))+
+#   # geom_point()+
+#   stat_smooth(method = 'lm', se = T)+
+#   theme_bw(base_size = 12)+
+#   labs(x='Viability after TUBB CRISPR-KO', y='Response to oxibendazole', color='TUBB\nmutation\nstatus')+
+#   stat_cor(label.y = c(0.8,0.9), size=3)
+# Figure5K
+```
+
+```{r}
+corr_PriTarget=KnownTarget_predictions$Maxcorr>0.23 & KnownTarget_predictions$mutation_interaction_P<0.2
+KnownTarget_predictions_CorrPrim=KnownTarget_predictions[corr_PriTarget,]
+
+na.omit(KnownTarget_predictions_CorrPrim[order(KnownTarget_predictions_CorrPrim$mutation_interaction_strength),
+                                 c('drugName','MaxTargetName',
+                                   'mutation_interaction_strength', 'mutation_interaction_P')])
+```
+
+```{r}
+GOI='MDM2'; DOI='CGM097'
+DOI_id=onTarget$drugCategory$broad_id_trimmed[match_stripall(DOI, onTarget$drugCategory$name)]
+
+Figure5J_data=data.frame(crispr=avana_matched[GOI,common_colnames],
+                         drug_response=drug_matched[DOI_id,common_colnames],
+                         mutation=onTarget$mutations_matrix[GOI,common_colnames])
 Figure5J_data$mutation=factor(Figure5J_data$mutation)
 levels(Figure5J_data$mutation)=c('WT', 'mutant')
 Figure5K <- ggplot(Figure5J_data, aes(x=crispr, y=drug_response, color=factor(mutation)))+
   # geom_point()+
-  stat_smooth(method = 'lm', se = F)+
+  stat_smooth(method = 'lm', se = T)+
   theme_bw(base_size = 12)+
-  labs(x='Viability after TUBB CRISPR-KO', y='Response to oxibendazole', color='TUBB\nmutation\nstatus')+
+  labs(x='Viability after MDM2 CRISPR-KO',
+       y='Response to CGM097',
+       color='MDM2\nmutation\nstatus')+
   stat_cor(label.y = c(0.8,0.9), size=3)
 Figure5K
 ```
+
+```{r}
+Figure5JK <- grid.arrange(Figure5J, Figure5K)
+ggsave(Figure5JK, filename = '/Users/sinhas8/Project_TrueTarget/Results/Figure5JK.pdf',width=4,height = 8)
+```
+
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
