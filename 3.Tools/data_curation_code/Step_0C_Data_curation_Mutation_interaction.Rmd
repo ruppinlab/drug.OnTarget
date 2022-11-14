@@ -1,0 +1,57 @@
+---
+title: ""Data curation of Known target prediction with interaction expression and secondary target""
+output: html_document
+date: "2022-09-17"
+---
+
+
+<!-- Step 3: Next we compute the interaction between the Mutation data and (the correlation between the crispr KO and the Drug response), and the add the variables in this step: -->
+
+<!-- libraries and data required -->
+```{r}
+onTarget=readRDS('../../Data/onTarget_v2.0.RDS')
+knitr::knit('../Step0_Write_Functions.Rmd')
+KnownTarget_predictions= readRDS('../../Data/KnownTarget_predictions.RDS')
+```
+
+
+<!-- Matched cellinies to between the expression, crispr, drug and mutation matrix datasets -->
+```{r}
+matched_cellLines = Reduce(intersect, 
+                         list(colnames(onTarget$expression),
+                              colnames(onTarget$avana_22Q2),
+                              colnames(onTarget$secondary_prism),
+                              colnames(onTarget$mutations_matrix)
+                              ))
+expression_matched = onTarget$expression[,matched_cellLines]
+avana_matched = onTarget$avana_22Q2[,matched_cellLines]
+drug_matched = onTarget$secondary_prism[,matched_cellLines]
+mutation_matched=onTarget$mutations_matrix[,matched_cellLines]
+dim(mutation_matched) 
+```
+
+<!-- Compute interaction between the mutation and the correlation of CRISPR KO and drug response-->
+<!-- Preprocessing -->
+```{r}
+# Compute interaction in all cases
+x=1
+interaction_Features=lapply(1:nrow(KnownTarget_predictions), function(x)
+  {
+  infunc_drug_matched=err_handle(drug_matched[KnownTarget_predictions$drugBroadID[x],])
+  infunc_avana_matched=err_handle(avana_matched[KnownTarget_predictions$MaxTargetName[x],])
+  infunc_mutation_matched=err_handle(mutation_matched[KnownTarget_predictions$MaxTargetName[x],])
+  err_handle(summary(lm(infunc_drug_matched ~ 
+                infunc_avana_matched*infunc_mutation_matched))$coefficients[4,c(1,4)])
+  }
+  )
+names(interaction_Features)=KnownTarget_predictions$drugName
+# This is an interaction where the where cell lines with low expression (<2, Trues in above vector) will have "lower" correlation strength than cell lines with high expression (>2, Falses in above vector)
+KnownTarget_predictions$mutation_interaction_strength=sapply(interaction_Features, function(x) x[1])
+KnownTarget_predictions$mutation_interaction_P=sapply(interaction_Features, function(x) x[2])
+
+## whether there is mutation interaction or not
+KnownTarget_predictions$predicted_resistance_mutation = KnownTarget_predictions$mutation_interaction_P<0.1
+
+KnownTarget_predictions$drugCategory = onTarget$drugCategory$drug_category[match(KnownTarget_predictions$drugName, onTarget$drugCategory$name)]
+saveRDS(KnownTarget_predictions, '../../Data/KnownTarget_predictions.RDS')
+```

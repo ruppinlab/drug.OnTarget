@@ -1,15 +1,12 @@
 ---
-title: "R Notebook"
+title: "example of secondary target"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 <!-- Identify secondary targets -->
 ```{r}
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0B_Data_and_Libraries.Rmd')
-knitr::knit('/Users/sinhas8/Project_TrueTarget/Tools/Step0_Write_Functions.Rmd')
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
 ```
 <!-- Step 1: Characterize drugs where secondary targets could be identified -->
 ```{r}
@@ -24,7 +21,7 @@ drugCandidates_for_secTargets$PredictedRank
 ```
 
 ```{r}
-drugCandidates_for_secTargets_ordered=unique(drugCandidates_for_secTargets[order(drugCandidates_for_secTargets$interaction_strength),])
+drugCandidates_for_secTargets_ordered=(drugCandidates_for_secTargets[order(drugCandidates_for_secTargets$interaction_strength),])
 ```
 
 ```{r}
@@ -33,21 +30,23 @@ drugCandidates_for_secTargets_ordered
 
 <!-- Visualize for an example interaction-->
 ```{r}
-candidate_drug_target_pair=drugCandidates_for_secTargets_ordered[17,]
-cand_drugName=candidate_drug_target_pair$drugName
-cand_Targetname=candidate_drug_target_pair$MaxTargetName
-cand_drugBroadID=candidate_drug_target_pair$drugBroadID
+### ask sanju to provide the updated file for the secondary target
+candidate_drug_target_pair = drugCandidates_for_secTargets_ordered[17,]
+cand_drugName = candidate_drug_target_pair$drugName
+cand_Targetname = candidate_drug_target_pair$MaxTargetName
+cand_drugBroadID = candidate_drug_target_pair$drugBroadID
 ```
 <!-- Variables from Step 2 -->
 ```{r}
-infunc_drug_matched=err_handle(drug_matched[cand_drugBroadID,])
-infunc_avana_matched=err_handle(avana_matched[cand_Targetname,])
-infunc_expression_matched=err_handle(expression_matched[cand_Targetname,]<2)
-lm_model=lm(infunc_drug_matched ~
+infunc_drug_matched = err_handle(drug_matched[cand_drugBroadID,])
+infunc_avana_matched = err_handle(avana_matched[cand_Targetname,])
+infunc_expression_matched = err_handle(expression_matched[cand_Targetname,]<2)
+lm_model = lm(infunc_drug_matched ~
                 infunc_avana_matched*infunc_expression_matched)
 err_handle(summary(lm_model)$coefficients[4,c(1,4)])
 interact_plot(lm_model, pred = infunc_avana_matched, modx = infunc_expression_matched)
 ```
+
 ```{r}
 CellLinesWD_Target_low_expression=names(which(infunc_expression_matched))
 Identify_secondary_Target_list <- function(infunc_cellLines=CellLinesWD_Target_low_expression,
@@ -63,12 +62,12 @@ Identify_secondary_Target_list <- function(infunc_cellLines=CellLinesWD_Target_l
 ```
 
 ```{r}
-secTargets_example=Identify_secondary_Target_list(infunc_cellLines=CellLinesWD_Target_low_expression,
+secTargets_example = Identify_secondary_Target_list(infunc_cellLines=CellLinesWD_Target_low_expression,
                                infunc_drugBroadID=cand_drugBroadID)
-secTargets_example_df=as.data.frame(secTargets_example)
-secTargets_example_df_ordered=secTargets_example_df[order(secTargets_example_df$estimate.cor, decreasing = T),]
-secTargets_example_df_ordered$FDR=fdrcorr(secTargets_example_df_ordered$p.value)
-secTargets_example_df_ordered$rank=1:nrow(secTargets_example_df_ordered)
+secTargets_example_df = as.data.frame(secTargets_example)
+secTargets_example_df_ordered = secTargets_example_df[order(secTargets_example_df$estimate.cor, decreasing = T),]
+secTargets_example_df_ordered$FDR = fdrcorr(secTargets_example_df_ordered$p.value)
+secTargets_example_df_ordered$rank = 1:nrow(secTargets_example_df_ordered)
 secTargets_example_df_ordered
 secTargets_example_df_ordered['CDK4',]
 ```
@@ -88,22 +87,11 @@ onTarget$drugCategory[grep(cand_drugBroadID,onTarget$drugCategory$broad_id_trimm
 ```
 
 ```{r}
-secTargets_example=Identify_secondary_Target_list(infunc_cellLines=colnames(avana_matched),
+secTargets_example = Identify_secondary_Target_list(infunc_cellLines=colnames(avana_matched),
                                infunc_drugBroadID=cand_drugBroadID)
-secTargets_example_df=as.data.frame(secTargets_example)
-secTargets_example_df_ordered=secTargets_example_df[order(secTargets_example_df$estimate.cor, decreasing = T),]
-secTargets_example_df_ordered$FDR=fdrcorr(secTargets_example_df_ordered$p.value)
-secTargets_example_df_ordered$rank=1:nrow(secTargets_example_df_ordered)
+secTargets_example_df = as.data.frame(secTargets_example)
+secTargets_example_df_ordered = secTargets_example_df[order(secTargets_example_df$estimate.cor, decreasing = T),]
+secTargets_example_df_ordered$FDR = fdrcorr(secTargets_example_df_ordered$p.value)
+secTargets_example_df_ordered$rank = 1:nrow(secTargets_example_df_ordered)
 secTargets_example_df_ordered
 ```
-
-
-
-
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-

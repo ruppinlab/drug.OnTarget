@@ -48,8 +48,8 @@ CancerInhibitors_noTargets[grep('Launched',CancerInhibitors_noTargets$phase),]
 
 <!-- How many drugs are wrongly annotated after removing the low-expressed ones-->
 ```{r}
-remove_not_expressed=CancerInhibitors$KnownTarget_meanCorr>3
-launched=CancerInhibitors$phase=='Launched'
+remove_not_expressed=CancerInhibitors_noTargets_withsigTargets$KnownTarget_meanCorr>3
+launched=CancerInhibitors_noTargets_withsigTargets$phase=='Launched'
 sum(CancerInhibitors$PredictedRank[remove_not_expressed & launched]<523,
     na.rm = T)/length(CancerInhibitors$PredictedRank[which(remove_not_expressed & launched)])
 sum(CancerInhibitors$PredictedRank[remove_not_expressed]<523,

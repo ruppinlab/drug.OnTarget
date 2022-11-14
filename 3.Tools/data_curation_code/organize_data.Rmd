@@ -1,0 +1,26 @@
+---
+title: "computing onTarget v2 file"
+output: html_notebook
+---
+
+# Adding the updated 2022 version from depmap of crispr data to the OnTarget previous version dataset file
+<!-- Load the needed data -->
+```{r}
+require(magrittr)
+require('tidyverse')
+onTarget=readRDS('../Data/onTarget_v12.RDS')
+CRISPR22Q2=read.csv('../Data/CRISPR_gene_effect.csv')
+```
+Load needed functions
+```{r}
+source('../3.Tools/myCustom_functions.R')
+```
+
+```{r, tidy = TRUE}
+CRISPR22Q2 <- CRISPR22Q2 %>% set_rownames(.$DepMap_ID) %>% select(-1)
+colnames(CRISPR22Q2) <- strsplit_customv0(colnames(CRISPR22Q2), infunc_split_by = '\\.')
+onTarget$avana_22Q2 <- CRISPR22Q2
+saveRDS(onTarget, '/Users/sinhas8/Project_TrueTarget/Data/onTarget_v2.0.RDS')
+```
+
+

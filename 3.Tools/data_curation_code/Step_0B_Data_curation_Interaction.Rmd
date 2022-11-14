@@ -1,0 +1,101 @@
+---
+title: ""Data curation of Known target prediction with interaction expression and secondary target""
+output: html_document
+date: "2022-09-17"
+---
+
+<!-- After computing the initial correlation, we next compute the interaction between the expression data and (the correlation between the crispr KO and the Drug response), and the add the variables: -->
+
+<!-- libraries and data required -->
+```{r}
+onTarget=readRDS('../../Data/onTarget_v2.0.RDS')
+knitr::knit('../Step0_Write_Functions.Rmd')
+KnownTarget_predictions= readRDS('../../Data/KnownTarget_predictions.RDS')
+clinical_data= read.csv('../../Data/biomarkers.csv')
+```
+
+
+<!-- Matched cellinies to between the expression, crispr, drug and mutation matrix datasets -->
+```{r}
+matched_cellLines = Reduce(intersect, 
+                         list(colnames(onTarget$expression),
+                              colnames(onTarget$avana_22Q2),
+                              colnames(onTarget$secondary_prism),
+                              colnames(onTarget$mutations_matrix)
+                              ))
+expression_matched = onTarget$expression[,matched_cellLines]
+avana_matched = onTarget$avana_22Q2[,matched_cellLines]
+drug_matched = onTarget$secondary_prism[,matched_cellLines]
+mutation_matched=onTarget$mutations_matrix[,matched_cellLines]
+dim(expression_matched) 
+```
+
+```{r}
+cellLines_with_LowTarget = sapply(KnownTarget_predictions$MaxTargetName, function(x) 
+                                  err_handle(sum(expression_matched[x,]<2)))
+
+KnownTarget_predictions = KnownTarget_predictions %>% mutate(cellLines_withLOWexp = cellLines_with_LowTarget) %>%
+  mutate(Maxcorr_Q = xtile(KnownTarget_predictions$Maxcorr, 2)) %>% relocate(drugBroadID, .after = Maxcorr_Q)
+```
+
+<!-- Compute interaction between the expression and the correlation of CRISPR KO and drug response-->
+<!-- Preprocessing -->
+```{r}
+# Compute interaction in all cases
+x= 9
+interaction_Features=lapply(1:nrow(KnownTarget_predictions), function(x)
+  {
+  infunc_drug_matched=err_handle(drug_matched[KnownTarget_predictions$drugBroadID[x],])
+  infunc_avana_matched=err_handle(avana_matched[KnownTarget_predictions$MaxTargetName[x],])
+  infunc_expression_matched=err_handle(expression_matched[KnownTarget_predictions$MaxTargetName[x],]<2)
+  err_handle(summary(lm(infunc_drug_matched ~ 
+                infunc_avana_matched*infunc_expression_matched))$coefficients[4,c(1,4)])
+  }
+  )
+names(interaction_Features)=KnownTarget_predictions$drugName
+# This is an interaction where the where cell lines with low expression (<2, Trues in above vector) will have "lower" correlation strength than cell lines with high expression (>2, Falses in above vector)
+KnownTarget_predictions = KnownTarget_predictions %>%
+  mutate(Whether_interaction = sapply(interaction_Features, function(x) x[1]<0 & x[2]<0.2 )) %>% 
+  mutate(interaction_strength = sapply(interaction_Features, function(x) x[1])) %>% 
+  mutate(interaction_P = sapply(interaction_Features, function(x) x[2]))
+```
+
+<!-- ## code for the predicted rank based on the  interaction, correlation streghth-->
+```{r}
+
+drugVScrispr_corr_Strength_ranked=apply(drugVScrispr_corr_Strength, 2, function(x) nrow(drugVScrispr_corr_Strength)-rank(x)+1 )
+myhead(drugVScrispr_corr_Strength_ranked)
+
+# KTP stands for "KnownTarget_predictions" matrix
+map_KTP_rankedMat=match(KnownTarget_predictions$drugBroadID, colnames(drugVScrispr_corr_Strength_ranked))
+
+drug_targets_ordered=KnownTarget_predictions$MaxTargetName[map_KTP_rankedMat]
+KnownTarget_predictions$PredictedRank=sapply(1:length(map_KTP_rankedMat), function(x) 
+  err_handle(drugVScrispr_corr_Strength_ranked[KnownTarget_predictions$MaxTargetName[x],
+                                               map_KTP_rankedMat[x] ])  )
+```
+
+```{r}
+#Mean Expression
+matched_cellLines_withExp=matched_cellLines[matched_cellLines %in% colnames(onTarget$expression_20Q4)]
+KnownTarget_predictions$KnownTarget_meanCorr=sapply(KnownTarget_predictions$MaxTargetName, function(x)
+  err_handle(mean(onTarget$expression_20Q4[x,matched_cellLines_withExp])) )
+
+#Integrate Clinical Phase
+KnownTarget_predictions$phase = clinical_data$phase[match_stripall(KnownTarget_predictions$drugName, clinical_data$name)]
+
+### relocating all the columns
+KnownTarget_predictions = KnownTarget_predictions %>% 
+  relocate(c(cellLines_withLOWexp, Maxcorr_Q, drugBroadID, Whether_interaction, PredictedRank, interaction_strength, interaction_P), .before = BestTargetName)
+
+saveRDS(KnownTarget_predictions, '../../Data/KnownTarget_predictions.RDS')
+drugCandidates_for_secTargets
+```
+
+```{r}
+drugs_wdBoth_interaction_andTrueKnownTarget=KnownTarget_predictions$PredictedRank < 100 & KnownTarget_predictions$Whether_interaction
+drugCandidates_for_secTargets=KnownTarget_predictions[which(drugs_wdBoth_interaction_andTrueKnownTarget),]
+sort(table(KnownTarget_predictions$MaxTargetName[which(drugs_wdBoth_interaction_andTrueKnownTarget)]))
+saveRDS(drugCandidates_for_secTargets, '../../Data/drugCandidates_for_secTargets_v1.RDS')
+```
+

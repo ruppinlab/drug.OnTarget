@@ -1,0 +1,350 @@
+---
+title: "Pathway enrichment"
+output: html_notebook
+---
+
+<!-- Identify Targets at pathway level -->
+<!-- For pathway enrichment code please refer to code in data curation file -->
+<!-- Load needed libraries, functions and data -->
+```{r}
+knitr::knit('../3.Tools/Step0B_Data_and_Libraries.Rmd')
+knitr::knit('../3.Tools/Step0_Write_Functions.Rmd')
+
+library(ggforce)
+library(tidyverse)
+theme_set(theme_bw(18))
+```
+
+```{r}
+gsea_enrichment_all_drugs= readRDS('../Data/gsea_enrichment_all_drugs.RDS')
+```
+
+```{r}
+## mapping the ID's
+drug_mapping= match(KnownTarget_predictions$drugBroadID, names(gsea_enrichment_all_drugs))
+
+gsea_enrichment_all_drugs_ordered=gsea_enrichment_all_drugs[drug_mapping]
+
+KnownTarget_predictions = KnownTarget_predictions %>% mutate(MOA = onTarget$drugCategory$moa[match(KnownTarget_predictions$drugBroadID, onTarget$drugCategory$broad_id_trimmed)])
+
+## apply for known pathway enrichment
+enrich_known=lapply(1:nrow(KnownTarget_predictions), function(x)
+  unlist(gsea_enrichment_all_drugs_ordered[[x]][match(as.character(KnownTarget_predictions$MOA[x]),
+                                               gsea_enrichment_all_drugs_ordered[[x]]$pathway),c('pathway','NES','pval','padj')])
+  )
+enrich_known[sapply(enrich_known, length)==0]=c(NA, NA, NA)
+enrich_known_df=do.call(rbind, enrich_known)
+```
+
+<!--Predicted pathway-->
+```{r}
+enrich_best=lapply(1:nrow(KnownTarget_predictions), function(x)
+  unlist(gsea_enrichment_all_drugs_ordered[[x]][which.max(gsea_enrichment_all_drugs_ordered[[x]]$NES),c('pathway','NES', 'pval', 'padj')])
+  )
+
+enrich_best[sapply(enrich_best, length)==0]=c(NA, NA, NA)
+enrich_best_df=do.call(rbind, enrich_best)
+colnames(enrich_best_df)= c('Best_Predicted_pathway', 'Best_Predicted_NES', 'Best_Predicted_pval', 'Best_Predicted_padj')
+KnownTarget_predictions_v3[grep('PKA', KnownTarget_predictions_v3$pathway),]
+```
+
+
+<!--Finding Rank-->
+```{r}
+gsea_enrichment_all_drugs_sorted=lapply(gsea_enrichment_all_drugs, function(x) x[order(x$NES, decreasing = T),] )
+gsea_enrichment_all_drugs_sorted= gsea_enrichment_all_drugs_sorted[drug_mapping]
+names(gsea_enrichment_all_drugs_sorted[1])
+
+pathway_known_rank=sapply(1:nrow(KnownTarget_predictions), function(x)
+  rank= match(KnownTarget_predictions$MOA[x], gsea_enrichment_all_drugs_sorted[[x]]$pathway)
+  )
+
+## c_bind the result : creating the KnownTarget_predictions_v3 with pathway information
+KnownTarget_predictions_v3=  cbind(KnownTarget_predictions, enrich_known_df, enrich_best_df, pathway_known_rank) %>% relocate(pathway_known_rank,.after= pathway) %>% mutate_at(c('pathway_known_rank','NES', 'pval', 'padj', 'Best_Predicted_NES', 'Best_Predicted_pval', 'Best_Predicted_padj'), as.numeric)
+```
+
+
+```{r}
+known_pathway_prediction= KnownTarget_predictions_v3[, c(1,2,6,16,17,25:33)]
+rownames(known_pathway_prediction)= NULL
+```
+
+<!--Plot1: including all the genes without any condition-->
+<!--removing low expression targets-->
+```{r fig.width=5,fig.height=5}
+known_pathway_prediction$rank_category = 'Known Mechanism of Action is wrong'
+known_pathway_prediction$rank_category[known_pathway_prediction$pathway_known_rank < 27] = 'Known Mechanism of Action is correct'
+##
+remove_not_expressed = known_pathway_prediction$KnownTarget_meanCorr>3
+
+dfplot1_pathway_all= unique(known_pathway_prediction[!(is.na(known_pathway_prediction$pathway)) & 
+                                                remove_not_expressed,])
+
+## To zoom the point and label it clearly
+zoomed_part_df_with_text= dfplot1_pathway_all %>% filter(pval < 0.05 & NES > 1.8) %>% mutate( zoom = TRUE)
+    
+Figure_supp_6i= ggplot(na.omit(dfplot1_pathway_all), aes(y= pathway_known_rank, x= NES, 
+                                                                   color= fct_rev(rank_category)))+
+  geom_jitter()+
+  # scale_color_manual(c("green", "red"))+
+  scale_y_reverse()+
+  theme_bw(base_size = 18)+
+  facet_zoom(x= pval < 0.05 & NES > 1, zoom.data = zoom)+
+  geom_text_repel(data = zoomed_part_df_with_text, aes(label = str_wrap(paste(pathway,":",drugName), 20)),
+                  nudge_x = c(2,-1.5),
+                  nudge_y = c(-10,-750), max.overlaps = 10, 
+                  size= 3.5)+
+  labs(x= 'Enrichment Score (NES)', 
+       y= 'Rank',
+       color= 'True-Target Prediction')
+
+ggsave('../result/Pathway_enrichment_plot1_all.jpg', Figure_supp_6i,
+       width = 8, height = 6, units = 'in', dpi = 300)
+```
+
+
+<!--Finding the pathway enrichment test with all drug: Four condition
+Cond 1: targeted therapy
+Cond 2: single target
+Cond 3: inihibitor drugs only
+Cond:4: single target
+Cond 5: FDA approved-->
+```{r}
+cond_1=onTarget$drugCategory$drug_category=='targeted cancer'
+cond_2=!is.na(as.character(onTarget$drugCategory$target))
+cond_3=sapply(strsplit(as.character(onTarget$drugCategory$target), ', '), length)==1
+cond_4=onTarget$drugCategory$is.inhibitor
+
+### condition satisfying all genes targeted inhibitor 
+cond_124_match_id= match(onTarget$drugCategory$broad_id_trimmed[cond_1 & cond_2 & cond_4],
+                         known_pathway_prediction$drugBroadID)
+
+### condition satisfying single targeted inhibitor 
+cond_1234_match_id= match(onTarget$drugCategory$broad_id_trimmed[cond_1 & cond_2 & cond_3 & cond_4],
+                         known_pathway_prediction$drugBroadID )
+```
+
+```{r fig.width=5,fig.height=5}
+dfplot_pathway_with_targeted_inhibitor= known_pathway_prediction[na.omit(cond_124_match_id),]
+dfplot_pathway_with_targeted_inhibitor= unique(dfplot_pathway_with_targeted_inhibitor)
+
+##### removing the low expressed 
+remove_not_expressed = dfplot_pathway_with_targeted_inhibitor$KnownTarget_meanCorr>3
+dfplot_pathway_with_targeted_inhibitor = dfplot_pathway_with_targeted_inhibitor[which(remove_not_expressed),]
+
+zoomed_part_df_with_text= dfplot_pathway_with_targeted_inhibitor %>% filter(pval < 0.05 & NES > 1.8) %>% mutate( zoom = TRUE)
+ 
+Figure_supp_6A= ggplot(dfplot_pathway_with_targeted_inhibitor, aes(y= pathway_known_rank, x= NES, 
+                                                                   color= fct_rev(rank_category)))+
+  geom_jitter()+
+  # scale_color_manual(c("green", "red"))+
+  scale_y_reverse()+
+  theme_bw(base_size = 18)+
+  facet_zoom(x= pval < 0.05 & NES > 1, zoom.data = zoom)+
+  geom_text_repel(data = zoomed_part_df_with_text, aes(label = str_wrap(paste(pathway,":",drugName), 20)),
+                  nudge_x = c(2,-1.5),
+                  nudge_y = c(-50,-750), max.overlaps = 10, 
+                  size= 3.5)+
+  labs(x= 'Enrichment Score (NES)', 
+       y= 'Rank',
+       color= 'True-Target Prediction')
+
+ggsave('../result/Pathway_enrichment_plot2_cond_targeted_inihibitor_.jpg', Figure_supp_6A,
+       width = 8, height = 6, units = 'in', dpi = 300)
+```
+
+```{r fig.width=5,fig.height=5}
+dfplot_pathway_with_single_targeted_inhibitor= known_pathway_prediction[na.omit(cond_1234_match_id),]
+dfplot_pathway_with_single_targeted_inhibitor= unique(dfplot_pathway_with_single_targeted_inhibitor)
+
+##### removing the low expressed 
+remove_not_expressed = dfplot_pathway_with_single_targeted_inhibitor$KnownTarget_meanCorr>3
+dfplot_pathway_with_single_targeted_inhibitor = dfplot_pathway_with_single_targeted_inhibitor[which(remove_not_expressed),]
+
+zoomed_part_df_with_text= dfplot_pathway_with_single_targeted_inhibitor %>% filter(pval < 0.05 & NES > 1.7) %>% mutate( zoom = TRUE)
+ 
+Figure_supp_6B= ggplot(dfplot_pathway_with_single_targeted_inhibitor,  aes(y= pathway_known_rank, x= NES, 
+                                                                   color= fct_rev(rank_category)))+
+  geom_jitter()+
+  # scale_color_manual(c("green", "red"))+
+  scale_y_reverse()+
+  theme_bw(base_size = 18)+
+  facet_zoom(x= pval < 0.05 & NES > 1, zoom.data = zoom)+
+  geom_text_repel(data = zoomed_part_df_with_text, aes(label = str_wrap(paste(pathway,":",drugName), 20)),
+                  nudge_x = c(2,-1.5),
+                  nudge_y = c(-50,-750), max.overlaps = 10, 
+                  size= 3.5)+
+  labs(x= 'Enrichment Score (NES)', 
+       y= 'Rank',
+       color= 'True-Target Prediction')
+
+ggsave('../result/Pathway_enrichment_plot2_cond_single_targeted_inihibitor_.jpg', Figure_supp_6B,
+       width = 8, height = 6, units = 'in', dpi = 300)
+```
+
+
+```{r fig.width=5,fig.height=5}
+FDA_approved= dfplot_pathway_with_targeted_inhibitor$phase =='Launched'
+
+df2plot_pathway_launched = dfplot_pathway_with_targeted_inhibitor[which(FDA_approved),]
+
+zoomed_part_df_with_text = df2plot_pathway_launched %>% filter(pval < 0.05 & NES > 1) %>% mutate( zoom = TRUE) 
+Figure_supp_6C_launched <- ggplot(df2plot_pathway_launched, aes(y= pathway_known_rank, x= NES, 
+                                                                   color= fct_rev(rank_category)))+
+  geom_jitter()+
+  # scale_color_manual(c("green", "red"))+
+  scale_y_reverse()+
+  theme_bw(base_size = 18)+
+  facet_zoom(x= pval < 0.15 & NES > 1, zoom.data = zoom)+
+  geom_text_repel(data = zoomed_part_df_with_text, aes(label = str_wrap(paste(pathway,":",drugName), 20)),
+                  nudge_x = c(2,-1.5),
+                  nudge_y = c(-50,-750), max.overlaps = 10, 
+                  size= 3.5)+
+  labs(x= 'Enrichment Score (NES)', 
+       y= 'Rank',
+       color= 'True-Target Prediction')
+
+ggsave('../result/FDA_approved_drug_with_pathway.jpg', Figure_supp_6C_launched,
+       width = 8, height = 6, units = 'in', dpi = 300)
+```
+
+```{r}
+
+Figure2_supp_abcd= ggarrange(Figure_supp_6i,Figure_supp_6A, Figure_supp_6B, Figure_supp_6C_launched,
+                             labels = 'AUTO', nrow= 2, ncol  = 2, common.legend = T, legend = 'top')
+ggsave(Figure2_supp_abcd, filename = '../result/Figure2_supp_v1.pdf',
+       width = 15, height = 12)
+```
+
+```{r}
+## best specificity threshold
+number_of_pathway= length(unique(gsea_enrichment_all_drugs_sorted[[1]]$pathway))
+threshold = number_of_pathway*523/nrow(onTarget$avana_22Q2)
+
+###### with removing low expression
+propotion_of_all_drug_removing_low_exp=sum(dfplot1_pathway_all$pathway_known_rank < threshold, na.rm = T)/ 
+  length(dfplot1_pathway_all$pathway_known_rank)
+
+### proprotion selecting drugs which are targeted therapy and are inhibitor and have atleast one target 
+### removing low expression
+propotion_of_Targeted_Inhibitor_removing_low_exp = sum(dfplot_pathway_with_targeted_inhibitor$pathway_known_rank < threshold, na.rm = T)/ 
+  length(dfplot_pathway_with_targeted_inhibitor$pathway_known_rank)
+
+### proprotion selecting drugs which are targeted therapy and are inhibitor and have single target are used where known pathway are available from gsea
+propotion_of_Single_Targeted_Inhibitor_removing_low_exp = sum(dfplot_pathway_with_single_targeted_inhibitor$pathway_known_rank < threshold, na.rm = T)/ 
+  length(dfplot_pathway_with_single_targeted_inhibitor$pathway_known_rank)
+
+### proprotion selecting drugs which are targeted therapy and are inhibitor and have single target FDA approved
+propotion_of_Approved_Targeted_Inhibitor_removing_low_exp = sum(df2plot_pathway_launched$pathway_known_rank < threshold, na.rm = T)/ 
+  length(df2plot_pathway_launched$pathway_known_rank)
+
+df= data.frame(drug_category= c('All Drug','Targeted Inhibitor', 'Single Targeted Inhibitor', "Approved Targeted Inhibitor"),
+              proportion_after_removing_low_exp= c(propotion_of_all_drug_removing_low_exp,
+                                        propotion_of_Targeted_Inhibitor_removing_low_exp,
+                                        propotion_of_Single_Targeted_Inhibitor_removing_low_exp,
+                                        propotion_of_Approved_Targeted_Inhibitor_removing_low_exp))
+
+Figure_supp_6D=ggplot(df[2:4,], aes(x= proportion_after_removing_low_exp, y= drug_category))+
+  geom_point(stat = "identity", color = "dark blue", size = 6)+
+   geom_segment(aes(x = 0,
+                   y = drug_category,
+                   yend = drug_category,
+                   xend =proportion_after_removing_low_exp),
+               color = 'Blue')+
+  theme_bw(base_size = 18)+
+  labs(x= 'Drug Category', y= 'propotion of Drug with\ncorrect known pathway')
+```
+
+```{r}
+Figure2_supp_bcde= ggarrange(Figure_supp_6A, Figure_supp_6B, Figure_supp_6C_launched, Figure_supp_6D,
+                             labels = 'AUTO', nrow= 2 , ncol  =2, common.legend = T, legend = 'top')
+ggsave(Figure2_supp_bcde, filename = '../result/Figure2_supp_v3.pdf',
+       width = 15, height = 12)
+```
+
+<!-- Supplementary figure 3A-C -->
+<!--preprocessing of pathway to find out best predicted pathway and improvement score-->
+```{r fig.width=3,fig.height=3}
+# pathway_all= known_pathway_prediction[!(is.na(known_pathway_prediction$pathway)),]
+pathway_all= known_pathway_prediction[na.omit(cond_124_match_id),]
+pathway_all= unique(pathway_all)
+
+##### removing the low expressed 
+remove_not_expressed = pathway_all$KnownTarget_meanCorr>3
+pathway_all = pathway_all[which(remove_not_expressed),] %>% mutate(improvement_over_known = Best_Predicted_NES - NES)
+
+pathway_all$category='Wrong Known Pathway;\n No Significant pathway our pipeline'
+pathway_all$category[pathway_all$pathway_known_rank < threshold]='Correct Known Pathway'
+pathway_all$category[pathway_all$pathway_known_rank > threshold &
+                            pathway_all$Best_Predicted_padj <0.2 &
+                       pathway_all$improvement_over_known > 0.1]='Wrong Known Pathway;\n Significant Pathway from our pipeline'
+```
+
+<!--Plot1 including all the genes which are targeted inihibitor-->
+```{r}
+supp_figure_3A = ggplot(pathway_all, aes(y=Best_Predicted_NES, x= NES,
+                       color=category))+
+  geom_point()+
+  theme_bw(base_size = 18)+
+  theme(legend.position = 'top')+
+  guides(color=guide_legend(nrow=3,byrow=TRUE))+
+  labs(x='Known NES Score', y='Best Predicted NES Score')+
+  geom_mark_ellipse(expand = 0)
+```
+
+<!-- How many wrong-known target drugs have a significant prediction from our pipeline -->
+```{r  fig.width=3,fig.height=3}
+supp_figure_3B = ggplot(pathway_all, aes(y=Best_Predicted_NES, x= pathway_known_rank ,
+                       color=category))+
+  geom_point()+
+  geom_vline(xintercept = round(threshold), linetype='dashed', color='blue')+
+  theme_bw(base_size = 18)+
+  theme(legend.position = 'top')+
+  guides(color=guide_legend(nrow=3,byrow=TRUE))+
+  labs(x='Rank of Known Pathway', y='Best Predicted NES Score')
+```
+
+```{r fig.width=3,fig.height=3}
+supp_figure_3C = ggplot(pathway_all, aes(y=improvement_over_known, x=pathway_known_rank,
+                             color= category))+
+  geom_point()+
+  theme_bw(base_size = 18)+
+  geom_text_repel(data = pathway_all[pathway_all$improvement_over_known >3.3 &
+                                       pathway_all$category == 'Wrong Known Pathway;\n Significant Pathway from our pipeline',],
+                  aes(label = str_wrap(paste(drugName,":",pathway,":",Best_Predicted_pathway),30)),
+                  max.overlaps = 15,
+                  nudge_y = c(-1, -2, -3)
+                  )+
+  theme(legend.position = 'None')+
+  geom_vline(xintercept = threshold, linetype='dashed', color='blue')+
+  labs(x='Rank of Known Pathway', y='Improvement score of\nPredicted NES Score over Known')
+```
+
+```{r}
+Supp_Figure3_ABC=ggarrange(supp_figure_3A, supp_figure_3B,supp_figure_3C, 
+                     labels = c('B','C','D'), nrow = 2,ncol = 2,
+                     common.legend = TRUE,
+                     legend="top")
+ggsave(Supp_Figure3_ABC, filename = '../result/Figure_supp_ABC_v1.pdf',
+       width = 12, height = 12)
+```
+
+```{r}
+cat_ofInterest = pathway_all$category == unique(pathway_all$category)[3]
+pathway_with_low_exp_sig_cat = pathway_all[which(cat_ofInterest),]
+
+supp_figure_3D_data=data.frame(table(pathway_with_low_exp_sig_cat$phase))
+supp_figure_3D <- ggplot(supp_figure_3D_data, aes(y=Freq, x=Var1))+
+  geom_segment( aes(x=Var1, xend=Var1, y=0, yend=Freq), color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6)+
+   theme_bw(base_size = 18) +
+  coord_flip()+
+  labs(y='Drugs with alternative\npredicted target',x='Drugs Category')
+```
+
+
+
+
+
+
+

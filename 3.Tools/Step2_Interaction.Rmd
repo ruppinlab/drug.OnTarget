@@ -3,9 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 <!-- Compute which drugs whose target KO and drug response viability similarity dimnishes when target expression is not expressed -->
 <!-- Function and libraries used -->
 ```{r}
@@ -19,32 +16,35 @@ KnownTarget_predictions$MaxTargetName[grep('ibru',KnownTarget_predictions$drugNa
 ```
 <!-- MATCHED MATRIX -->
 ```{r}
-matched_cellLines=Reduce(intersect,
+matched_cellLines = Reduce(intersect, 
                          list(colnames(onTarget$expression),
                               colnames(onTarget$avana_22Q2),
                               colnames(onTarget$secondary_prism),
                               colnames(onTarget$mutations_matrix)
                               ))
-expression_matched=onTarget$expression[,matched_cellLines]
-avana_matched=onTarget$avana_22Q2[,matched_cellLines]
-drug_matched=onTarget$secondary_prism[,matched_cellLines]
+expression_matched = onTarget$expression[,matched_cellLines]
+avana_matched = onTarget$avana_22Q2[,matched_cellLines]
+drug_matched = onTarget$secondary_prism[,matched_cellLines]
+
+dim(onTarget$mutations_matrix)
 ```
 
 <!-- Compute cell lines with low vs high expression -->
 <!-- Only for drugs with targets with non-zero low expression cell lines can be used in interaction analysis -->
 <!-- Most of the drug targets are never zero expressed -->
 ```{r}
-cellLines_with_LowTarget=sapply(KnownTarget_predictions$MaxTargetName,
+cellLines_with_LowTarget = sapply(KnownTarget_predictions$MaxTargetName,
                                 function(x) 
                                   err_handle(sum(expression_matched[x,]<2)) )
 hist(cellLines_with_LowTarget)
-KnownTarget_predictions$cellLines_withLOWexp=cellLines_with_LowTarget
+KnownTarget_predictions$cellLines_withLOWexp = cellLines_with_LowTarget
 ```
 
 ```{r}
 wilcox.test(KnownTarget_predictions$cellLines_withLOWexp,
             xtile(KnownTarget_predictions$Maxcorr, 2), alternative = 'g')
 KnownTarget_predictions$Maxcorr_Q=xtile(KnownTarget_predictions$Maxcorr, 2)
+
 ggplot(na.omit(KnownTarget_predictions), aes(y=cellLines_withLOWexp,
                                     x=factor(Maxcorr_Q)))+
   geom_boxplot()+
@@ -53,12 +53,12 @@ ggplot(na.omit(KnownTarget_predictions), aes(y=cellLines_withLOWexp,
 ```
 <!-- Targets with low expression in at least five cell lines -->
 ```{r}
-Targets_wd_lowExp_atLeast_FiveCellLines=KnownTarget_predictions$cellLines_withLOWexp>5
+Targets_wd_lowExp_atLeast_FiveCellLines = KnownTarget_predictions$cellLines_withLOWexp > 5
 ```
 <!-- Compute interaction -->
 <!-- Preprocessing -->
 ```{r}
-KnownTarget_predictions$drugBroadID=onTarget$drugCategory$broad_id_trimmed[match(KnownTarget_predictions$drugName, onTarget$drugCategory$name)]
+KnownTarget_predictions$drugBroadID = onTarget$drugCategory$broad_id_trimmed[match(KnownTarget_predictions$drugName, onTarget$drugCategory$name)]
 # Compute interaction in all cases
 interaction_Features=lapply(1:nrow(KnownTarget_predictions), function(x)
   {
@@ -101,6 +101,7 @@ table(KnownTarget_predictions$Whether_interaction)
 head(drugVScrispr_corr_Strength[,1])
 drugVScrispr_corr_Strength_ranked=apply(drugVScrispr_corr_Strength, 2, function(x) nrow(drugVScrispr_corr_Strength)-rank(x)+1 )
 myhead(drugVScrispr_corr_Strength_ranked)
+
 # KTP stands for "KnownTarget_predictions" matrix
 map_KTP_rankedMat=match(KnownTarget_predictions$drugBroadID, colnames(drugVScrispr_corr_Strength_ranked))
 
@@ -126,11 +127,5 @@ sort(table(KnownTarget_predictions$MaxTargetName[which(drugs_wdBoth_interaction_
 # saveRDS(drugCandidates_for_secTargets, '../data/drugCandidates_for_secTargets.RDS')
 # saveRDS(KnownTarget_predictions, '../Data/KnownTarget_predictions.RDS')
 # KnownTarget_predictions=readRDS('../Data/KnownTarget_predictions.RDS')
-```
-
-```{r}
-KnownTarget_predictions$Maxcorr=sapply(1:nrow(KnownTarget_predictions), function(x)
-  err_handle(drugVScrispr_corr_Strength[KnownTarget_predictions$MaxTargetName[x],
-                                        KnownTarget_predictions$drugBroadID[x]]) )
 ```
 
