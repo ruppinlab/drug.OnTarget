@@ -5,6 +5,9 @@
 
 > Packages required: parallel,tictoc,fgsea, ggplot2, ggpubr, statar, interactions,stats, reshape2, pROC, data.table,ggrepel, grid,cowplot,gridExtra, stringb, DEGreport, readxl, stringr
 
+> Please download the data required to execute the scripts from here: https://doi.org/10.5281/zenodo.7367726
+Following this, please move them to a folder name 'Data'. Please move 'Data' to the repository 'drug.OnTarget' & set that as your 'working_dir' in the scripts.
+
 ### Core Steps of DeepTarget:
 > Tools >> 'Core Steps'
 
