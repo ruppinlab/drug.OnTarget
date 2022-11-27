@@ -21,7 +21,7 @@ Pre-loading and preprocessing data and libraries required.
  * human_Kinases (human_Kinases.xlsx): List of all Human Kinases genes
 
 ---
-The result of the correlation is saved in the Data folder.
+### The result of the below scripts are saved in the Data folder.
 
 1) Step 1: Step1_Create_Drug_KO_similarity_matrix.Rmd:
 > Step_0A_data_curation_and saving.Rmd
