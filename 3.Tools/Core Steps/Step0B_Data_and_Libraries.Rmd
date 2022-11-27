@@ -1,0 +1,96 @@
+---
+title: " Atomic inputs needed for DeepTarget"
+output: html_notebook
+---
+
+<!-- Set the working Directory -->
+```{r, setup, include=FALSE}
+working_directory='/Users/sinhas8/Project_TrueTarget/'
+knitr::opts_knit$set(root.dir = working_directory)
+```
+
+<!-- Loading Libraries -->
+```{r}
+packages_required<-c('parallel','tictoc','fgsea', 'ggplot2', 'ggpubr',
+                     'statar', 'interactions','stats', 'reshape2', 'pROC',
+                     'data.table','ggrepel', 'grid','cowplot','gridExtra',
+                     'stringb', 'DEGreport', 'readxl', 'stringr')
+
+installORload(packages_required)
+installORload.bioc(packages_required)
+```
+<!-- Load the necessary Data for to execute any data-->
+<!-- Download this data using the following link -->
+```{r}
+onTarget=readRDS('Data/onTarget_v3.0.RDS')
+# onTarget is the most important piece in the DeepTarget Framework
+# It is a list of Data.frames with the following data
+#                                 Length    Class      Mode     Description
+# drugsCommonName                      4686 factor     numeric  Commonly used Drug Names
+# Annotated_Target                     4686 factor     numeric  Known Targets of above drugs from Drugbank
+# broad_id                             4686 -none-     character Broad designated unique Drug id (all screens use this ID)
+# avana                            11458125 -none-     numeric  CRISPR KO profile of ~800 cell lines for 20K genes
+# mutations_matrix                 30979350 -none-     numeric  Mutation binary matrix for ~2K cell lines; 0 is WT; 1 is mutated
+# achilles                         12272081 -none-     numeric  shRNA KO profile of ~800 cell lines for 20K genes
+# drug_prism                        2708508 -none-     numeric  Drug Treatment profile of ~5K drugs in 500 cell lines; 1 dosage
+# drugCategory                            8 data.frame list     Metadata on drugs
+# secondary_prism                    789584 -none-     numeric  Drug Treatment profile of ~5K drugs in 500 cell lines; AUC across 8 dosages
+# annotation_20Q4                        26 data.frame list     Metadata of cellines
+# expression_20Q4                  26394432 -none-     numeric  Expression profile of ~2K cell lines for 20K genes
+# secondary_screen_drugAnnotation         4 data.frame list     Metadata of secondary Screen with 8 dosages
+# secondary_prism_ic50               789584 -none-     numeric  secondary screen where drug response is measured using ic50 instead of AUC
+
+#!* Describe the dataset below
+KnownTarget_predictions=readRDS('Data/KnownTarget_predictions_v4.RDS')
+drugCandidates_for_secTargets=readRDS('Data/drugCandidates_for_secTargets.RDS')
+drugVScrispr_corr_features_list=readRDS('Data/drugVScrispr_corr_features_list.RDS')
+drugVScrispr_corr_features_list_secondary=readRDS('/Users/sinhas8/Project_TrueTarget/Data/drugVScrispr_corr_features_list_secondary.RDS')
+human_Kinases=read_xlsx('Data/human_Kinases.xlsx')
+```
+<!-- Preprocessing -->
+<!-- Creating dataframes that would be required during analysis -->
+```{r}
+# <!-- Defining the cormat strength, Pvalue and the rank to save in known target prediction-->
+drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_features_list, function(x) x[,2])
+corrMat_P=sapply(drugVScrispr_corr_features_list, function(x) x[,1])
+corrMat=drugVScrispr_corr_Strength
+corrMat_rank=apply(-corrMat, 2, rank)
+
+#corrmat-Z
+#Z-score in the first possible way.
+corrMat_z=apply(corrMat, 2, scale)
+rownames(corrMat_z)=rownames(corrMat)
+corrMat_log10P=-log10(corrMat_P)
+corrMat_bothMAGandP=corrMat_log10P*corrMat_z
+
+#Add Secondary-DKS score
+sec_corrMat=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,2])))
+sec_corrMat_P=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,1])))
+sec_corrMat_rank=apply(-sec_corrMat, 2, rank)
+
+# <!-- Compute if a drug is inhibitor or not -->
+category_inhibitor=c('inhibitor', 'antagonist', 'blocker')
+category_activator=c('agonist', 'activator', 'stimulant')
+category_inhibitor_drugs_ID=sapply(category_inhibitor, function(x) grep(x, onTarget$drugCategory$moa))
+category_activator_drugs_ID=sapply(category_activator, function(x) grep(x, onTarget$drugCategory$moa))
+category_inhibitor_drugs_ID=unique(unlist(category_inhibitor_drugs_ID))
+category_activator_drugs_ID=unique(unlist(category_activator_drugs_ID))
+onTarget$drugCategory$is.inhibitor=F
+onTarget$drugCategory$is.inhibitor[category_inhibitor_drugs_ID]=T
+onTarget$drugCategory$is.activator=F
+onTarget$drugCategory$is.activator[category_activator_drugs_ID]=T
+
+# <!-- create matrix of drug, crispr and expression with the matched cell lines -->
+matched_cellLines=Reduce(intersect,
+                         list(colnames(onTarget$expression_20Q4),
+                              colnames(onTarget$avana_22Q2),
+                              colnames(onTarget$secondary_prism)))
+expression_matched=onTarget$expression_20Q4[,matched_cellLines]
+avana_matched=onTarget$avana_22Q2[,matched_cellLines]
+drug_matched=onTarget$secondary_prism[,matched_cellLines]
+```
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

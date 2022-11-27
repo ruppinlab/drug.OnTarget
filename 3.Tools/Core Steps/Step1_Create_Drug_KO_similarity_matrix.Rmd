@@ -1,0 +1,54 @@
+---
+title: "Compute a correlation between the every gene crispr KO vs each drug response."
+output: html_document
+date: "2022-08-28"
+---
+<!-- DeepTarget's first step if to compute a correlation between viability after each gene CRISPR-KO & drug treatment. -->
+<!-- !Input!-->
+<!-- Description                       Object Name-->
+<!-- Viability matrix after CRISPR-KO ;onTarget$avana) -->
+<!-- Viability after Drug Treatment   ;onTarget$secondary_prism-->
+<!-- !Output!-->
+<!-- Correlation Btw viability profiles.; drugVScrispr_corr_features_list) -->
+<!-- ..after CRISPR vs drug treatment                                       -->
+
+<!-- Set the working Directory -->
+```{r, setup, include=FALSE}
+working_directory='/Users/sinhas8/Project_TrueTarget/'
+knitr::opts_knit$set(root.dir = working_directory)
+```
+
+<!-- Uncomment this chunk to make each files independelty run -->
+```{r}
+# knitr::knit('Step0B_Data_and_Libraries.Rmd')
+# knitr::knit('Step0_Write_Functions.Rmd')
+```
+
+```{r}
+# finding the commom cellines between the CRISPR and drug screen
+common_cellLines=intersect(colnames(onTarget$avana_22Q2),colnames(onTarget$secondary_prism))
+
+# extracting names of all drugs and genes
+all_genenames=rownames(onTarget$avana_22Q2)
+all_drugNames=rownames(onTarget$secondary_prism)
+
+# Running the function to find correlation between all crispr vs all drugs
+# drugVScrispr_corr_features_list=mclapply(all_drugNames,
+#                                          function(x) correlation_bet_crispr_drug(x), mc.cores = detectCores())
+# names(drugVScrispr_corr_features_list)=all_drugNames
+
+## Running the function to find correlation between all crispr vs 10 random drugs
+# Change the mc.cores - detectCores()
+sample_drugs=sample(all_drugNames, 2)
+drugVScrispr_corr_features_list=mclapply(sample_drugs,
+                                         function(x) correlation_bet_crispr_drug(x),
+                                         mc.cores = 2)
+names(drugVScrispr_corr_features_list)=sample_drugs
+
+saveRDS(drugVScrispr_corr_features_list,
+        file = paste('Data/drugVScrispr_corr_features_list', Sys.Date(), '.RDS', sep=''))
+```
+
+
+
+

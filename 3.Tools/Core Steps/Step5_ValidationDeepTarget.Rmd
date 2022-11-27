@@ -1,0 +1,19 @@
+---
+title: "Testing_DeepTarget"
+output: html_notebook
+---
+<!-- Validation of Primary Target Identification -->
+```{r}
+# Please see: Curating_Gold_Standard_datasets.
+Comp_Gold_Standard_df=readRDS('/Users/sinhas8/Project_TrueTarget/Data/Comp_Gold_Standard_withDKS.RDS')
+Comp_Gold_Standard_df_list=split(Comp_Gold_Standard_df, Comp_Gold_Standard_df$Dataset)
+# Q.1: In each dataset, What is the stratication power (AUC) of DeepTarget to find positive primary target labels vs negative labels (negative shuffles).
+sapply(Comp_Gold_Standard_df_list, function(x) roc(x$Label, x$crispr_corr)$auc)
+# Q.1: Overall, What is the stratication power (AUC)?.
+roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr)$auc
+```
+
+```{r}
+
+```
+

@@ -3,8 +3,8 @@ title: "Functions needed for true target project "
 output: html_notebook
 ---
 <!-- Functions needed for DeepTarget Project -->
-<!-- Compute drug vs crispr correlation - primary target -->
 ```{r}
+# <!-- primary target Score (DKS Score): Compute drug vs crispr correlation -  -->
 correlation_bet_crispr_drug <- function(infunc_drugName){
   infunc_drugResp=onTarget$secondary_prism[infunc_drugName, common_cellLines]
   infunc_CRISPRResp=onTarget$avana_22Q2[, common_cellLines]
@@ -14,9 +14,8 @@ correlation_bet_crispr_drug <- function(infunc_drugName){
   row.names(correlation_df) <- all_genenames
   correlation_df
 }
-```
-<!-- Compute drug vs crispr correlation in cell lines where primary target is not expressed - secondary target -->
-```{r}
+
+# <!-- secondary target Score (Secondary DKS SCore): Compute drug vs crispr correlation in cell lines where primary target is not expressed-->
 correlation_bet_crispr_drug_secondary_target <- function(infunc_drugName, CellLines_withoutPrimary){
   infunc_drugResp=onTarget$secondary_prism[infunc_drugName, CellLines_withoutPrimary]
   infunc_CRISPRResp=onTarget$avana_22Q2[, CellLines_withoutPrimary]
@@ -26,45 +25,20 @@ correlation_bet_crispr_drug_secondary_target <- function(infunc_drugName, CellLi
   row.names(correlation_df) <- all_genenames
   correlation_df
 }
-```
-<!-- Moved it from step0B -->
-<!-- Functions for producing negative controld during primary target identification -->
-```{r}
-# Create a random df unique to the input df
-randomize_DF_with_unique_Pairs<-function(df2randomize=Positive_Set_DrugGene_Pairs){
-  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
-  fixedCol=df2randomize[,2]
-  shuffledCol=sample(df2randomize[,1])
-  new_df=paste(shuffledCol, fixedCol, sep = '_')
-  while(sum(df2randomize_collapsed==new_df)>0){
-    new_df[df2randomize_collapsed==new_df]=
-      paste(sample(df2randomize[,1], sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
-  }
-  df2return=do.call(rbind, strsplit(new_df, '_'))
-  df2return=data.frame(df2return[,1], df2return[,2])
-  colnames(df2return)=colnames(df2randomize)
-  df2return
-}
 
-randomize_DF_with_unique_Pairs_V2<-function(df2randomize=Positive_Set_DrugGene_Pairs){
-  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
-  fixedCol=df2randomize[,2]
-  shuffledCol=sample(rownames(corrMat), nrow(df2randomize))
-  new_df=paste(shuffledCol, fixedCol, sep = '_')
-  while(sum(df2randomize_collapsed==new_df)>0){
-    new_df[df2randomize_collapsed==new_df]=
-      paste(sample(rownames(onTarget$corrMat), sum(df2randomize_collapsed==new_df)),
-            fixedCol[df2randomize_collapsed==new_df], sep = '_')
+# <!-- Mutant Specificity Score (MS Score): We reason that if a drug more specifically targets a mutant form of protein, in the cell lines with this mutant form, the similarity between viability after drug treatment and target CRISPR-KO (their DKS score) would be significantly higher than in the cell lines with WT protein. We mathematically model this dependency of the DKS score on the mutation status of the target by employing a regression between the drug and the target’s response across the cell lines, including the mutation status as an interaction term. We call this score the mutant-specificity score (this composes the second output of DeepTarget), where a positive mutant-specificity score indicates that a drug differentially targets the mutant form of the target protein more than WT and vice-versa for the negative score.-->
+Mutant_Specificity_Score<- function(infunc_geneName, infunc_drugID){
+  infunc_drug_matched = err_handle(drug_matched[infunc_drugID,])
+  infunc_avana_matched = err_handle(avana_matched[infunc_geneName,])
+  infunc_mutation_matched = err_handle(mutation_matched[infunc_geneName,])
+  err_handle(summary(lm(infunc_drug_matched ~ 
+                infunc_avana_matched*infunc_mutation_matched))$coefficients[4,c(1,4)])
   }
-  df2return=do.call(rbind, strsplit(new_df, '_'))
-  df2return=data.frame(df2return[,1], df2return[,2])
-  colnames(df2return)=colnames(df2randomize)
-  df2return
-}
-```
 
-<!-- Trimmed cor test -->
-```{r}
+
+
+
+# <!-- Trimmed cor test -->
 cor.test_trimmed_v0 <- function(x, ...) UseMethod("cor.test_trimmed_v0")
 cor.test_trimmed_v0.default <-
   function(x, y, alternative = c("two.sided", "less", "greater"),
@@ -274,4 +248,174 @@ cor.test.formula <-
     y
   }
 
+# <!-- Functions for producing negative controld during primary target identification -->
+# Create a random df unique to the input df (Control 1)
+randomize_DF_with_unique_Pairs<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(df2randomize[,1])
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(df2randomize[,1], sum(df2randomize_collapsed==new_df)), fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
+}
+# Create a random df unique to the input df (Control 2)
+randomize_DF_with_unique_Pairs_V2<-function(df2randomize=Positive_Set_DrugGene_Pairs){
+  df2randomize_collapsed=paste(df2randomize[,1], df2randomize[,2], sep = '_')
+  fixedCol=df2randomize[,2]
+  shuffledCol=sample(rownames(corrMat), nrow(df2randomize))
+  new_df=paste(shuffledCol, fixedCol, sep = '_')
+  while(sum(df2randomize_collapsed==new_df)>0){
+    new_df[df2randomize_collapsed==new_df]=
+      paste(sample(rownames(onTarget$corrMat), sum(df2randomize_collapsed==new_df)),
+            fixedCol[df2randomize_collapsed==new_df], sep = '_')
+  }
+  df2return=do.call(rbind, strsplit(new_df, '_'))
+  df2return=data.frame(df2return[,1], df2return[,2])
+  colnames(df2return)=colnames(df2randomize)
+  df2return
+}
 ```
+<!-- Following are custom functions I've made to avoid repetitively writing same things again for DeepTarget; -->
+```{r}
+# Custom head function
+myhead<-function(x){
+  x[1:min(5, nrow(x)), 1:min(5, ncol(x))]
+}
+#Custom Error handling 
+err_handle<-function(x){ tryCatch(x, error=function(e){NA}) }
+
+# Hypergeometric test for two list of elements
+hypergeometric_test_for_twolists<-function(test_list, base_list, global, lowertail=FALSE) {
+  #If lowertail=FALSE - we calculate the probability for enrichment
+  length(base_list)
+  base_list_within_global=global[na.omit(match(base_list, global))]
+  intersect_of_two_list= test_list[!is.na(match(test_list, base_list_within_global))]
+  phyper(length(intersect_of_two_list)-1, #white balls in the samples
+         length(base_list_within_global), #total white balls in the box
+         length(global)- length(base_list_within_global), #total black balls in the box
+         length(test_list), #total balls sampled
+         lower.tail=lowertail) #whether you wish to calculate enrichment or depletion
+}
+# FDR correction using BH method
+fdrcorr<-function(test_list){p.adjust(test_list, method = 'fdr')}
+
+# Subsetting a set of columns given a matrix and a column names
+colSubset<-function(mat, column_Names){
+  mat[,na.omit(match(column_Names, colnames(mat)))]
+}
+# Subsetting a set of rows given a matrix and a column names
+rowSubset<-function(mat, row_Names){
+  mat[na.omit(match(row_Names, rownames(mat))),]
+}
+# Subsetting a vector given names
+vectorSubset<-function(vec, Names){
+  vec[!is.na(match(names(vec), Names))]
+}
+
+# Install or load a given package;
+installORload<-function(packages){
+  package.check <- lapply(packages, FUN = function(x) {
+    if (!require(x, character.only = TRUE)) {
+      install.packages(x, dependencies = TRUE)
+      library(x, character.only = TRUE)
+    }
+  })
+}
+
+# Install or load bioconductor;
+installORload.bioc<-function(packages){
+  package.check <- lapply(packages, FUN = function(x) {
+    if (!require(x, character.only = TRUE)) {
+      BiocManager::install(x)
+      library(x, character.only = TRUE)
+    }
+  })
+}
+
+# Identify top X percent values
+topXPercentValue<-function(vec, X_percentile=95){
+  vec=na.omit(vec)
+  len=length(vec)
+  vec=sort(vec)
+  vec[ceiling(len*(X_percentile/100))]
+}
+
+# Scale 0-1 to a vector
+range01 <- function(x){
+  # Chossing 95% and 5% percentile as thresholds for outliers
+  substitute_of_Min=topXPercentValue(vec=x, 
+                                     X_percentile=5)
+  substitute_of_Max=topXPercentValue(vec=x, 
+                                     X_percentile=95)
+  x_scaled=(x-substitute_of_Min)/(substitute_of_Max-substitute_of_Min)
+  x_scaled[x_scaled<0]=0
+  x_scaled[x_scaled>1]=1
+  x_scaled
+}
+
+# Converting a factor to numeric directly
+factor2numeric<-function(x){
+  as.numeric(as.character(x))
+}
+
+# My cor test
+mycorTest<-function(x, y){
+  unlist(cor.test(x, y)[c(3, 4)])
+}
+
+# Striping all the non-alpha numeric from a string to match; This removes a lot of noises in names
+stripall2match<-function(x){
+  # Strip all non-char and non-numeric and make lower case
+  # this is primarily to facilitate inconsistent naming
+  tolower(gsub('[^A-z0-9]','',x) )
+}
+
+# Opposite of %in%
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+# strsplit; but for a list
+strsplit_customv0 <- function(infunc_list=pred_viab$cellLines_mapping$cellLine_ID,
+                              infunc_split_by='_',
+                              retreving_onject_id=1){
+  sapply(strsplit(infunc_list, split = infunc_split_by), function(x) x[retreving_onject_id])
+}
+
+#Max of a column
+colMax <- function (colData) {
+  apply(colData, MARGIN=c(2), max)
+}
+
+#median of a column
+colMedian <- function (colData) {
+  apply(colData, MARGIN=c(2), median)
+}
+#Max of a row
+rowMax <- function (colData) {
+  apply(colData, MARGIN=c(1), max)
+}
+
+#Min of a column
+rowMin <- function (colData) {
+  apply(colData, MARGIN=c(1), min)
+}
+
+#product of a row
+rowProd <- function (colData) {
+  apply(colData, 1, prod)
+}
+
+# Match after striping both the strings
+match_stripall <- function(x, y){
+  x_striped=tolower(gsub('[^A-z0-9]','',x) )
+  y_striped=tolower(gsub('[^A-z0-9]','',y) )
+  match(x_striped, y_striped)
+}
+
+```
+
