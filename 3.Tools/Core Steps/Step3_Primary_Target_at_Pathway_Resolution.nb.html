@@ -11,7 +11,7 @@
 
 
 
-<title>Testing_DeepTarget</title>
+<title>Primary Target at a pathway Level; Provides a score for each pathway to be the MOA of a drug</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1762,33 +1762,71 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">Testing_DeepTarget</h1>
+<h1 class="title toc-ignore">Primary Target at a pathway Level; Provides
+a score for each pathway to be the MOA of a drug</h1>
 
 </div>
 
 
 <!-- rnb-text-begin -->
-<!-- Validation of Primary Target Identification -->
+<!-- This script predicts a Primary Target at a pathwya Level. It next finds the pathways that are most enriched in the genes with high DKS scores. It does this by performing a pathway enrichment test on the ranked gene list by DKS score. The output is a matrix of pathway-level probabilities for each drug to be the primary MOA. This matrix can be used to further produce figures such as supplementary figures 3 and 5. -->
+<!-- !Input!-->
+<!-- Description                       Object Name-->
+<!-- Viability matrix after CRISPR-KO ;onTarget$avana) -->
+<!-- Viability after Drug Treatment   ;onTarget$secondary_prism-->
+<!-- !Output!-->
+<!-- Pathway level probability to be a primary MOA; gsea_enrichment_all_drugs -->
+<!-- Set the working Directory -->
+<!-- rnb-text-end -->
+<!-- rnb-text-begin -->
+<!-- Uncomment this chunk to make run this script independently run -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBQbGVhc2Ugc2VlOiBDdXJhdGluZ19Hb2xkX1N0YW5kYXJkX2RhdGFzZXRzLlxuQ29tcF9Hb2xkX1N0YW5kYXJkX2RmPXJlYWRSRFMoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9EYXRhL0NvbXBfR29sZF9TdGFuZGFyZF93aXRoREtTLlJEUycpXG5Db21wX0dvbGRfU3RhbmRhcmRfZGZfbGlzdD1zcGxpdChDb21wX0dvbGRfU3RhbmRhcmRfZGYsIENvbXBfR29sZF9TdGFuZGFyZF9kZiREYXRhc2V0KVxuIyBRLjE6IEluIGVhY2ggZGF0YXNldCwgV2hhdCBpcyB0aGUgc3RyYXRpY2F0aW9uIHBvd2VyIChBVUMpIG9mIERlZXBUYXJnZXQgdG8gZmluZCBwb3NpdGl2ZSBwcmltYXJ5IHRhcmdldCBsYWJlbHMgdnMgbmVnYXRpdmUgbGFiZWxzIChuZWdhdGl2ZSBzaHVmZmxlcykuXG5zYXBwbHkoQ29tcF9Hb2xkX1N0YW5kYXJkX2RmX2xpc3QsIGZ1bmN0aW9uKHgpIHJvYyh4JExhYmVsLCB4JGNyaXNwcl9jb3JyKSRhdWMpXG4jIFEuMTogT3ZlcmFsbCwgV2hhdCBpcyB0aGUgc3RyYXRpY2F0aW9uIHBvd2VyIChBVUMpPy5cbnJvYyhDb21wX0dvbGRfU3RhbmRhcmRfZGYkTGFiZWwsIENvbXBfR29sZF9TdGFuZGFyZF9kZiRjcmlzcHJfY29ycikkYXVjXG5gYGAifQ== -->
-<pre class="r"><code># Please see: Curating_Gold_Standard_datasets.
-Comp_Gold_Standard_df=readRDS(&#39;/Users/sinhas8/Project_TrueTarget/Data/Comp_Gold_Standard_withDKS.RDS&#39;)
-Comp_Gold_Standard_df_list=split(Comp_Gold_Standard_df, Comp_Gold_Standard_df$Dataset)
-# Q.1: In each dataset, What is the stratication power (AUC) of DeepTarget to find positive primary target labels vs negative labels (negative shuffles).
-sapply(Comp_Gold_Standard_df_list, function(x) roc(x$Label, x$crispr_corr)$auc)
-# Q.1: Overall, What is the stratication power (AUC)?.
-roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr)$auc</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBrbml0cjo6a25pdCgnU3RlcDBCX0RhdGFfYW5kX0xpYnJhcmllcy5SbWQnKVxuIyBrbml0cjo6a25pdCgnU3RlcDBfV3JpdGVfRnVuY3Rpb25zLlJtZCcpXG5gYGAifQ== -->
+<pre class="r"><code># knitr::knit(&#39;Step0B_Data_and_Libraries.Rmd&#39;)
+# knitr::knit(&#39;Step0_Write_Functions.Rmd&#39;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<!-- MOA pathway annotation: The code above creates a list called moa_pathways, which contains the pathways that are associated with each MOA (mechanism of action) of a drug. The pathways are split by MOA and then the duplicates are removed. This list is then used in the next chunk of code to run gene enrichment tests on the pathways. -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFyZ2V0X2J5X21vYT1zcGxpdChvblRhcmdldCRkcnVnQ2F0ZWdvcnkkdGFyZ2V0LCBvblRhcmdldCRkcnVnQ2F0ZWdvcnkkbW9hKVxudGFyZ2V0X2J5X21vYV91bmxpc3RlZD1zYXBwbHkodGFyZ2V0X2J5X21vYSwgdW5saXN0KVxubW9hX3BhdGh3YXlzPWxhcHBseSh0YXJnZXRfYnlfbW9hX3VubGlzdGVkLCBmdW5jdGlvbih5KXtcbiAgdW5pcXVlKHVubGlzdChzYXBwbHkoYXMuY2hhcmFjdGVyKHkpLCBmdW5jdGlvbih4KVxuICAgIHVubGlzdChzdHJzcGxpdCh4LCAnLCAnKSkgKSkpXG59IClcbiMgc2F2ZVJEUyhtb2FfcGF0aHdheXMsJ2RhdGEvbW9hX3BhdGh3YXlzLlJEUycpXG4jIDwhLS0gTG9hZCBwYXRod2F5IGFubm90YXRpb24gZGF0YSBhbmQgcGVyZm9ybSB0aGUgbmVlZGVkIHByZXByb2Nlc3NpbmcgLS0+XG5tb2FfcGF0aHdheXM9c2FwcGx5KG1vYV9wYXRod2F5cywgbmEub21pdClcbmBgYCJ9 -->
+<pre class="r"><code>target_by_moa=split(onTarget$drugCategory$target, onTarget$drugCategory$moa)
+target_by_moa_unlisted=sapply(target_by_moa, unlist)
+moa_pathways=lapply(target_by_moa_unlisted, function(y){
+  unique(unlist(sapply(as.character(y), function(x)
+    unlist(strsplit(x, &#39;, &#39;)) )))
+} )
+# saveRDS(moa_pathways,&#39;data/moa_pathways.RDS&#39;)
+# &lt;!-- Load pathway annotation data and perform the needed preprocessing --&gt;
+moa_pathways=sapply(moa_pathways, na.omit)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<!-- Run gene enrichment (this will take around ~20 mins):: 
+This code is running gene enrichment analysis on drugVScrispr_corr_Strength, a matrix that contains the correlation strength between drugs and CRISPR knockouts. The analysis is performed using the fgsea function in the parallel package. The resulting gene enrichment scores for each drug are saved in the object gsea_enrichment_all_drugs, which is then saved to a file called 'data/gsea_enrichment_all_drugs.RDS'. This file can be used later to produce supplementary figures 3 and 5.-->
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncz1tY2xhcHBseSgxOm5jb2woZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpLCBmdW5jdGlvbih4KSB7XG4gIElGX2NvcnJfd2l0aF9nZW5lPXVubGlzdChkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aFsseF0pXG4gIG5hbWVzKElGX2NvcnJfd2l0aF9nZW5lKSAgPSByb3duYW1lcyhkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aClcbiAgSUZfY29ycl93aXRoX2dlbmVfb3JkZXJlZD1zb3J0KElGX2NvcnJfd2l0aF9nZW5lLCBkZWNyZWFzaW5nID0gVClcbiAgXG4gIGdzZWFfZW5yaWNobWVudD1mZ3NlYShwYXRod2F5cyA9IG1vYV9wYXRod2F5cyxcbiAgICAgICAgICAgICAgICAgICAgICAgIHN0YXRzID0gSUZfY29ycl93aXRoX2dlbmVfb3JkZXJlZCxcbiAgICAgICAgICAgICAgICAgICAgICAgIG1pblNpemU9MSxcbiAgICAgICAgICAgICAgICAgICAgICAgIG1heFNpemU9MTAwKVxuICBnc2VhX2VucmljaG1lbnRcbn0sIG1jLmNvcmVzID0gZGV0ZWN0Q29yZXMoKSlcblxubmFtZXMoZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncyk9Y29sbmFtZXMoZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgpXG5zYXZlUkRTKGdzZWFfZW5yaWNobWVudF9hbGxfZHJ1Z3MsICdkYXRhL2dzZWFfZW5yaWNobWVudF9hbGxfZHJ1Z3MuUkRTJylcbmBgYCJ9 -->
+<pre class="r"><code>gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
+  IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
+  names(IF_corr_with_gene)  = rownames(drugVScrispr_corr_Strength)
+  IF_corr_with_gene_ordered=sort(IF_corr_with_gene, decreasing = T)
+  
+  gsea_enrichment=fgsea(pathways = moa_pathways,
+                        stats = IF_corr_with_gene_ordered,
+                        minSize=1,
+                        maxSize=100)
+  gsea_enrichment
+}, mc.cores = detectCores())
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiVGVzdGluZ19EZWVwVGFyZ2V0IgpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sKLS0tCjwhLS0gVmFsaWRhdGlvbiBvZiBQcmltYXJ5IFRhcmdldCBJZGVudGlmaWNhdGlvbiAtLT4KYGBge3J9CiMgUGxlYXNlIHNlZTogQ3VyYXRpbmdfR29sZF9TdGFuZGFyZF9kYXRhc2V0cy4KQ29tcF9Hb2xkX1N0YW5kYXJkX2RmPXJlYWRSRFMoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9EYXRhL0NvbXBfR29sZF9TdGFuZGFyZF93aXRoREtTLlJEUycpCkNvbXBfR29sZF9TdGFuZGFyZF9kZl9saXN0PXNwbGl0KENvbXBfR29sZF9TdGFuZGFyZF9kZiwgQ29tcF9Hb2xkX1N0YW5kYXJkX2RmJERhdGFzZXQpCiMgUS4xOiBJbiBlYWNoIGRhdGFzZXQsIFdoYXQgaXMgdGhlIHN0cmF0aWNhdGlvbiBwb3dlciAoQVVDKSBvZiBEZWVwVGFyZ2V0IHRvIGZpbmQgcG9zaXRpdmUgcHJpbWFyeSB0YXJnZXQgbGFiZWxzIHZzIG5lZ2F0aXZlIGxhYmVscyAobmVnYXRpdmUgc2h1ZmZsZXMpLgpzYXBwbHkoQ29tcF9Hb2xkX1N0YW5kYXJkX2RmX2xpc3QsIGZ1bmN0aW9uKHgpIHJvYyh4JExhYmVsLCB4JGNyaXNwcl9jb3JyKSRhdWMpCiMgUS4xOiBPdmVyYWxsLCBXaGF0IGlzIHRoZSBzdHJhdGljYXRpb24gcG93ZXIgKEFVQyk/Lgpyb2MoQ29tcF9Hb2xkX1N0YW5kYXJkX2RmJExhYmVsLCBDb21wX0dvbGRfU3RhbmRhcmRfZGYkY3Jpc3ByX2NvcnIpJGF1YwpgYGAKCmBgYHtyfQoKYGBgCgo=</div>
+names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)
+saveRDS(gsea_enrichment_all_drugs, &#39;data/gsea_enrichment_all_drugs.RDS&#39;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUHJpbWFyeSBUYXJnZXQgYXQgYSBwYXRod2F5IExldmVsOyBQcm92aWRlcyBhIHNjb3JlIGZvciBlYWNoIHBhdGh3YXkgdG8gYmUgdGhlIE1PQSBvZiBhIGRydWciCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KPCEtLSBUaGlzIHNjcmlwdCBwcmVkaWN0cyBhIFByaW1hcnkgVGFyZ2V0IGF0IGEgcGF0aHd5YSBMZXZlbC4gSXQgbmV4dCBmaW5kcyB0aGUgcGF0aHdheXMgdGhhdCBhcmUgbW9zdCBlbnJpY2hlZCBpbiB0aGUgZ2VuZXMgd2l0aCBoaWdoIERLUyBzY29yZXMuIEl0IGRvZXMgdGhpcyBieSBwZXJmb3JtaW5nIGEgcGF0aHdheSBlbnJpY2htZW50IHRlc3Qgb24gdGhlIHJhbmtlZCBnZW5lIGxpc3QgYnkgREtTIHNjb3JlLiBUaGUgb3V0cHV0IGlzIGEgbWF0cml4IG9mIHBhdGh3YXktbGV2ZWwgcHJvYmFiaWxpdGllcyBmb3IgZWFjaCBkcnVnIHRvIGJlIHRoZSBwcmltYXJ5IE1PQS4gVGhpcyBtYXRyaXggY2FuIGJlIHVzZWQgdG8gZnVydGhlciBwcm9kdWNlIGZpZ3VyZXMgc3VjaCBhcyBzdXBwbGVtZW50YXJ5IGZpZ3VyZXMgMyBhbmQgNS4gLS0+Cgo8IS0tICFJbnB1dCEtLT4KPCEtLSBEZXNjcmlwdGlvbiAgICAgICAgICAgICAgICAgICAgICAgT2JqZWN0IE5hbWUtLT4KPCEtLSBWaWFiaWxpdHkgbWF0cml4IGFmdGVyIENSSVNQUi1LTyA7b25UYXJnZXQkYXZhbmEpIC0tPgo8IS0tIFZpYWJpbGl0eSBhZnRlciBEcnVnIFRyZWF0bWVudCAgIDtvblRhcmdldCRzZWNvbmRhcnlfcHJpc20tLT4KPCEtLSAhT3V0cHV0IS0tPgo8IS0tIFBhdGh3YXkgbGV2ZWwgcHJvYmFiaWxpdHkgdG8gYmUgYSBwcmltYXJ5IE1PQTsgZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncyAtLT4KCjwhLS0gU2V0IHRoZSB3b3JraW5nIERpcmVjdG9yeSAtLT4KYGBge3IsIHNldHVwLCBpbmNsdWRlPUZBTFNFfQp3b3JraW5nX2RpcmVjdG9yeT0nL1VzZXJzL3NpbmhhczgvUHJvamVjdF9UcnVlVGFyZ2V0LycKa25pdHI6Om9wdHNfa25pdCRzZXQocm9vdC5kaXIgPSB3b3JraW5nX2RpcmVjdG9yeSkKYGBgCgo8IS0tIFVuY29tbWVudCB0aGlzIGNodW5rIHRvIG1ha2UgcnVuIHRoaXMgc2NyaXB0IGluZGVwZW5kZW50bHkgcnVuIC0tPgpgYGB7cn0KIyBrbml0cjo6a25pdCgnU3RlcDBCX0RhdGFfYW5kX0xpYnJhcmllcy5SbWQnKQojIGtuaXRyOjprbml0KCdTdGVwMF9Xcml0ZV9GdW5jdGlvbnMuUm1kJykKYGBgCgo8IS0tIE1PQSBwYXRod2F5IGFubm90YXRpb246IFRoZSBjb2RlIGFib3ZlIGNyZWF0ZXMgYSBsaXN0IGNhbGxlZCBtb2FfcGF0aHdheXMsIHdoaWNoIGNvbnRhaW5zIHRoZSBwYXRod2F5cyB0aGF0IGFyZSBhc3NvY2lhdGVkIHdpdGggZWFjaCBNT0EgKG1lY2hhbmlzbSBvZiBhY3Rpb24pIG9mIGEgZHJ1Zy4gVGhlIHBhdGh3YXlzIGFyZSBzcGxpdCBieSBNT0EgYW5kIHRoZW4gdGhlIGR1cGxpY2F0ZXMgYXJlIHJlbW92ZWQuIFRoaXMgbGlzdCBpcyB0aGVuIHVzZWQgaW4gdGhlIG5leHQgY2h1bmsgb2YgY29kZSB0byBydW4gZ2VuZSBlbnJpY2htZW50IHRlc3RzIG9uIHRoZSBwYXRod2F5cy4gLS0+CmBgYHtyfQp0YXJnZXRfYnlfbW9hPXNwbGl0KG9uVGFyZ2V0JGRydWdDYXRlZ29yeSR0YXJnZXQsIG9uVGFyZ2V0JGRydWdDYXRlZ29yeSRtb2EpCnRhcmdldF9ieV9tb2FfdW5saXN0ZWQ9c2FwcGx5KHRhcmdldF9ieV9tb2EsIHVubGlzdCkKbW9hX3BhdGh3YXlzPWxhcHBseSh0YXJnZXRfYnlfbW9hX3VubGlzdGVkLCBmdW5jdGlvbih5KXsKICB1bmlxdWUodW5saXN0KHNhcHBseShhcy5jaGFyYWN0ZXIoeSksIGZ1bmN0aW9uKHgpCiAgICB1bmxpc3Qoc3Ryc3BsaXQoeCwgJywgJykpICkpKQp9ICkKIyBzYXZlUkRTKG1vYV9wYXRod2F5cywnZGF0YS9tb2FfcGF0aHdheXMuUkRTJykKIyA8IS0tIExvYWQgcGF0aHdheSBhbm5vdGF0aW9uIGRhdGEgYW5kIHBlcmZvcm0gdGhlIG5lZWRlZCBwcmVwcm9jZXNzaW5nIC0tPgptb2FfcGF0aHdheXM9c2FwcGx5KG1vYV9wYXRod2F5cywgbmEub21pdCkKYGBgCjwhLS0gUnVuIGdlbmUgZW5yaWNobWVudCAodGhpcyB3aWxsIHRha2UgYXJvdW5kIH4yMCBtaW5zKTo6IApUaGlzIGNvZGUgaXMgcnVubmluZyBnZW5lIGVucmljaG1lbnQgYW5hbHlzaXMgb24gZHJ1Z1ZTY3Jpc3ByX2NvcnJfU3RyZW5ndGgsIGEgbWF0cml4IHRoYXQgY29udGFpbnMgdGhlIGNvcnJlbGF0aW9uIHN0cmVuZ3RoIGJldHdlZW4gZHJ1Z3MgYW5kIENSSVNQUiBrbm9ja291dHMuIFRoZSBhbmFseXNpcyBpcyBwZXJmb3JtZWQgdXNpbmcgdGhlIGZnc2VhIGZ1bmN0aW9uIGluIHRoZSBwYXJhbGxlbCBwYWNrYWdlLiBUaGUgcmVzdWx0aW5nIGdlbmUgZW5yaWNobWVudCBzY29yZXMgZm9yIGVhY2ggZHJ1ZyBhcmUgc2F2ZWQgaW4gdGhlIG9iamVjdCBnc2VhX2VucmljaG1lbnRfYWxsX2RydWdzLCB3aGljaCBpcyB0aGVuIHNhdmVkIHRvIGEgZmlsZSBjYWxsZWQgJ2RhdGEvZ3NlYV9lbnJpY2htZW50X2FsbF9kcnVncy5SRFMnLiBUaGlzIGZpbGUgY2FuIGJlIHVzZWQgbGF0ZXIgdG8gcHJvZHVjZSBzdXBwbGVtZW50YXJ5IGZpZ3VyZXMgMyBhbmQgNS4tLT4KYGBge3J9CmdzZWFfZW5yaWNobWVudF9hbGxfZHJ1Z3M9bWNsYXBwbHkoMTpuY29sKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKSwgZnVuY3Rpb24oeCkgewogIElGX2NvcnJfd2l0aF9nZW5lPXVubGlzdChkcnVnVlNjcmlzcHJfY29ycl9TdHJlbmd0aFsseF0pCiAgbmFtZXMoSUZfY29ycl93aXRoX2dlbmUpICA9IHJvd25hbWVzKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKQogIElGX2NvcnJfd2l0aF9nZW5lX29yZGVyZWQ9c29ydChJRl9jb3JyX3dpdGhfZ2VuZSwgZGVjcmVhc2luZyA9IFQpCiAgCiAgZ3NlYV9lbnJpY2htZW50PWZnc2VhKHBhdGh3YXlzID0gbW9hX3BhdGh3YXlzLAogICAgICAgICAgICAgICAgICAgICAgICBzdGF0cyA9IElGX2NvcnJfd2l0aF9nZW5lX29yZGVyZWQsCiAgICAgICAgICAgICAgICAgICAgICAgIG1pblNpemU9MSwKICAgICAgICAgICAgICAgICAgICAgICAgbWF4U2l6ZT0xMDApCiAgZ3NlYV9lbnJpY2htZW50Cn0sIG1jLmNvcmVzID0gZGV0ZWN0Q29yZXMoKSkKCm5hbWVzKGdzZWFfZW5yaWNobWVudF9hbGxfZHJ1Z3MpPWNvbG5hbWVzKGRydWdWU2NyaXNwcl9jb3JyX1N0cmVuZ3RoKQpzYXZlUkRTKGdzZWFfZW5yaWNobWVudF9hbGxfZHJ1Z3MsICdkYXRhL2dzZWFfZW5yaWNobWVudF9hbGxfZHJ1Z3MuUkRTJykKYGBgCg==</div>
 
 
 
@@ -1835,7 +1873,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("Step5_ValidationDeepTarget.Rmd");
+  window.initializeSourceEmbed("Step3_Primary_Target_at_Pathway_Resolution.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>

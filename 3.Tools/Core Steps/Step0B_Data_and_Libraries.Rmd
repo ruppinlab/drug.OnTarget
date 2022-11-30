@@ -9,7 +9,8 @@ working_directory='/Users/sinhas8/Project_TrueTarget/'
 knitr::opts_knit$set(root.dir = working_directory)
 ```
 
-<!-- Loading Libraries -->
+<!-- This code ensures that all required packages are installed and available for use in the script, allowing the user to run the script without encountering any errors related to missing packages. -->
+<!-- It installs or loads a list of required R packages. The packages_required variable is a character vector containing the names of the packages that are needed for the script to run properly. The installORload function is then used to install any packages that are not already installed on the user's system. The installORload.bioc function is used to install any Bioconductor packages that are not already installed. -->
 ```{r}
 packages_required<-c('parallel','tictoc','fgsea', 'ggplot2', 'ggpubr',
                      'statar', 'interactions','stats', 'reshape2', 'pROC',
@@ -19,11 +20,14 @@ packages_required<-c('parallel','tictoc','fgsea', 'ggplot2', 'ggpubr',
 installORload(packages_required)
 installORload.bioc(packages_required)
 ```
-<!-- Load the necessary Data for to execute any data-->
-<!-- Download this data using the following link -->
+<!-- This code loads the necessary data for the script to run properly. It uses the readRDS function to read in four RDS files containing the data that the script will use. The names of the files and the data they contain are: -->
+<!-- onTarget_v3.0.RDS: This file contains the main data object used by the DeepTarget framework. It is a list of data frames with various data on drugs, cell lines, and gene expression. -->
+<!-- KnownTarget_predictions_v4.RDS: This file contains metadata on drugs and their known and predicted targets. -->
+<!-- drugVScrispr_corr_features_list.RDS: This file contains DKS scores and p-values for each gene versus each drug. -->
+<!-- drugVScrispr_corr_features_list_secondary.RDS: This file contains secondary DKS scores and p-values for each gene versus each drug. -->
+<!-- The read_xlsx function is also used to read in an Excel file containing a list of all human kinases genes.-->
 ```{r}
 onTarget=readRDS('Data/onTarget_v3.0.RDS')
-# onTarget is the most important piece in the DeepTarget Framework
 # It is a list of Data.frames with the following data
 #                                 Length    Class      Mode     Description
 # drugsCommonName                      4686 factor     numeric  Commonly used Drug Names
@@ -41,13 +45,17 @@ onTarget=readRDS('Data/onTarget_v3.0.RDS')
 # secondary_prism_ic50               789584 -none-     numeric  secondary screen where drug response is measured using ic50 instead of AUC
 
 #!* Describe the dataset below
+# Metadata of Drugs and their target+DeepTarget's top predicted target information 
 KnownTarget_predictions=readRDS('Data/KnownTarget_predictions_v4.RDS')
-drugCandidates_for_secTargets=readRDS('Data/drugCandidates_for_secTargets.RDS')
+# DKS Score & P for each gene vs each drug. 
 drugVScrispr_corr_features_list=readRDS('Data/drugVScrispr_corr_features_list.RDS')
+# Secondary DKS Score & P for each gene vs each drug.
 drugVScrispr_corr_features_list_secondary=readRDS('/Users/sinhas8/Project_TrueTarget/Data/drugVScrispr_corr_features_list_secondary.RDS')
+# drugCandidates_for_secTargets=readRDS('Data/drugCandidates_for_secTargets.RDS')
+# List of all Human Kinases genes
 human_Kinases=read_xlsx('Data/human_Kinases.xlsx')
 ```
-<!-- Preprocessing -->
+<!-- This code performs some preprocessing steps on the data. It first defines some variables for the DKS scores, p-values, and ranks of the genes versus drugs -->
 <!-- Creating dataframes that would be required during analysis -->
 ```{r}
 # <!-- Defining the cormat strength, Pvalue and the rank to save in known target prediction-->
@@ -56,7 +64,7 @@ corrMat_P=sapply(drugVScrispr_corr_features_list, function(x) x[,1])
 corrMat=drugVScrispr_corr_Strength
 corrMat_rank=apply(-corrMat, 2, rank)
 
-#corrmat-Z
+# Next, the code computes the Z-scores for the DKS scores and combines them with the log10-transformed p-values to create a matrix of both magnitude and p-values. The secondary DKS scores are also added to this matrix.
 #Z-score in the first possible way.
 corrMat_z=apply(corrMat, 2, scale)
 rownames(corrMat_z)=rownames(corrMat)
@@ -68,6 +76,7 @@ sec_corrMat=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, fun
 sec_corrMat_P=do.call(cbind, sapply(drugVScrispr_corr_features_list_secondary, function(x) err_handle(x[,1])))
 sec_corrMat_rank=apply(-sec_corrMat, 2, rank)
 
+# We then define which drugs are inhibitors or activators based on their mechanism of action (MOA). This is done by using the grep function to find the MOA categories that contain the keywords 'inhibitor', 'antagonist', 'blocker', 'agonist', 'activator', and 'stimulant'. The resulting drug IDs are then used to create new columns in the onTarget$drugCategory data frame indicating whether a drug is an inhibitor or activator.
 # <!-- Compute if a drug is inhibitor or not -->
 category_inhibitor=c('inhibitor', 'antagonist', 'blocker')
 category_activator=c('agonist', 'activator', 'stimulant')
@@ -80,7 +89,7 @@ onTarget$drugCategory$is.inhibitor[category_inhibitor_drugs_ID]=T
 onTarget$drugCategory$is.activator=F
 onTarget$drugCategory$is.activator[category_activator_drugs_ID]=T
 
-# <!-- create matrix of drug, crispr and expression with the matched cell lines -->
+# Finally, we create matrices of gene expression, CRISPR knockout data, and drug treatment data for only the cell lines that are common to all three datasets. This allows us to perform analyses on only the cell lines that have data available for all three types of data.
 matched_cellLines=Reduce(intersect,
                          list(colnames(onTarget$expression_20Q4),
                               colnames(onTarget$avana_22Q2),

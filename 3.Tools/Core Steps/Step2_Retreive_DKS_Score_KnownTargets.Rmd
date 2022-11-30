@@ -3,10 +3,9 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 
 <!-- DeepTarget's second step is to provide a similarity score for Known Target of a drug; also provide a best Primary Target for each one. -->
+<!-- It takes the name of a drug as an input and returns a list containing the DKS score and P-value for the correlation between the drug and each gene. -->
 <!-- !Input!-->
 <!-- Description                       Object Name-->
 <!-- Correlation Btw viability profiles.; drugVScrispr_corr_features_list -->
@@ -36,7 +35,9 @@ all_drugNames_common = onTarget$drugCategory$name[drugSubset_map2_annotation]
 all_drugTargets = onTarget$drugCategory[drugSubset_map2_annotation,c('name','target')]
 all_drugMOA = onTarget$drugCategory$moa[drugSubset_map2_annotation]
 ```
+
 <!-- Identify the known target DeepTarget's Score (Drug and KO Similarity Score - DKS Score) -->
+<!-- Description: calculating the known target DeepTarget's score (Drug and KO Similarity Score - DKS Score) for a given set of drugs and their corresponding targets. It is doing this by first splitting the target names for each drug, which are stored in the all_drugTargets data frame, using the str_split function. It then calculates the correlation between each drug and its targets using the drugVScrispr_corr_Strength variable, which contains the correlation between viability profiles after CRISPR knockouts and drug treatments. The code then identifies the maximum correlation for each drug and its target using the sapply function, and creates a data frame named KnownTarget_predictions that contains the drug name, the maximum target name, and the maximum correlation for each drug.  -->
 ```{r}
 all_drugTargets_seperated = str_split(as.character(all_drugTargets$target), ", ")
 
@@ -97,10 +98,4 @@ KnownTarget_predictions$KnownTargetCorrFDR = sapply(1:nrow(KnownTarget_predictio
 saveRDS(KnownTarget_predictions, 
         file = paste('Data/KnownTarget_predictions.RDS', Sys.Date(), '.RDS', sep=''))
 ```
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 

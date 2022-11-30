@@ -26,18 +26,31 @@ mutation_matched=onTarget$mutations_matrix[,matched_cellLines]
 ```{r}
 # Compute interaction in all cases
 interaction_Features=lapply(1:nrow(KnownTarget_predictions), function(x)
-  {
+{
   infunc_drug_matched=err_handle(drug_matched[KnownTarget_predictions$drugBroadID[x],])
   infunc_avana_matched=err_handle(avana_matched[KnownTarget_predictions$MaxTargetName[x],])
   infunc_mutation_matched=err_handle(mutation_matched[KnownTarget_predictions$MaxTargetName[x],])
   err_handle(summary(lm(infunc_drug_matched ~ 
-                infunc_avana_matched*infunc_mutation_matched))$coefficients[4,c(1,4)])
-  }
-  )
+                          infunc_avana_matched*infunc_mutation_matched))$coefficients[4,c(1,4)])
+}
+)
 names(interaction_Features)=KnownTarget_predictions$drugName
+Target_Mutation_specificity=data.frame(mutation_interaction_strength=sapply(interaction_Features, function(x) x[1]),
+                                       mutation_interaction_P=sapply(interaction_Features, function(x) x[2]))
+Target_Mutation_specificity=cbind(KnownTarget_predictions[,1:2], Target_Mutation_specificity)
+saveRDS(Target_Mutation_specificity,
+        file=paste('Data/Target_Mutation_specificity.RDS', Sys.Date(), '.RDS', sep=''))
+```
+
+<!-- The above code performs the following steps: -->
+<!-- It extracts the interaction strength and p-value for the relationship between drug response and CRISPR knockout of the known target for each drug, using the lm() function to fit a linear model with an interaction term. -->
+<!-- It creates a new data frame called Target_Mutation_specificity that contains the interaction strength and p-value for each drug. -->
+<!-- It adds a new column called predicted_resistance_mutation to the KnownTarget_predictions data frame, which is a binary variable indicating whether there is a significant interaction between the mutation status of the target and the drug response (i.e. whether the drug differentially targets the mutant form of the protein). -->
+<!-- It adds a new column called drugCategory to the KnownTarget_predictions data frame, which indicates the category of the drug (e.g. "antiproliferative"). -->
+<!-- It saves the updated KnownTarget_predictions data frame to a file. -->
+```{r}
 KnownTarget_predictions$mutation_interaction_strength=sapply(interaction_Features, function(x) x[1])
 KnownTarget_predictions$mutation_interaction_P=sapply(interaction_Features, function(x) x[2])
-
 # whether there is mutation interaction or not based on a significance threshold
 KnownTarget_predictions$predicted_resistance_mutation = KnownTarget_predictions$mutation_interaction_P<0.1
 # Add category of drug Description
@@ -45,5 +58,4 @@ KnownTarget_predictions$drugCategory = onTarget$drugCategory$drug_category[match
 
 saveRDS(KnownTarget_predictions,
         file=paste('Data/KnownTarget_predictions.RDS', Sys.Date(), '.RDS', sep=''))
-
 ```

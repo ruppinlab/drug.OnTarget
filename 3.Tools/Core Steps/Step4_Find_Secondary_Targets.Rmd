@@ -24,13 +24,12 @@ knitr::opts_knit$set(root.dir = working_directory)
 # knitr::knit('Step0B_Data_and_Libraries.Rmd')
 # knitr::knit('Step0_Write_Functions.Rmd')
 ```
-<!-- Exploratory Analysis Part 1: We hypothesize and tested whether the Drugs where the primary target is not expressed in most cell lines, whether the Primary Target score of Known Target very low. -->
+<!-- Exploratory Analysis Part 1: The code below is performing an exploratory analysis on the data in the KnownTarget_predictions object to see whether drugs where the primary target is not expressed in most cell lines have a low Primary Target score. -->
 ```{r}
-# <!-- Add BTK as target manually -->
-# In our target annotation, the infromation that BTK is a target of Ibrutinib is missing. We are manually adding that
+# First, the script adds BTK as a target manually, since this information is missing in the target annotation. 
 KnownTarget_predictions[grep('ibru',KnownTarget_predictions$drugName),]
 KnownTarget_predictions$MaxTargetName[grep('ibru',KnownTarget_predictions$drugName)][1]='BTK'
-# <!-- Cell lines with the following matrices: crispr, drug-treamtent, expression, mutation-->
+# Then, it identifies cell lines where the primary target is expressed at a low level, by looking for cell lines where the expression level is less than 2. The cellLines_with_LowTarget variable stores the number of cell lines where each target has low expression.
 matched_cellLines = Reduce(intersect, 
                          list(colnames(onTarget$expression),
                               colnames(onTarget$avana_22Q2),
@@ -40,7 +39,9 @@ matched_cellLines = Reduce(intersect,
 expression_matched = onTarget$expression[,matched_cellLines]
 avana_matched = onTarget$avana_22Q2[,matched_cellLines]
 drug_matched = onTarget$secondary_prism[,matched_cellLines]
-# <!-- To this end, we first identify cell lines with low primary target expression -->
+
+# Next, the script adds a new column to the KnownTarget_predictions object that stores the number of cell lines with low expression for each drug target.
+# Identify cell lines with low primary target expression
 cellLines_with_LowTarget = sapply(KnownTarget_predictions$MaxTargetName,
                                 function(x) 
                                   err_handle(sum(expression_matched[x,]<2)) )
@@ -49,6 +50,8 @@ cellLines_with_LowTarget = sapply(KnownTarget_predictions$MaxTargetName,
 KnownTarget_predictions$cellLines_withLOWexp = cellLines_with_LowTarget
 KnownTarget_predictions$Maxcorr_Q=xtile(KnownTarget_predictions$Maxcorr, 2)
 KnownTarget_predictions$drugBroadID = onTarget$drugCategory$broad_id_trimmed[match(KnownTarget_predictions$drugName, onTarget$drugCategory$name)]
+
+# Finally, the script generates a boxplot that shows the distribution of cellLines_withLOWexp for each Maxcorr_Q quartile.
 ggplot(na.omit(KnownTarget_predictions), aes(y=cellLines_withLOWexp,
                                     x=factor(Maxcorr_Q)))+
   geom_boxplot()+
