@@ -43,19 +43,28 @@ In this Step, we compared large-scale drug response screens (PRISM) with ~1500 c
   * DKS Score & P for known Target of each drug & best Predicted Target by DeepTarget (KnownTarget_predictions.RDS)
 
 Retreive a DKS Score for Known Target of a drug; also provide a best predicted Primary Target for each drug.
-
 ---
-3) Step 3: Step3_Find_Secondary_Targets.Rmd.
+
+3) Step 3: Step3_Primary_Target_at_Pathway_Resolution.Rmd
 * Input:
   * onTarget (onTarget_v3.0.RDS) 
 * Output:
-  * Secondary DKS Score & P for each drug vs each drug (drugVScrispr_corr_features_list_secondary.RDS)
+  * Secondary DKS Score & P for each pathway vs each drug.
+
+Provide each pathway a likelihood score of being a secondary Mechanism of Action.
+
+---
+4) Step 4: Step3_Find_Secondary_Targets.Rmd.
+* Input:
+  * onTarget (onTarget_v3.0.RDS) 
+* Output:
+  * Secondary DKS Score & P for each gene vs each drug (drugVScrispr_corr_features_list_secondary.RDS)
 
 Provide each gene a likelihood score of being a secondary target of drug. (Exploratory: We first hypothesize and tested whether the Drugs where the primary target is not expressed in most cell lines, whether the Primary Target score of Known Target very low. Second, We test drugs whose target KO and drug response viability similarity dimnishes when target expression is not expressed.) Crux: In this step, we repeated our target identification process (Step 1) in cell lines where their primary targets are not expressed to produce a secondary-DKS Score for such drugs. This saved dataset is used in secondary target analysis and figure generation.
 
 ---
 
-4) Step 4: step4_Mutant_Specificity.Rmd.
+5) Step 5: step4_Mutant_Specificity.Rmd.
 * Input:
   * onTarget (onTarget_v3.0.RDS) 
 * Output:
