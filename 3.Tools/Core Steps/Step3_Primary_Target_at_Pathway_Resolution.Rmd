@@ -38,7 +38,8 @@ moa_pathways=sapply(moa_pathways, na.omit)
 <!-- Run gene enrichment (this will take around ~20 mins):: 
 This code is running gene enrichment analysis on drugVScrispr_corr_Strength, a matrix that contains the correlation strength between drugs and CRISPR knockouts. The analysis is performed using the fgsea function in the parallel package. The resulting gene enrichment scores for each drug are saved in the object gsea_enrichment_all_drugs, which is then saved to a file called 'data/gsea_enrichment_all_drugs.RDS'. This file can be used later to produce supplementary figures 3 and 5.-->
 ```{r}
-gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
+SAMPLE_NUMBERS=2
+gsea_enrichment_all_drugs=mclapply(1:SAMPLE_NUMBERS, function(x) {
   IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
   names(IF_corr_with_gene)  = rownames(drugVScrispr_corr_Strength)
   IF_corr_with_gene_ordered=sort(IF_corr_with_gene, decreasing = T)
@@ -50,6 +51,23 @@ gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(
   gsea_enrichment
 }, mc.cores = detectCores())
 
-names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)
-saveRDS(gsea_enrichment_all_drugs, 'data/gsea_enrichment_all_drugs.RDS')
+
+# gsea_enrichment_all_drugs=mclapply(1:ncol(drugVScrispr_corr_Strength), function(x) {
+#   IF_corr_with_gene=unlist(drugVScrispr_corr_Strength[,x])
+#   names(IF_corr_with_gene)  = rownames(drugVScrispr_corr_Strength)
+#   IF_corr_with_gene_ordered=sort(IF_corr_with_gene, decreasing = T)
+#   
+#   gsea_enrichment=fgsea(pathways = moa_pathways,
+#                         stats = IF_corr_with_gene_ordered,
+#                         minSize=1,
+#                         maxSize=100)
+#   gsea_enrichment
+# }, mc.cores = detectCores())
+
+names(gsea_enrichment_all_drugs)=colnames(drugVScrispr_corr_Strength)[1:SAMPLE_NUMBERS]
+saveRDS(gsea_enrichment_all_drugs,
+        paste('data/gsea_enrichment_all_drugs', Sys.Date(),'.RDS', sep='')
+        )
+summary(gsea_enrichment_all_drugs)
+dim(gsea_enrichment_all_drugs$A00077618)
 ```

@@ -1,0 +1,127 @@
+---
+title: "Query a Drug"
+output: html_notebook
+---
+
+<!-- Given a query Drug, DeepTarget can provide the following information:: -->
+<!-- 1. Likelihood of each gene to a primary Target; Predicted Primary Target passing the threshold. -->
+<!-- 2. Likelihood of each pathway to a primary MOA; Predicted Primary MOAs passing the threshold. -->
+<!-- 3. Likelihood of each gene to a secondary Target; Secondary Targets passing Threshold-->
+<!-- 4. Extent of Mutant Specificity of the drug to its mutant target form-->
+
+
+<!-- !Input!-->
+<!-- Description                       Object Name-->
+<!-- corrMat -->
+<!-- corrMat_FDR -->
+<!-- sec_corrMat -->
+<!-- sec_corrMat_P -->
+
+<!-- Target_Mutation_specificity -->
+<!-- Viability after Drug Treatment   ;onTarget$secondary_prism-->
+<!-- !Output!-->
+<!-- Correlation Btw viability profiles.; drugVScrispr_corr_features_list) -->
+<!-- ..after CRISPR vs drug treatment                                       -->
+
+<!-- Set the working Directory -->
+```{r, setup, include=FALSE}
+working_directory='/Users/sinhas8/Project_TrueTarget/'
+knitr::opts_knit$set(root.dir = working_directory)
+```
+
+<!-- Uncomment this chunk to make run this script independently run -->
+```{r}
+# knitr::knit('Step0B_Data_and_Libraries.Rmd')
+# knitr::knit('Step0_Write_Functions.Rmd')
+```
+
+```{r}
+GOI='RNF5'
+```
+<!-- Provide the expression Distribution of the gene -->
+<!-- We first test if gene of interest is expressed in at least a major proportion of cell lines -->
+```{r}
+cellLines_withAllData=Reduce(intersect,
+                        list(colnames(onTarget$expression_20Q4),
+                             colnames(onTarget$secondary_prism),
+                             colnames(onTarget$avana_22Q2),
+                             colnames(onTarget$mutations_matrix))
+                        )
+GOI_expression=onTarget$expression_20Q4[GOI,cellLines_withAllData]
+GOI_expression_2plot=data.frame(GOI=GOI_expression)
+ggplot(GOI_expression_2plot, aes(GOI))+
+  geom_histogram()
+```
+
+```{r}
+Known_Inhibitors=onTarget$drugCategory[grep(GOI,onTarget$drugCategory$target),]
+Known_Inhibitors_broadTrimmed=Known_Inhibitors$broad_id_trimmed
+```
+<!-- DKS Score: All Dosages -->
+```{r}
+# corrMat; corrMat_FDR; corrMat_rank
+DKS=data.frame(drugName=colnames(corrMat),
+               DKS_score=corrMat[GOI,],
+               DKS_rank=corrMat_rank[GOI,])
+mapping_broad2common=match(DKS$drugName, onTarget$drugCategory$broad_id_trimmed)
+DKS$drugName_common=onTarget$drugCategory$name[mapping_broad2common]
+DKS$KnownTarget=onTarget$drugCategory$target[mapping_broad2common]
+DKS$KnownMOA=onTarget$drugCategory$moa[mapping_broad2common]
+DKS[order(DKS$DKS_rank),]
+```
+<!-- DKS Score: One Dosages -->
+```{r}
+# corrMat_1dose; corrMat_P_1dose; corrMat_rank_1dose
+DKS_1dose=data.frame(drugName=colnames(corrMat_1dose),
+               DKS_score=corrMat_1dose[GOI,],
+               DKS_rank=corrMat_rank_1dose[GOI,])
+mapping_broad2common=match(DKS_1dose$drugName,
+                           onTarget$drugCategory$broad_id_trimmed)
+DKS_1dose$drugName_common=onTarget$drugCategory$name[mapping_broad2common]
+DKS_1dose$KnownTarget=onTarget$drugCategory$target[mapping_broad2common]
+DKS_1dose$KnownMOA=onTarget$drugCategory$moa[mapping_broad2common]
+DKS_1dose=DKS_1dose[order(DKS_1dose$DKS_score, decreasing = T),]
+DKS_1dose$HitRank=1:nrow(DKS_1dose)
+DKS_1dose
+tableS1=head(DKS_1dose, 2)
+# write.table(tableS1[,c(4,2,3,5,6)], file = 'Data/TableS1_Drugs_for_FIBP_by_DeepTarget.tsv', sep = '\t')
+write.table(tableS1[,c(4,2,3,5,6)], file = 'Data/TableS1_Drugs_for_RNF5_by_DeepTarget.tsv', sep = '\t')
+```
+<!-- Where does the known inhibitor ranks -->
+```{r}
+DKS_1dose[DKS_1dose$drugName %in% Known_Inhibitors$broad_id_trimmed,]
+dim(DKS_1dose)
+```
+
+<!-- Find other drugs like known Inhibitors -->
+```{r}
+library("Hmisc")
+prism_cor <- rcorr(as.matrix(t(onTarget$drug_prism)))
+Similarity2_otherdrugs=prism_cor$r[Known_Inhibitors$broad_id_trimmed,]
+top10Hits=head(Similarity2_otherdrugs[order(Similarity2_otherdrugs, decreasing = T)], 10)
+DDS_Score=onTarget$drugCategory[match(names(top10Hits), onTarget$drugCategory$broad_id_trimmed),]
+TableS2=data.frame(drugName=DDS_Score[,3],DDS_Score=top10Hits,DDS_Score[,c(5, 6)])
+write.table(TableS2, file = 'Data/TableS2_CitrinReport.tsv', sep = '\t')
+```
+
+```{r}
+DKS_1dose[DKS_1dose$drugName %in% rownames(TableS2),]
+onTarget$drugCategory[grep('solute',onTarget$drugCategory$moa),]
+onTarget$drugCategory[grep('SLC25',onTarget$drugCategory$target),]
+```
+
+
+```{r}
+sec_corrMat
+sec_corrMat_P
+```
+
+```{r}
+Target_Mutation_specificity
+```
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

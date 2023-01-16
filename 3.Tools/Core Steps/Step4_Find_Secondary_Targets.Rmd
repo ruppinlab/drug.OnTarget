@@ -141,9 +141,9 @@ drugVScrispr_corr_features_list_secondary = mclapply(N_examples,
                                                        CellLines_withoutPrimary = Low_expression_cellLines[[unlist(DrugTarget_wd_lowTargetCellLines[x,2])]]
                                                      )) , mc.cores = detectCores())
 names(drugVScrispr_corr_features_list_secondary) = DrugTarget_wd_lowTargetCellLines$drugname[N_examples]
-head(drugVScrispr_corr_features_list_secondary$A00077618)
 saveRDS(drugVScrispr_corr_features_list_secondary,
         paste('Data/drugVScrispr_corr_features_list_secondary', Sys.Date(), '.RDS', sep=''))
+head(drugVScrispr_corr_features_list_secondary$A00077618[order(drugVScrispr_corr_features_list_secondary$A00077618[,2], decreasing = T),])
 ```
 
 

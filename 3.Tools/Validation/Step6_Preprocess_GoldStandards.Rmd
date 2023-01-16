@@ -91,6 +91,7 @@ Complete_Set$crispr_corr=sapply(1:nrow(Complete_Set), function(x)
   err_handle(corrMat[
     as.character(Complete_Set$Drugbank_Gene)[x], as.character(Complete_Set$drug_BroadID)[x]]))
 Gold_Standard_Dataset1=data.frame(Complete_Set, Source='Biogrid Highly Cited')
+Gold_Standard_Dataset1
 ```
 <!-- Dataset 2: Drug-Target pairs, where drugs are inhibitors & target have a pharmacologically active status from DrugBank-->
 ```{r}
@@ -378,5 +379,5 @@ Gold_Standard_Dataset8=data.frame(Complete_Set, Source='oncoKB approved')
 
 <!-- Intergarte the above 8 datasets for testing the performance of DeepTarget for primary Target prediction  -->
 ```{r}
-Comp_Gold_Standard=rbind(Gold_Standard_Dataset3)
+Comp_Gold_Standard=rbind(Gold_Standard_Dataset8)
 ```

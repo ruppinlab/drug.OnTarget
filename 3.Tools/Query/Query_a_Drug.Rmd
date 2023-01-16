@@ -1,0 +1,57 @@
+---
+title: "Query a Drug"
+output: html_notebook
+---
+
+<!-- Given a query Drug, DeepTarget can provide the following information:: -->
+<!-- 1. Likelihood of each gene to a primary Target; Predicted Primary Target passing the threshold. -->
+<!-- 2. Likelihood of each pathway to a primary MOA; Predicted Primary MOAs passing the threshold. -->
+<!-- 3. Likelihood of each gene to a secondary Target; Secondary Targets passing Threshold-->
+<!-- 4. Extent of Mutant Specificity of the drug to its mutant target form-->
+
+
+<!-- !Input!-->
+<!-- Description                       Object Name-->
+<!-- corrMat -->
+<!-- corrMat_FDR -->
+<!-- sec_corrMat -->
+<!-- sec_corrMat_P -->
+
+<!-- Target_Mutation_specificity -->
+<!-- Viability after Drug Treatment   ;onTarget$secondary_prism-->
+<!-- !Output!-->
+<!-- Correlation Btw viability profiles.; drugVScrispr_corr_features_list) -->
+<!-- ..after CRISPR vs drug treatment                                       -->
+
+<!-- Set the working Directory -->
+```{r, setup, include=FALSE}
+working_directory='/Users/sinhas8/Project_TrueTarget/'
+knitr::opts_knit$set(root.dir = working_directory)
+```
+
+<!-- Uncomment this chunk to make run this script independently run -->
+```{r}
+# knitr::knit('Step0B_Data_and_Libraries.Rmd')
+# knitr::knit('Step0_Write_Functions.Rmd')
+```
+
+```{r}
+corrMat
+corrMat_FDR
+corrMat_rank
+
+corrMat_1dose
+corrMat_P_1dose
+corrMat_rank_1dose
+
+sec_corrMat
+sec_corrMat_P
+Target_Mutation_specificity
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

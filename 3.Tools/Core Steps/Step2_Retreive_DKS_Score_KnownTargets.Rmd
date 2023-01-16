@@ -97,5 +97,6 @@ KnownTarget_predictions$KnownTargetCorrFDR = sapply(1:nrow(KnownTarget_predictio
 
 saveRDS(KnownTarget_predictions, 
         file = paste('Data/KnownTarget_predictions.RDS', Sys.Date(), '.RDS', sep=''))
+head(KnownTarget_predictions)
 ```
 

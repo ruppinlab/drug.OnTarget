@@ -7,6 +7,7 @@ output: html_notebook
 ```{r, setup, include=FALSE}
 working_directory='/Users/sinhas8/Project_TrueTarget/'
 knitr::opts_knit$set(root.dir = working_directory)
+onTarget=readRDS('Data/onTarget_v3.0.RDS')
 ```
 
 <!-- This code ensures that all required packages are installed and available for use in the script, allowing the user to run the script without encountering any errors related to missing packages. -->
@@ -51,7 +52,7 @@ KnownTarget_predictions=readRDS('Data/KnownTarget_predictions_v4.RDS')
 drugVScrispr_corr_features_list=readRDS('Data/drugVScrispr_corr_features_list.RDS')
 # Secondary DKS Score & P for each gene vs each drug.
 drugVScrispr_corr_features_list_secondary=readRDS('/Users/sinhas8/Project_TrueTarget/Data/drugVScrispr_corr_features_list_secondary.RDS')
-# drugCandidates_for_secTargets=readRDS('Data/drugCandidates_for_secTargets.RDS')
+drugCandidates_for_secTargets=readRDS('Data/drugCandidates_for_secTargets.RDS')
 # List of all Human Kinases genes
 human_Kinases=read_xlsx('Data/human_Kinases.xlsx')
 ```
@@ -98,6 +99,23 @@ expression_matched=onTarget$expression_20Q4[,matched_cellLines]
 avana_matched=onTarget$avana_22Q2[,matched_cellLines]
 drug_matched=onTarget$secondary_prism[,matched_cellLines]
 ```
+<!-- DDS_Score -->
+```{r}
+prism_cor <- rcorr(as.matrix(t(onTarget$drug_prism)))
+Similarity2_otherdrugs=prism_cor$r[Known_Inhibitors$broad_id_trimmed,]
+```
+
+<!-- Creating dataframes that would be required during analysis -->
+```{r}
+drugVScrispr_corr_1Dose=readRDS('Data/drugVScrispr_corr_features_list_1Dose2022-12-19.RDS')
+# <!-- Defining the cormat strength, Pvalue and the rank to save in known target prediction-->
+drugVScrispr_corr_Strength=sapply(drugVScrispr_corr_1Dose, function(x) x[,2])
+corrMat_1dose=drugVScrispr_corr_Strength
+corrMat_P_1dose=sapply(drugVScrispr_corr_1Dose, function(x) x[,1])
+corrMat_rank_1dose=apply(-corrMat_1dose, 2, rank)
+dim(corrMat_rank_1dose)
+```
+
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 

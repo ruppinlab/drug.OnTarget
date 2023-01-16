@@ -1772,15 +1772,35 @@ pre code {
 <!-- The results of the AUC analysis show the ability of DeepTarget to stratify positive primary target labels versus negative labels (negative shuffles) in each dataset. The overall AUC indicates the overall stratification power of DeepTarget. -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBQbGVhc2Ugc2VlOiBDdXJhdGluZ19Hb2xkX1N0YW5kYXJkX2RhdGFzZXRzLlxuQ29tcF9Hb2xkX1N0YW5kYXJkX2RmPXJlYWRSRFMoJy9Vc2Vycy9zaW5oYXM4L1Byb2plY3RfVHJ1ZVRhcmdldC9EYXRhL0NvbXBfR29sZF9TdGFuZGFyZF93aXRoREtTLlJEUycpXG5Db21wX0dvbGRfU3RhbmRhcmRfZGZfbGlzdD1zcGxpdChDb21wX0dvbGRfU3RhbmRhcmRfZGYsIENvbXBfR29sZF9TdGFuZGFyZF9kZiREYXRhc2V0KVxuIyBRLjE6IEluIGVhY2ggZGF0YXNldCwgV2hhdCBpcyB0aGUgc3RyYXRpY2F0aW9uIHBvd2VyIChBVUMpIG9mIERlZXBUYXJnZXQgdG8gZmluZCBwb3NpdGl2ZSBwcmltYXJ5IHRhcmdldCBsYWJlbHMgdnMgbmVnYXRpdmUgbGFiZWxzIChuZWdhdGl2ZSBzaHVmZmxlcykuXG5zYXBwbHkoQ29tcF9Hb2xkX1N0YW5kYXJkX2RmX2xpc3QsIGZ1bmN0aW9uKHgpIHJvYyh4JExhYmVsLCB4JGNyaXNwcl9jb3JyKSRhdWMpXG4jIFEuMTogT3ZlcmFsbCwgV2hhdCBpcyB0aGUgc3RyYXRpY2F0aW9uIHBvd2VyIChBVUMpPy5cbnJvYyhDb21wX0dvbGRfU3RhbmRhcmRfZGYkTGFiZWwsIENvbXBfR29sZF9TdGFuZGFyZF9kZiRjcmlzcHJfY29ycikkYXVjXG5gYGAifQ== -->
-<pre class="r"><code># Please see: Curating_Gold_Standard_datasets.
-Comp_Gold_Standard_df=readRDS(&#39;/Users/sinhas8/Project_TrueTarget/Data/Comp_Gold_Standard_withDKS.RDS&#39;)
-Comp_Gold_Standard_df_list=split(Comp_Gold_Standard_df, Comp_Gold_Standard_df$Dataset)
-# Q.1: In each dataset, What is the stratication power (AUC) of DeepTarget to find positive primary target labels vs negative labels (negative shuffles).
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBRLjE6IEluIGVhY2ggZGF0YXNldCwgV2hhdCBpcyB0aGUgc3RyYXRpY2F0aW9uIHBvd2VyIChBVUMpIG9mIERlZXBUYXJnZXQgdG8gZmluZCBwb3NpdGl2ZSBwcmltYXJ5IHRhcmdldCBsYWJlbHMgdnMgbmVnYXRpdmUgbGFiZWxzIChuZWdhdGl2ZSBzaHVmZmxlcykuXG5zYXBwbHkoQ29tcF9Hb2xkX1N0YW5kYXJkX2RmX2xpc3QsIGZ1bmN0aW9uKHgpIHJvYyh4JExhYmVsLCB4JGNyaXNwcl9jb3JyKSRhdWMpXG5cbmBgYCJ9 -->
+<pre class="r"><code># Q.1: In each dataset, What is the stratication power (AUC) of DeepTarget to find positive primary target labels vs negative labels (negative shuffles).
 sapply(Comp_Gold_Standard_df_list, function(x) roc(x$Label, x$crispr_corr)$auc)
-# Q.1: Overall, What is the stratication power (AUC)?.
-roc(Comp_Gold_Standard_df$Label, Comp_Gold_Standard_df$crispr_corr)$auc</code></pre>
+</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiU2V0dGluZyBsZXZlbHM6IGNvbnRyb2wgPSBOZWdhdGl2ZSwgY2FzZSA9IFBvc2l0aXZlXG5TZXR0aW5nIGRpcmVjdGlvbjogY29udHJvbHMgPCBjYXNlc1xuU2V0dGluZyBsZXZlbHM6IGNvbnRyb2wgPSBOZWdhdGl2ZSwgY2FzZSA9IFBvc2l0aXZlXG5TZXR0aW5nIGRpcmVjdGlvbjogY29udHJvbHMgPCBjYXNlc1xuU2V0dGluZyBsZXZlbHM6IGNvbnRyb2wgPSBOZWdhdGl2ZSwgY2FzZSA9IFBvc2l0aXZlXG5TZXR0aW5nIGRpcmVjdGlvbjogY29udHJvbHMgPCBjYXNlc1xuU2V0dGluZyBsZXZlbHM6IGNvbnRyb2wgPSBOZWdhdGl2ZSwgY2FzZSA9IFBvc2l0aXZlXG5TZXR0aW5nIGRpcmVjdGlvbjogY29udHJvbHMgPCBjYXNlc1xuU2V0dGluZyBsZXZlbHM6IGNvbnRyb2wgPSBOZWdhdGl2ZSwgY2FzZSA9IFBvc2l0aXZlXG5TZXR0aW5nIGRpcmVjdGlvbjogY29udHJvbHMgPCBjYXNlc1xuU2V0dGluZyBsZXZlbHM6IGNvbnRyb2wgPSBOZWdhdGl2ZSwgY2FzZSA9IFBvc2l0aXZlXG5TZXR0aW5nIGRpcmVjdGlvbjogY29udHJvbHMgPCBjYXNlc1xuU2V0dGluZyBsZXZlbHM6IGNvbnRyb2wgPSBOZWdhdGl2ZSwgY2FzZSA9IFBvc2l0aXZlXG5TZXR0aW5nIGRpcmVjdGlvbjogY29udHJvbHMgPCBjYXNlc1xuU2V0dGluZyBsZXZlbHM6IGNvbnRyb2wgPSBOZWdhdGl2ZSwgY2FzZSA9IFBvc2l0aXZlXG5TZXR0aW5nIGRpcmVjdGlvbjogY29udHJvbHMgPCBjYXNlc1xuIn0= -->
+<pre><code>Setting levels: control = Negative, case = Positive
+Setting direction: controls &lt; cases
+Setting levels: control = Negative, case = Positive
+Setting direction: controls &lt; cases
+Setting levels: control = Negative, case = Positive
+Setting direction: controls &lt; cases
+Setting levels: control = Negative, case = Positive
+Setting direction: controls &lt; cases
+Setting levels: control = Negative, case = Positive
+Setting direction: controls &lt; cases
+Setting levels: control = Negative, case = Positive
+Setting direction: controls &lt; cases
+Setting levels: control = Negative, case = Positive
+Setting direction: controls &lt; cases
+Setting levels: control = Negative, case = Positive
+Setting direction: controls &lt; cases</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiIEJpb2dyaWQgSGlnaGx5IENpdGVkICAgICBDT1NNSUMgcmVzaXN0YW5jZSBEcnVnQmFuayAgQW50YWdvbmlzdHMgIERydWdCYW5rICBJbmhpYml0b3JzIEZEQSBtdXRhdGlvbiBhcHByb3ZhbCAgICAgb25jb0tCIHJlc2lzdGFuY2UgICAgICAgICAgICAgICAgICAgU0FCIFxuICAgICAgICAgICAgMC43NTUxMDIwICAgICAgICAgICAgIDAuOTM3NTAwMCAgICAgICAgICAgICAwLjcyMjIyMjIgICAgICAgICAgICAgMC42OTE2MzIyICAgICAgICAgICAgIDAuOTExMDExMSAgICAgICAgICAgICAwLjk1MjY2MjcgICAgICAgICAgICAgMC44NzYwMzMxIFxuIFNlbGVjdGl2ZSBJbmhpYml0b3JzIFxuICAgICAgICAgICAgMC43NDg2NjEwIFxuIn0= -->
+<pre><code> Biogrid Highly Cited     COSMIC resistance DrugBank  Antagonists  DrugBank  Inhibitors FDA mutation approval     oncoKB resistance                   SAB 
+            0.7551020             0.9375000             0.7222222             0.6916322             0.9110111             0.9526627             0.8760331 
+ Selective Inhibitors 
+            0.7486610 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
