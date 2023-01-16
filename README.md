@@ -1,5 +1,7 @@
 ## DeepTarget: Predicting in-depth Mechanism of Cancer Drugs
- 
+ <img width="605" alt="Screen Shot 2022-12-01 at 11 51 50 AM" src="https://user-images.githubusercontent.com/29957280/205112105-64f2c923-58c5-4d99-8cf6-09b88ee9e0e7.png">
+
+
 ### Prerequisites
 > Software: RStudio, R
 
