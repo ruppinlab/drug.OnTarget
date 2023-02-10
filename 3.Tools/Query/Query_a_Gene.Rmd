@@ -7,7 +7,10 @@ output: html_notebook
 <!-- 1. Likelihood of each gene to a primary Target; Predicted Primary Target passing the threshold. -->
 <!-- 2. Likelihood of each pathway to a primary MOA; Predicted Primary MOAs passing the threshold. -->
 <!-- 3. Likelihood of each gene to a secondary Target; Secondary Targets passing Threshold-->
-<!-- 4. Extent of Mutant Specificity of the drug to its mutant target form-->
+<!-- 4. Likelihood of each pathway to be secondary Target; Predicted Secondary MOAs passing Threshold-->
+<!-- 5. Extent of Mutant Specificity of the drug to its mutant target form-->
+<!-- 6. DKS Score vs Clinical stage of all the drugs targeting the known target and how this drugs ranks among them-->
+<!-- 7. Based on the above, relative clinical succees probability-->
 
 
 <!-- !Input!-->
