@@ -7,6 +7,9 @@ output: html_notebook
 ```{r, setup, include=FALSE}
 working_directory='/Users/sinhas8/Project_TrueTarget/'
 knitr::opts_knit$set(root.dir = working_directory)
+```
+<!-- Load the ontarget object -->
+```{r}
 onTarget=readRDS('Data/onTarget_v3.0.RDS')
 ```
 

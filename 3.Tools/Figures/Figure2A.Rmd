@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+<!-- Plot Figure 2A -->
+<!-- Set the working Directory -->
+```{r, setup, include=FALSE}
+working_directory='/Users/sinhas8/Project_TrueTarget/'
+knitr::opts_knit$set(root.dir = working_directory)
+```
+
+```{r}
+knitr::knit('Step0B_Data_and_Libraries.Rmd')
+knitr::knit('Step0_Write_Functions.Rmd')
+```
+<!-- Figure 2A - Viability of BRAF after CRISPR KO:  Proof of concept of our pipeline’s ability to predict mutation-specific targeting for Dabrafenib -->
+```{r}
+GOI = 'BRAF';DOI = 'Dabrafenib'
+DOI_id = onTarget$drugCategory$broad_id_trimmed[
+  match_stripall(DOI, onTarget$drugCategory$name)]
+Figure_2A_data = data.frame(crispr = avana_matched['BRAF',], Dabrafenib = drug_matched[DOI_id,], BRAF_mutation = mutation_matched['BRAF',])
+Figure_2A_data$BRAF_mutation = factor(Figure_2A_data$BRAF_mutation)
+levels(Figure_2A_data$BRAF_mutation) = c('WT', 'V600E')
+Figure_2A <- ggplot(Figure_2A_data, aes(x = crispr, y = Dabrafenib, color = factor(BRAF_mutation)))+
+  # geom_point()+
+  stat_smooth(method = 'lm')+
+  theme_bw(base_size = 15)+
+  labs(x = 'Viability after BRAF CRISPR-KO', y = 'Response to Dabrafenib', color = 'BRAF\nmutation\nstatus')+
+  stat_cor(label.y = c(1.3,1.4))
+Figure_2A
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
